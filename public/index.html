@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribe AI Workspace</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fbfaf7;
+            color: #191919;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #intro-page-screen {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            background-color: #0b0b0c;
+            color: #f3f4f6;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .intro-navbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid #1f1f23;
+        }
+
+        .intro-logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .intro-logo span { color: #ff6600; }
+
+        .intro-nav-links {
+            display: flex;
+            gap: 28px;
+            font-size: 14px;
+            color: #9ca3af;
+            align-items: center;
+        }
+
+        .intro-nav-links a { color: inherit; text-decoration: none; }
+        .intro-nav-links a:hover { color: #f3f4f6; }
+
+        .btn-try-intro {
+            background-color: #ff6600;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .intro-hero-container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px;
+            width: 100%;
+            gap: 40px;
+        }
+
+        .intro-left { flex: 0 1 480px; }
+
+        .intro-headline {
+            font-size: 56px;
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            color: #f3f4f6;
+            margin-bottom: 20px;
+        }
+
+        .intro-subhead {
+            font-size: 17px;
+            color: #9ca3af;
+            margin-bottom: 32px;
+        }
+
+        .intro-auth-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 360px;
+        }
+
+        .btn-social {
+            width: 100%;
+            background-color: #f3f4f6;
+            color: #191919;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-social:hover { background-color: #e5e2da; }
+
+        .intro-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        .intro-divider::before, .intro-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #23232a;
+        }
+
+        .btn-email-intro {
+            width: 100%;
+            background-color: #1a1a1f;
+            border: 1px solid #282830;
+            color: #f3f4f6;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-email-intro:hover { background-color: #22222a; }
+
+        .intro-fine-print {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+        .intro-fine-print a { color: #ff6600; text-decoration: underline; }
+
+        .btn-download-intro {
+            margin-top: 24px;
+            background: transparent;
+            border: 1px solid #282830;
+            color: #f3f4f6;
+            padding: 11px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-download-intro:hover { background-color: #1a1a1f; }
+
+        .intro-right {
+            flex: 0 1 520px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .intro-preview-box {
+            background-color: #fbfaf7;
+            border: 1px solid #23232a;
+            border-radius: 24px;
+            width: 100%;
+            height: 460px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-image: radial-gradient(#e5e2da 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .btn-preview-chat {
+            background-color: #191919;
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .btn-preview-chat:hover { background-color: #000; }
+
+        /* Small brand rail pinned to the corner on marketing/auth pages,
+           so the identity stays visible and consistent across every screen */
+        .corner-rail {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 30;
+            background-color: rgba(255,255,255,0.06);
+            border: 1px solid #23232a;
+            padding: 6px 14px 6px 8px;
+            border-radius: 30px;
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+        }
+        .corner-rail.on-light {
+            background-color: rgba(255,255,255,0.9);
+            border: 1px solid #e5e2da;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+        }
+        .corner-rail span.crail-txt {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f3f4f6;
+        }
+        .corner-rail.on-light span.crail-txt { color: #191919; }
+
+        #landing-page-screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            background-color: #fbfaf7;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .landing-navbar {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid #e5e2da;
+        }
+
+        .landing-logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #191919;
+        }
+
+        .landing-logo span {
+            color: #cc6b49;
+        }
+
+        .landing-nav-links {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #666;
+            align-items: center;
+        }
+
+        .btn-try-scribe {
+            background-color: #191919;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .landing-hero-container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px;
+            width: 100%;
+        }
+
+        .hero-left {
+            flex: 0 1 460px;
+        }
+
+        .auth-card {
+            background: white;
+            border: 1px solid #e5e2da;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            width: 100%;
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e2da;
+            margin-bottom: 24px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding-bottom: 12px;
+            font-weight: 600;
+            color: #999;
+            cursor: pointer;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .auth-tab-btn.active {
+            color: #cc6b49;
+            border-bottom: 2px solid #cc6b49;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e2da;
+            border-radius: 12px;
+            outline: none;
+            background-color: #fbfaf7;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            border-color: #cc6b49;
+            background-color: white;
+        }
+
+        .landing-submit-btn {
+            width: 100%;
+            background-color: #cc6b49;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .hero-right {
+            flex: 0 1 550px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .preview-showcase-box {
+            background-color: white;
+            border: 1px solid #e5e2da;
+            border-radius: 24px;
+            width: 100%;
+            height: 480px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-image: radial-gradient(#e5e2da 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .preview-showcase-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #191919;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-showcase-logo span { color: #cc6b49; }
+
+        .preview-showcase-title {
+            font-size: 42px;
+            font-weight: 400;
+            line-height: 1.2;
+            color: #1a1a1a;
+            max-width: 420px;
+            letter-spacing: -0.5px;
+        }
+
+        #workspace-screen {
+            display: none;
+            background-color: #fbfaf7;
+            color: #191919;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 64px;
+            background-color: #ffffff;
+            border-right: 1px solid #e5e2da;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            z-index: 20;
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .sidebar-top, .sidebar-bottom {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-item {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            overflow: hidden;
+            white-space: nowrap;
+            gap: 16px;
+        }
+
+        .sidebar:hover .nav-item { width: calc(100% - 24px); }
+        .nav-item span.label { display: none; font-size: 14px; font-weight: 500; }
+        .sidebar:hover .nav-item span.label { display: inline; }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(204, 107, 73, 0.1); color: #cc6b49;
+        }
+
+        .nav-logo {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .main-workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-image: radial-gradient(circle at 50% 30%, rgba(204, 107, 73, 0.05), transparent 60%);
+        }
+
+        .top-subnav {
+            height: 60px; display: flex; align-items: center; justify-content: center; padding: 0 32px; gap: 16px;
+        }
+
+        .badge-tier {
+            background-color: #f3f1ec; border: 1px solid #e5e2da; color: #666; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+
+        .btn-upgrade-top {
+            background: transparent; border: 1px solid rgba(204, 107, 73, 0.4); color: #cc6b49;
+            padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-upgrade-top:hover { background-color: #cc6b49; color: white; }
+
+        .dashboard-content-stream {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; max-width: 800px; width: 100%; margin: 0 auto; transform: translateY(-40px);
+        }
+
+        .chat-console-body {
+            width: 100%; display: none; flex-direction: column; overflow-y: auto;
+            padding-bottom: 20px; margin-bottom: 20px; height: calc(100vh - 240px);
+        }
+
+        .greeting-header-title {
+            font-size: 40px; font-weight: 400; color: #191919; margin-bottom: 40px; display: flex; align-items: center; gap: 14px;
+        }
+        .greeting-header-title span.icon { color: #cc6b49; }
+
+        .master-prompt-enclosure {
+            width: 100%; background-color: #ffffff; border: 1px solid #e5e2da; border-radius: 24px; padding: 16px 20px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+
+        .master-prompt-enclosure textarea {
+            width: 100%; background: transparent; border: none; outline: none; color: #191919; font-size: 16px; resize: none; min-height: 50px; max-height: 200px; line-height: 1.5;
+        }
+
+        .prompt-controls-dock {
+            display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eeece5;
+        }
+        .controls-left-group, .controls-right-group { display: flex; align-items: center; gap: 10px; }
+
+        .action-icon-node {
+            background-color: #f3f1ec; border: 1px solid #e5e2da; color: #666; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+        }
+        .action-icon-node:hover { color: #191919; background-color: #eae7de; }
+
+        .engine-picker-selector {
+            background-color: #f3f1ec;
+            border: 1px solid #e5e2da;
+            color: #666;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-prompt-deliver {
+            background-color: #eeece5; color: #a8a29e; border: none; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .btn-prompt-deliver.active-ready { background-color: #cc6b49; color: white; }
+
+        .attach-menu-wrap { position: relative; }
+        .attach-menu {
+            display: none;
+            position: absolute;
+            bottom: 44px;
+            left: 0;
+            background: white;
+            border: 1px solid #e5e2da;
+            border-radius: 14px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+            padding: 6px;
+            min-width: 190px;
+            z-index: 15;
+        }
+        .attach-menu.open { display: block; }
+        .attach-menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; color: #333;
+        }
+        .attach-menu-item:hover { background-color: #f3f1ec; }
+
+        .attachment-preview-row { display: none; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        .attachment-chip {
+            display: flex; align-items: center; gap: 6px; background: #f3f1ec;
+            border: 1px solid #e5e2da; border-radius: 10px; padding: 5px 10px; font-size: 12px; color: #444;
+        }
+        .attachment-chip img { width: 22px; height: 22px; border-radius: 6px; object-fit: cover; }
+        .attachment-chip .remove-chip { cursor: pointer; color: #999; font-weight: bold; padding-left: 2px; }
+
+        #mic-btn.listening { background-color: #cc6b49; color: white; animation: avatarPulse 1s ease-in-out infinite; }
+
+        .console-stream-row { display: flex; gap: 14px; margin-bottom: 28px; width: 100%; align-items: flex-start; }
+        .console-avatar-bubble {
+            width: 34px; height: 34px; min-width: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #ff9466, #cc6b49);
+            color: white; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(204,107,73,0.35);
+        }
+        .console-avatar-bubble.thinking { animation: avatarPulse 1.1s ease-in-out infinite; }
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(204,107,73,0.35); }
+            50% { transform: scale(1.14); box-shadow: 0 2px 18px rgba(204,107,73,0.55); }
+        }
+        .console-text-payload { font-size: 16px; line-height: 1.6; color: #333; width: 100%; padding-top: 6px; }
+
+        .user-avatar-bubble {
+            width: 34px; height: 34px; min-width: 34px; border-radius: 50%;
+            background-color: #191919; color: white; display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 14px;
+        }
+
+        .global-popup-overlay {
+            display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 100;
+        }
+        .popup-window-box { background-color: #111113; border: 1px solid #222227; border-radius: 24px; width: 90%; max-width: 960px; padding: 40px; position: relative; }
+        .popup-close-trigger { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #6b7280; font-size: 26px; cursor: pointer; }
+
+        .price-tier-card {
+            background-color: #16161a; border: 1px solid #23232a; border-radius: 16px;
+            padding: 26px 22px; flex: 1; min-width: 220px; position: relative; display: flex; flex-direction: column;
+        }
+        .price-tier-card.featured { border: 2px solid #ff6600; }
+        .price-tier-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background-color: #ff6600; color: white; font-size: 11px; font-weight: 700;
+            padding: 4px 12px; border-radius: 20px; white-space: nowrap;
+        }
+        .price-tier-card h3 { color: #f3f4f6; font-size: 16px; margin-bottom: 6px; }
+        .price-tier-amount { font-size: 26px; font-weight: bold; color: #f3f4f6; margin: 8px 0 16px; }
+        .price-tier-amount span { font-size: 13px; color: #9ca3af; font-weight: 500; }
+        .price-tier-card.featured .price-tier-amount { color: #ff6600; }
+        .price-feature-list { list-style: none; margin-bottom: 20px; flex: 1; }
+        .price-feature-list li {
+            font-size: 13px; color: #c9c9cf; padding: 6px 0 6px 20px; position: relative; line-height: 1.4;
+        }
+        .price-feature-list li::before { content: "✓"; position: absolute; left: 0; color: #ff6600; font-weight: bold; }
+        .price-tier-btn {
+            width: 100%; background-color: #ff6600; border: none; color: white;
+            padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 14px;
+        }
+        .price-tier-btn:hover { background-color: #e65c00; }
+
+        @keyframes wordRiseIn {
+            from { opacity: 0; transform: translateY(0.4em); filter: blur(4px); }
+            to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .anim-word {
+            display: inline-block;
+            opacity: 0;
+            animation: wordRiseIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .logo-mark {
+            display: inline-block;
+            vertical-align: -6px;
+            flex-shrink: 0;
+        }
+        .logo-mark--sm { width: 24px; height: 24px; }
+        .logo-mark--lg { width: 28px; height: 28px; vertical-align: -7px; }
+        .logo-mark--nav { width: 26px; height: 26px; vertical-align: 0; }
+        .logo-mark--chat { width: 20px; height: 20px; vertical-align: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- ORIGINAL LOGO MARK: a rounded squircle badge with a deep-to-warm
+         diagonal gradient, a soft glass highlight, and a signature "spark
+         quill" glyph — a nib-stroke that lifts into a four-point spark.
+         Reused everywhere via <use>. -->
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <linearGradient id="scribeLogoGrad" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ff9d6c"/>
+                <stop offset="0.55" stop-color="#e8623f"/>
+                <stop offset="1" stop-color="#9c2f52"/>
+            </linearGradient>
+            <linearGradient id="scribeLogoGradSoft" x1="0" y1="0" x2="40" y2="26" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ffffff" stop-opacity="0.5"/>
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="scribeLogoSpark" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="#fff7ef"/>
+                <stop offset="1" stop-color="#ffd9b8"/>
+            </radialGradient>
+            <symbol id="scribe-logo-mark" viewBox="0 0 40 40">
+                <rect x="1" y="1" width="38" height="38" rx="13" fill="url(#scribeLogoGrad)"/>
+                <rect x="1" y="1" width="38" height="17" rx="13" fill="url(#scribeLogoGradSoft)"/>
+                <!-- nib stroke, curling upward like a pen lifting off the page -->
+                <path d="M11.5 27.5C11.5 23 15 21.5 18.5 20C23 18 25 15.5 24 12.5"
+                      fill="none" stroke="white" stroke-opacity="0.92" stroke-width="2.6" stroke-linecap="round"/>
+                <!-- signature four-point spark where the stroke lifts off -->
+                <g fill="url(#scribeLogoSpark)">
+                    <path d="M27 8.4C27.35 10.4 28 11.6 30 12C28 12.4 27.35 13.6 27 15.6C26.65 13.6 26 12.4 24 12C26 11.6 26.65 10.4 27 8.4Z"/>
+                </g>
+                <circle cx="12" cy="28" r="1.6" fill="white" fill-opacity="0.92"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- SCREEN 0: DARK MARKETING INTRO PAGE -->
+    <div id="intro-page-screen">
+        <header class="intro-navbar">
+            <div class="intro-logo"><svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg> <span>Scribe AI</span></div>
+            <div class="intro-nav-links">
+                <a href="#">Meet Scribe</a>
+                <a href="#">Platform</a>
+                <a href="#">Pricing</a>
+                <button class="btn-try-intro" onclick="goToAuthScreen()">Try Scribe</button>
+            </div>
+        </header>
+
+        <main class="intro-hero-container">
+            <div class="intro-left">
+                <h1 class="intro-headline" id="intro-headline-text"></h1>
+                <p class="intro-subhead">Brainstorm in chat, draft in your workspace.</p>
+
+                <div class="intro-auth-actions">
+                    <button class="btn-social" onclick="goToAuthScreen()">
+                        <span>🔵</span> Continue with Google
+                    </button>
+                    <div class="intro-divider">OR</div>
+                    <button class="btn-email-intro" onclick="goToAuthScreen()">Continue with email</button>
+                </div>
+
+                <p class="intro-fine-print">By continuing, you acknowledge Scribe AI's <a href="#">Privacy Policy</a> and agree to get occasional promotional emails and notifications.</p>
+
+                <button class="btn-download-intro" onclick="goToAuthScreen()">⬇ Download desktop app</button>
+            </div>
+
+            <div class="intro-right">
+                <div class="intro-preview-box">
+                    <button class="btn-preview-chat" onclick="goToAuthScreen()">Chat</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SCREEN 1: LANDING / AUTH PAGE (brand rail pinned to the corner) -->
+    <div id="landing-page-screen">
+        <div class="corner-rail on-light" onclick="location.reload()" title="Scribe AI">
+            <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
+            <span class="crail-txt">Scribe AI</span>
+        </div>
+        <header class="landing-navbar">
+            <div class="landing-logo"><svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg> <span>Scribe AI</span></div>
+            <div class="landing-nav-links">
+                <span style="cursor:pointer;" onclick="toggleMeetScribeModal()">Meet Scribe</span>
+                <span style="cursor:pointer;" onclick="toggleSolutionsModal()">Solutions</span>
+                <span style="cursor:pointer;" onclick="togglePricingModal()">Pricing</span>
+                <button class="btn-try-scribe" onclick="document.getElementById('landing-email').focus()">Try Scribe</button>
+            </div>
+        </header>
+
+        <main class="landing-hero-container">
+            <div class="hero-left">
+                <div class="auth-card">
+                    <div class="auth-tabs">
+                        <button id="landing-tab-login" class="auth-tab-btn active" onclick="switchLandingAuth('login')">Sign In</button>
+                        <button id="landing-tab-signup" class="auth-tab-btn" onclick="switchLandingAuth('signup')">Create Account</button>
+                    </div>
+                    <form id="landing-auth-form" onsubmit="handleLandingAuth(event)">
+                        <div id="landing-name-group" class="input-group" style="display: none;">
+                            <label>Full Name</label>
+                            <input type="text" id="landing-name" placeholder="Your Name">
+                        </div>
+                        <div class="input-group">
+                            <label>Nickname</label>
+                            <input type="text" id="landing-nickname" placeholder="e.g. Faizan" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" id="landing-email" placeholder="name@domain.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" id="landing-password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" id="landing-submit-btn" class="landing-submit-btn">Continue with Email</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="preview-showcase-box">
+                    <div class="preview-showcase-logo"><svg class="logo-mark logo-mark--lg"><use href="#scribe-logo-mark"></use></svg> <span>Scribe AI</span></div>
+                    <h2 class="preview-showcase-title" id="preview-showcase-title-text"></h2>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SCREEN 2: MAIN WORKSPACE (POST LOGIN) -->
+    <div id="workspace-screen">
+        <div style="display: flex; width: 100%; height: 100vh;">
+            <aside class="sidebar">
+                <div class="sidebar-top">
+                    <div class="nav-logo" title="Scribe AI" onclick="resetDashboardView()"><svg class="logo-mark logo-mark--nav"><use href="#scribe-logo-mark"></use></svg></div>
+                    <a href="#" class="nav-item active" title="New Chat" onclick="resetDashboardView()">
+                        <span class="icon">➕</span><span class="label">New Chat</span>
+                    </a>
+                    <a href="#" class="nav-item" title="Search chats" onclick="alert('Chat search is coming soon.')">
+                        <span class="icon">🔍</span><span class="label">Search chats</span>
+                    </a>
+                    <a href="#" class="nav-item" title="Pricing" onclick="togglePricingModal()">
+                        <span class="icon">💳</span><span class="label">Pricing</span>
+                    </a>
+                </div>
+                <div class="sidebar-bottom">
+                    <div id="sidebar-profile-node"></div>
+                </div>
+            </aside>
+
+            <main class="main-workspace">
+                <header class="top-subnav">
+                    <span class="badge-tier">Free Trial</span>
+                    <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
+                </header>
+
+                <div class="dashboard-content-stream">
+                    <div id="greeting-banner-hub" class="greeting-header-title">
+                        <span class="icon">✨</span> <span id="greeting-txt-hook">What can I help with?</span>
+                    </div>
+
+                    <div id="chat-stream-console" class="chat-console-body"></div>
+
+                    <div class="master-prompt-enclosure">
+                        <div id="attachment-preview-row" class="attachment-preview-row"></div>
+                        <textarea id="prompt-input" placeholder="Ask Scribe" rows="1"></textarea>
+                        <div class="prompt-controls-dock">
+                            <div class="controls-left-group">
+                                <div class="attach-menu-wrap">
+                                    <div class="action-icon-node" id="attach-plus-btn" title="Add">+</div>
+                                    <div class="attach-menu" id="attach-menu">
+                                        <div class="attach-menu-item" onclick="triggerFileSelect('image')">🖼️ <span>Upload image</span></div>
+                                        <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
+                                        <div class="attach-menu-item" onclick="triggerGenerateImage()">✨ <span>Generate image</span></div>
+                                        <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
+                                    </div>
+                                </div>
+                                <input type="file" id="hidden-file-image" accept="image/*" style="display:none;">
+                                <input type="file" id="hidden-file-any" style="display:none;">
+                                <select class="engine-picker-selector">
+                                    <option>Scribe Ultra (Llama 3.3)</option>
+                                    <option>Analytical Logic Model</option>
+                                </select>
+                            </div>
+                            <div class="controls-right-group">
+                                <div class="action-icon-node" id="mic-btn" title="Voice input">🎙️</div>
+                                <button id="submit-prompt-btn" class="btn-prompt-deliver">➤</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- SUBSCRIPTION POPUP CARD MODAL -->
+    <div id="pricing-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePricingModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 30px;">Scribe AI <span style="color: #ff6600;">Pricing Tiers</span></h2>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="price-tier-card">
+                    <h3>Free</h3>
+                    <div class="price-tier-amount">$0</div>
+                    <ul class="price-feature-list">
+                        <li>Unlimited text chat</li>
+                        <li>Voice input &amp; voice replies</li>
+                        <li>File upload</li>
+                        <li>Standard response speed</li>
+                    </ul>
+                    <button class="price-tier-btn" style="background-color:#2a2a30; cursor:default;" disabled>Current Plan</button>
+                </div>
+                <div class="price-tier-card featured">
+                    <div class="price-tier-badge">Most Popular</div>
+                    <h3>Pro Build</h3>
+                    <div class="price-tier-amount">$20<span>/mo</span></div>
+                    <ul class="price-feature-list">
+                        <li>Everything in Free</li>
+                        <li>AI image generation</li>
+                        <li>AI video generation — up to 50 videos/mo</li>
+                        <li>Priority response speed</li>
+                    </ul>
+                    <button class="price-tier-btn" id="stripe-checkout-node" onclick="handleUpgradeClick(this, 'pro')">Upgrade</button>
+                </div>
+                <div class="price-tier-card">
+                    <h3>Ultra</h3>
+                    <div class="price-tier-amount">$100<span>/mo</span></div>
+                    <ul class="price-feature-list">
+                        <li>Everything in Pro Build</li>
+                        <li>Unlimited AI image generation</li>
+                        <li>Unlimited AI video generation</li>
+                        <li>Fastest response speed</li>
+                    </ul>
+                    <button class="price-tier-btn" onclick="handleUpgradeClick(this, 'ultra')">Upgrade</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEET SCRIBE INFO MODAL -->
+    <div id="meet-scribe-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleMeetScribeModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Meet <span style="color: #ff6600;">Scribe AI</span></h2>
+            <p style="color: #9ca3af; font-size: 15px; line-height: 1.7; text-align: center; max-width: 520px; margin: 0 auto 24px;">
+                Scribe AI is your everyday writing and thinking partner — draft emails, summarize documents, brainstorm ideas, and get quick answers, all from one simple chat window.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 14px; padding: 16px 20px; flex: 1; min-width: 140px; text-align: center;">
+                    <div style="font-size: 22px;">✍️</div>
+                    <div style="font-size: 13px; color: #e5e7eb; margin-top: 8px; font-weight: 600;">Write &amp; Draft</div>
+                </div>
+                <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 14px; padding: 16px 20px; flex: 1; min-width: 140px; text-align: center;">
+                    <div style="font-size: 22px;">💡</div>
+                    <div style="font-size: 13px; color: #e5e7eb; margin-top: 8px; font-weight: 600;">Brainstorm</div>
+                </div>
+                <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 14px; padding: 16px 20px; flex: 1; min-width: 140px; text-align: center;">
+                    <div style="font-size: 22px;">📄</div>
+                    <div style="font-size: 13px; color: #e5e7eb; margin-top: 8px; font-weight: 600;">Summarize</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOLUTIONS INFO MODAL -->
+    <div id="solutions-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleSolutionsModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 24px;">Solutions <span style="color: #ff6600;">for every team</span></h2>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
+                    <h3 style="font-size: 15px; margin-bottom: 8px;">For Individuals</h3>
+                    <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">Quick answers, everyday writing help, and research on the fly.</p>
+                </div>
+                <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
+                    <h3 style="font-size: 15px; margin-bottom: 8px;">For Teams</h3>
+                    <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">Shared workflows for content, support replies, and internal docs.</p>
+                </div>
+                <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
+                    <h3 style="font-size: 15px; margin-bottom: 8px;">For Developers</h3>
+                    <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">API access to build Scribe into your own products and tools.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC WORKFLOW -->
+    <script>
+        const chatConsole = document.getElementById('chat-stream-console');
+        const promptInput = document.getElementById('prompt-input');
+        const submitBtn = document.getElementById('submit-prompt-btn');
+        const greetingBanner = document.getElementById('greeting-banner-hub');
+        const greetingText = document.getElementById('greeting-txt-hook');
+
+        let landingAuthMode = 'login';
+        let currentNickname = '';
+
+        function animateWords(el, text, baseDelay = 0, stepMs = 90) {
+            if (!el) return;
+            el.innerHTML = '';
+            const lines = text.split('|');
+            lines.forEach((line, lineIdx) => {
+                const words = line.trim().split(' ');
+                words.forEach((word, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'anim-word';
+                    span.style.animationDelay = (baseDelay + (lineIdx * words.length + i) * stepMs) + 'ms';
+                    span.textContent = word;
+                    el.appendChild(span);
+                    el.appendChild(document.createTextNode(' '));
+                });
+                if (lineIdx < lines.length - 1) el.appendChild(document.createElement('br'));
+            });
+        }
+
+        animateWords(document.getElementById('intro-headline-text'), 'Write faster, | think clearer');
+        animateWords(document.getElementById('preview-showcase-title-text'), 'Scribe handles your everyday tasks');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('user_session');
+            if (savedSession) {
+                const session = JSON.parse(savedSession);
+                document.getElementById('intro-page-screen').style.display = 'none';
+                switchToWorkspaceUI(session.email, session.nickname);
+            }
+        });
+
+        function goToAuthScreen() {
+            document.getElementById('intro-page-screen').style.display = 'none';
+            document.getElementById('landing-page-screen').style.display = 'flex';
+        }
+
+        function switchLandingAuth(type) {
+            landingAuthMode = type;
+            const tabLogin = document.getElementById('landing-tab-login');
+            const tabSignup = document.getElementById('landing-tab-signup');
+            const nameGroup = document.getElementById('landing-name-group');
+            const submitBtn = document.getElementById('landing-submit-btn');
+
+            if (type === 'login') {
+                tabLogin.classList.add('active'); tabSignup.classList.remove('active');
+                nameGroup.style.display = 'none'; submitBtn.innerText = "Continue with Email";
+            } else {
+                tabSignup.classList.add('active'); tabLogin.classList.remove('active');
+                nameGroup.style.display = 'block'; submitBtn.innerText = "Register Free Account";
+            }
+        }
+
+        async function handleLandingAuth(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('landing-submit-btn');
+            const nameVal = document.getElementById('landing-name').value.trim();
+            const nicknameVal = document.getElementById('landing-nickname').value.trim();
+            const emailVal = document.getElementById('landing-email').value.trim();
+            const passwordVal = document.getElementById('landing-password').value.trim();
+
+            const endpoint = landingAuthMode === 'login' ? '/api/signin' : '/api/signup';
+            submitBtn.innerText = "Connecting...";
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nameVal, nickname: nicknameVal, email: emailVal, password: passwordVal })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal }));
+                    switchToWorkspaceUI(emailVal, nicknameVal);
+                } else { alert("Auth Error: " + data.error); }
+            } catch (err) { alert("Server Offline."); }
+            finally { submitBtn.innerText = landingAuthMode === 'login' ? "Continue with Email" : "Register Free Account"; }
+        }
+
+        function switchToWorkspaceUI(email, nickname) {
+            document.getElementById('landing-page-screen').style.display = 'none';
+            document.getElementById('workspace-screen').style.display = 'flex';
+
+            currentNickname = nickname || '';
+
+            const targetNode = document.getElementById('sidebar-profile-node');
+            const initialLetter = (nickname || email).trim().charAt(0).toUpperCase();
+
+            targetNode.innerHTML = `
+                <div id="logout-trigger" style="width: 38px; height: 38px; background-color: #cc6b49; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 14px;" title="Click to Logout (${nickname ? nickname + ' — ' : ''}${email})">
+                    ${initialLetter}
+                </div>
+            `;
+
+            document.getElementById('logout-trigger').addEventListener('click', () => {
+                if (confirm("Confirm Logout Session?")) {
+                    localStorage.removeItem('user_session'); window.location.reload();
+                }
+            });
+
+            configureGreetingBanner();
+        }
+
+        function configureGreetingBanner() {
+            let text = "What can I help with";
+            if (currentNickname) { text += `, ${currentNickname}`; }
+            text += "?";
+            document.querySelector('#greeting-banner-hub .icon').innerText = "✨";
+            animateWords(greetingText, text);
+        }
+
+        // ---------------- Attach menu (+) : upload image / upload file / generate image ----------------
+        let pendingAttachments = [];
+        const attachPlusBtn = document.getElementById('attach-plus-btn');
+        const attachMenu = document.getElementById('attach-menu');
+
+        attachPlusBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            attachMenu.classList.toggle('open');
+        });
+        document.addEventListener('click', () => attachMenu.classList.remove('open'));
+        attachMenu.addEventListener('click', (e) => e.stopPropagation());
+
+        function triggerFileSelect(kind) {
+            attachMenu.classList.remove('open');
+            if (kind === 'image') document.getElementById('hidden-file-image').click();
+            else document.getElementById('hidden-file-any').click();
+        }
+
+        document.getElementById('hidden-file-image').addEventListener('change', (e) => {
+            handleFileChosen(e.target.files[0], true); e.target.value = '';
+        });
+        document.getElementById('hidden-file-any').addEventListener('change', (e) => {
+            handleFileChosen(e.target.files[0], false); e.target.value = '';
+        });
+
+        function handleFileChosen(file, isImage) {
+            if (!file) return;
+            pendingAttachments.push({ name: file.name, isImage, url: isImage ? URL.createObjectURL(file) : null });
+            renderAttachmentPreviews();
+        }
+
+        function renderAttachmentPreviews() {
+            const row = document.getElementById('attachment-preview-row');
+            if (pendingAttachments.length === 0) { row.style.display = 'none'; row.innerHTML = ''; return; }
+            row.style.display = 'flex';
+            row.innerHTML = pendingAttachments.map((a, i) => `
+                <div class="attachment-chip">
+                    ${a.isImage ? `<img src="${a.url}">` : a.isVideo ? `<video src="${a.url}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;" muted></video>` : '📄'}
+                    <span>${a.name}</span>
+                    <span class="remove-chip" onclick="removeAttachment(${i})">×</span>
+                </div>
+            `).join('');
+        }
+
+        function removeAttachment(i) { pendingAttachments.splice(i, 1); renderAttachmentPreviews(); }
+
+        // NOTE: Scribe AI has no real image-generation model wired up here —
+        // this paints an abstract "mood art" cover from the prompt text
+        // (same words always produce the same piece) so the attachment at
+        // least looks intentional instead of a flat gradient + caption.
+        function triggerGenerateImage() {
+            attachMenu.classList.remove('open');
+            const prompt = promptInput.value.trim() || 'Scribe AI';
+            const size = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            let hash = 0;
+            for (let i = 0; i < prompt.length; i++) hash = prompt.charCodeAt(i) + ((hash << 5) - hash);
+            const seed = Math.abs(hash);
+            const rand = (n) => { const x = Math.sin(seed + n * 999.77) * 10000; return x - Math.floor(x); };
+            const h1 = seed % 360;
+            const h2 = (h1 + 40 + rand(1) * 60) % 360;
+            const h3 = (h1 + 200 + rand(2) * 60) % 360;
+
+            // base wash
+            const base = ctx.createLinearGradient(0, 0, size, size);
+            base.addColorStop(0, `hsl(${h1},60%,14%)`);
+            base.addColorStop(1, `hsl(${h3},55%,10%)`);
+            ctx.fillStyle = base; ctx.fillRect(0, 0, size, size);
+
+            // soft glowing blobs, layered with additive blending
+            ctx.globalCompositeOperation = 'lighter';
+            const blobs = 6;
+            for (let i = 0; i < blobs; i++) {
+                const bx = rand(i * 3 + 1) * size;
+                const by = rand(i * 3 + 2) * size;
+                const br = size * (0.22 + rand(i * 3 + 3) * 0.28);
+                const hue = [h1, h2, h3][i % 3];
+                const glow = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+                glow.addColorStop(0, `hsla(${hue},85%,68%,0.85)`);
+                glow.addColorStop(1, `hsla(${hue},85%,68%,0)`);
+                ctx.fillStyle = glow;
+                ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over';
+
+            // fine grain for texture
+            for (let i = 0; i < 2200; i++) {
+                ctx.fillStyle = `rgba(255,255,255,${rand(i) * 0.05})`;
+                ctx.fillRect(rand(i + 0.5) * size, rand(i + 0.7) * size, 1, 1);
+            }
+
+            // vignette
+            const vg = ctx.createRadialGradient(size/2, size/2, size*0.35, size/2, size/2, size*0.72);
+            vg.addColorStop(0, 'rgba(0,0,0,0)');
+            vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+            ctx.fillStyle = vg; ctx.fillRect(0, 0, size, size);
+
+            // caption pill
+            const label = prompt.length > 42 ? prompt.slice(0, 42) + '…' : prompt;
+            ctx.font = '600 17px -apple-system, Segoe UI, sans-serif';
+            const padX = 16, textW = ctx.measureText(label).width;
+            const pillW = textW + padX * 2, pillH = 38, pillX = 20, pillY = size - 58;
+            ctx.fillStyle = 'rgba(10,10,12,0.55)';
+            ctx.beginPath();
+            ctx.roundRect ? ctx.roundRect(pillX, pillY, pillW, pillH, 19) : ctx.rect(pillX, pillY, pillW, pillH);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.fillText(label, pillX + padX, pillY + pillH / 2 + 6);
+
+            pendingAttachments.push({ name: 'Generated image', isImage: true, url: canvas.toDataURL('image/png'), promptText: prompt });
+            renderAttachmentPreviews();
+        }
+
+        // NOTE: same honesty note as the image function — there is no real
+        // AI video model behind this. It renders a looping abstract particle
+        // scene from the prompt and records the canvas to a .webm clip.
+        // Browsers don't let us bake synthesized speech directly into that
+        // file, so instead we tag the clip with promptText and speak it out
+        // loud (via speakText) whenever the clip is played back in the UI —
+        // see wireVoiceOnPlay() below.
+        function triggerGenerateVideo() {
+            attachMenu.classList.remove('open');
+            if (!('MediaRecorder' in window) || !HTMLCanvasElement.prototype.captureStream) {
+                alert('Video generation isn\'t supported in this browser. Please try Chrome.');
+                return;
+            }
+            const prompt = promptInput.value.trim() || 'Scribe AI';
+            const size = 400;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            let hash = 0;
+            for (let i = 0; i < prompt.length; i++) hash = prompt.charCodeAt(i) + ((hash << 5) - hash);
+            const seed = Math.abs(hash);
+            const rand = (n) => { const x = Math.sin(seed + n * 999.77) * 10000; return x - Math.floor(x); };
+            const h1 = seed % 360, h2 = (h1 + 130) % 360;
+
+            const particles = Array.from({ length: 22 }, (_, i) => ({
+                x: rand(i + 1) * size,
+                y: rand(i + 2) * size,
+                r: size * (0.08 + rand(i + 3) * 0.16),
+                hue: i % 2 === 0 ? h1 : h2,
+                speedX: (rand(i + 4) - 0.5) * 1.6,
+                speedY: (rand(i + 5) - 0.5) * 1.6,
+                phase: rand(i + 6) * Math.PI * 2
+            }));
+
+            const stream = canvas.captureStream(30);
+            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            const chunks = [];
+            recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+
+            let frame = 0;
+            const totalFrames = 90; // ~3 seconds at 30fps
+            const label = prompt.length > 34 ? prompt.slice(0, 34) + '…' : prompt;
+
+            const drawFrame = () => {
+                const t = frame / totalFrames;
+                const bg = ctx.createLinearGradient(0, 0, size, size);
+                bg.addColorStop(0, `hsl(${h1},45%,9%)`);
+                bg.addColorStop(1, `hsl(${h2},45%,7%)`);
+                ctx.fillStyle = bg; ctx.fillRect(0, 0, size, size);
+
+                ctx.globalCompositeOperation = 'lighter';
+                particles.forEach((p) => {
+                    p.x += p.speedX; p.y += p.speedY;
+                    if (p.x < -p.r) p.x = size + p.r; if (p.x > size + p.r) p.x = -p.r;
+                    if (p.y < -p.r) p.y = size + p.r; if (p.y > size + p.r) p.y = -p.r;
+                    const pulse = 0.85 + 0.15 * Math.sin(t * Math.PI * 4 + p.phase);
+                    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * pulse);
+                    glow.addColorStop(0, `hsla(${p.hue},85%,68%,0.8)`);
+                    glow.addColorStop(1, `hsla(${p.hue},85%,68%,0)`);
+                    ctx.fillStyle = glow;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2); ctx.fill();
+                });
+                ctx.globalCompositeOperation = 'source-over';
+
+                const fadeIn = Math.min(1, frame / 10);
+                const pillY = size - 56;
+                ctx.font = '600 15px -apple-system, Segoe UI, sans-serif';
+                const textW = ctx.measureText(label).width;
+                ctx.fillStyle = `rgba(10,10,12,${0.55 * fadeIn})`;
+                ctx.beginPath();
+                const pillArgs = [16, pillY, textW + 32, 34, 17];
+                ctx.roundRect ? ctx.roundRect(...pillArgs) : ctx.rect(16, pillY, textW + 32, 34);
+                ctx.fill();
+                ctx.fillStyle = `rgba(255,255,255,${0.95 * fadeIn})`;
+                ctx.fillText(label, 32, pillY + 23);
+
+                frame++;
+                if (frame <= totalFrames) requestAnimationFrame(drawFrame);
+                else recorder.stop();
+            };
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                pendingAttachments.push({ name: 'Generated video', isVideo: true, url: URL.createObjectURL(blob), promptText: prompt });
+                renderAttachmentPreviews();
+            };
+
+            recorder.start();
+            drawFrame();
+        }
+
+        // Attaches a play handler to every <video> under the given root so
+        // that, since the prompt's spoken narration can't be muxed into the
+        // .webm file itself in-browser, it plays in sync live instead —
+        // reading out exactly what the user typed as the prompt.
+        function wireVoiceOnPlay(root) {
+            root.querySelectorAll('video[data-narrate]').forEach((v) => {
+                if (v.dataset.wired) return;
+                v.dataset.wired = '1';
+                v.addEventListener('play', () => speakText(v.dataset.narrate));
+                v.addEventListener('pause', () => window.speechSynthesis && window.speechSynthesis.cancel());
+            });
+        }
+
+        // ---------------- Voice input (speech-to-text) + voice output (text-to-speech) ----------------
+        let cachedVoices = [];
+        function loadVoices() { cachedVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+        if ('speechSynthesis' in window) {
+            loadVoices();
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        const micBtn = document.getElementById('mic-btn');
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null, isListening = false;
+
+        if (SpeechRecognitionAPI) {
+            recognition = new SpeechRecognitionAPI();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                promptInput.value = transcript;
+                promptInput.dispatchEvent(new Event('input'));
+                processPromptSubmission();
+            };
+            recognition.onend = () => { isListening = false; micBtn.classList.remove('listening'); };
+            recognition.onerror = () => { isListening = false; micBtn.classList.remove('listening'); };
+        }
+
+        micBtn.addEventListener('click', () => {
+            if (!recognition) { alert('Voice input isn\'t supported in this browser. Please try Chrome.'); return; }
+            if (isListening) { recognition.stop(); return; }
+            isListening = true; micBtn.classList.add('listening');
+            recognition.start();
+        });
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window) || !text) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const isUrdu = /[\u0600-\u06FF]/.test(text);
+            const targetLang = isUrdu ? 'ur' : 'en';
+
+            let voice = cachedVoices.find(v => v.lang.toLowerCase().startsWith(targetLang) && /google/i.test(v.name));
+            if (!voice) voice = cachedVoices.find(v => v.lang.toLowerCase().startsWith(targetLang) && v.localService === false);
+            if (!voice) voice = cachedVoices.find(v => v.lang.toLowerCase().startsWith(targetLang));
+            if (!voice && !isUrdu) voice = cachedVoices.find(v => /google/i.test(v.name));
+
+            if (voice) { utterance.voice = voice; utterance.lang = voice.lang; }
+            else { utterance.lang = isUrdu ? 'ur-PK' : 'en-US'; }
+
+            utterance.rate = 0.98;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        promptInput.addEventListener('input', () => {
+            submitBtn.classList.toggle('active-ready', promptInput.value.trim() !== '');
+            promptInput.style.height = 'auto'; promptInput.style.height = promptInput.scrollHeight + 'px';
+        });
+
+        function togglePricingModal() { const card = document.getElementById('pricing-popup-card'); card.style.display = card.style.display === 'flex' ? 'none' : 'flex'; }
+        function toggleMeetScribeModal() { const card = document.getElementById('meet-scribe-popup-card'); card.style.display = card.style.display === 'flex' ? 'none' : 'flex'; }
+        function toggleSolutionsModal() { const card = document.getElementById('solutions-popup-card'); card.style.display = card.style.display === 'flex' ? 'none' : 'flex'; }
+        function resetDashboardView() { greetingBanner.style.display = 'flex'; chatConsole.style.display = 'none'; chatConsole.innerHTML = ''; }
+
+        async function processPromptSubmission() {
+            const promptPayload = promptInput.value.trim(); if (!promptPayload) return;
+
+            greetingBanner.style.display = 'none'; chatConsole.style.display = 'flex';
+
+            const userInitial = (currentNickname || 'U').trim().charAt(0).toUpperCase();
+            let attachmentsHtml = '';
+            if (pendingAttachments.length) {
+                attachmentsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;justify-content:flex-end;">' +
+                    pendingAttachments.map(a => a.isImage
+                        ? `<img src="${a.url}" style="width:90px;height:90px;border-radius:10px;object-fit:cover;">`
+                        : a.isVideo
+                        ? `<video src="${a.url}" style="width:160px;border-radius:10px;" controls loop data-narrate="${(a.promptText || '').replace(/"/g, '&quot;')}"></video>`
+                        : `<span style="font-size:12px;background:#e5e2da;padding:4px 8px;border-radius:8px;">📄 ${a.name}</span>`
+                    ).join('') + '</div>';
+            }
+            const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f3f1ec; border: 1px solid #e5e2da; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #191919;">${promptPayload}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
+            chatConsole.insertAdjacentHTML('beforeend', userHtml);
+            wireVoiceOnPlay(chatConsole);
+            promptInput.value = ''; submitBtn.classList.remove('active-ready'); promptInput.style.height = '50px';
+            pendingAttachments = []; renderAttachmentPreviews();
+            chatConsole.scrollTop = chatConsole.scrollHeight;
+
+            const targetId = 'ai-chunk-' + Date.now();
+            const avatarId = targetId + '-avatar';
+            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload" id="${targetId}">Scribe AI is thinking...</div></div>`;
+            chatConsole.insertAdjacentHTML('beforeend', aiHtml); chatConsole.scrollTop = chatConsole.scrollHeight;
+            const targetOutputBox = document.getElementById(targetId);
+            const avatarNode = document.getElementById(avatarId);
+
+            try {
+                const response = await fetch('/api/ask-question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: promptPayload }) });
+                const data = await response.json();
+                avatarNode.classList.remove('thinking');
+                if (data.success && data.answer) { animateWords(targetOutputBox, data.answer, 0, 60); speakText(data.answer); }
+                else { animateWords(targetOutputBox, "Error compilation model response.", 0, 60); }
+            } catch (err) {
+                avatarNode.classList.remove('thinking');
+                animateWords(targetOutputBox, "Connection lost with Groq background server.", 0, 60);
+            }
+            chatConsole.scrollTop = chatConsole.scrollHeight;
+        }
+
+        submitBtn.addEventListener('click', processPromptSubmission);
+        promptInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); processPromptSubmission(); } });
+
+        async function handleUpgradeClick(btn, tier) {
+            const original = btn.innerText;
+            btn.innerText = "Connecting...";
+            try {
+                const r = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tier })
+                });
+                const d = await r.json();
+                if (d.success && d.url) window.location.href = d.url; else alert("Stripe Failed");
+            } catch { alert("Error triggers."); } finally { btn.innerText = original; }
+        }
+    </script>
+</body>
+</html>
