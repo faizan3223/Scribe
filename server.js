@@ -61,14 +61,20 @@ export default {
         const encoder = new TextEncoder();
 
         ctx.waitUntil((async () => {
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            if (content) {
-              await writer.write(encoder.encode(`data: ${JSON.stringify({ text: content })}\n\n`));
+          try {
+            for await (const chunk of stream) {
+              // Fix: Choices check lagaya takay crash na ho
+              const content = chunk.choices?.[0]?.delta?.content || '';
+              if (content) {
+                await writer.write(encoder.encode(`data: ${JSON.stringify({ text: content })}\n\n`));
+              }
             }
+          } catch (streamErr) {
+            console.error("Stream error:", streamErr);
+          } finally {
+            await writer.write(encoder.encode('data: [DONE]\n\n'));
+            await writer.close();
           }
-          await writer.write(encoder.encode('data: [DONE]\n\n'));
-          await writer.close();
         })());
 
         return new Response(readable, {
@@ -99,8 +105,8 @@ export default {
             quantity: 1,
           }],
           mode: 'subscription',
-          success_url: 'https://pages.dev?session_id={CHECKOUT_SESSION_ID}',
-          cancel_url: 'https://pages.dev',
+          success_url: 'https://scribe-5mr.pages.dev?session_id={CHECKOUT_SESSION_ID}',
+          cancel_url: 'https://scribe-5mr.pages.dev',
         });
 
         return new Response(JSON.stringify({ success: true, url: session.url }), {
@@ -125,4 +131,3 @@ export default {
 };
 
 // deploy trigger check
-
