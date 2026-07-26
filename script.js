@@ -15,6 +15,17 @@ userInput.addEventListener('input', () => {
     }
 });
 
+function showError(message) {
+    const errorHtml = `
+        <div class="flex items-center gap-2 text-red-600 text-sm p-2">
+            <span>⚠️</span>
+            <span>${message}</span>
+        </div>
+    `;
+    chatContainer.insertAdjacentHTML('beforeend', errorHtml);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
 async function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
@@ -31,113 +42,66 @@ async function sendMessage() {
     sendBtn.classList.remove('bg-[#cc6b49]', 'text-white');
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        // 2. Fetch Response from Backend (Updated for Stream & Cloudflare)
-        try {
-            // Note: '/api/chat' ki jagah sahi endpoint '/api/ask-question' use kiya hai aur workerURL lagaya hai
-            const response = await fetch(`${workerURL}/api/ask-question`, { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: text }) // backend 'question' expect kar raha hai
-            });
-    
-            if (!response.ok) throw new Error("Server rejected request");
-    
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let aiResponseText = "";
-    
-            // Scribe container ya dynamic append ke liye pehle ek khali message element create karlein 
-            // Agar aapke paas 'appendMessage' ya 'addChatBubble' ka function hai to use pehle call karein
-            // Yeh line sirf placeholder hai, agar error aaye to ise mita dena:
-            // let messageElement = createChatBubble('scribe', ''); 
-    
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-    
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split("\n");
-    
-                for (const line of lines) {
-                    if (line.startsWith("data: ")) {
-                        const dataStr = line.slice(6).trim();
-                        if (dataStr === "[DONE]") break;
-    
-                        try {
-                            const parsed = JSON.parse(dataStr);
-                            if (parsed.text) {
-                                aiResponseText += parsed.text;
-                                
-                                // ZAROORI NOTE: Apne screen par live text dikhane ke liye niche wala function update karein
-                                // Agar aapke function ka naam alag hai (jaise updateChatBox), to woh naam likhein:
-                                updateChatUI('scribe', aiResponseText); 
-                            }
-                        } catch (e) {
-                            console.error("Chunk parse error:", e);
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.error("Fetch Connection Error:", error);
-            showError("Connection lost with Groq background server.");
-        }
-    
-        // 3. Append AI Response
-      
-        // 2. Fetch Response from Backend (Sahi Bracket Structure)
-        try {
-           const response = await fetch(`${workerURL}/api/ask-question`, { 
+    // 2. Fetch Response from Backend (streamed via Cloudflare Worker)
+    try {
+        const response = await fetch(`${workerURL}/api/ask-question`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: text })
+        });
 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: text }) 
-            });
-    
-            if (!response.ok) throw new Error("Server rejected request");
-    
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let aiResponseText = "";
-    
-            // Chat container clear/update logic
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-    
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split("\n");
-    
-                for (const line of lines) {
-                    if (line.startsWith("data: ")) {
-                        const dataStr = line.slice(6).trim();
-                        if (dataStr === "[DONE]") break;
-    
-                        try {
-                            const parsed = JSON.parse(dataStr);
-                            if (parsed.text) {
-                                aiResponseText += parsed.text;
-    
-                                // Live text container build and render update
-                                const aiHtml = `
-                                    <div class="flex gap-4 max-w-2xl">
-                                        <div class="w-8 h-8 rounded-full bg-[#cc6b49] flex items-center justify-center text-white text-xs shrink-0 font-bold">S</div>
-                                        <div class="text-[15px] leading-relaxed text-[#191919]">${aiResponseText}</div>
-                                    </div>
-                                `;
-                                
-                                // Purana live-updated text mita kar naya show karne ke liye logic (ya directly render append)
-                                chatContainer.insertAdjacentHTML('beforeend', aiHtml);
-                                chatContainer.scrollTop = chatContainer.scrollHeight;
-                            }
-                        } catch (e) {
-                            console.error("Chunk parse error:", e);
+        if (!response.ok) throw new Error("Server rejected request");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let aiResponseText = "";
+
+        // Ek khaali AI bubble create karo jise hum live update karenge
+        const aiWrapperId = `ai-msg-${Date.now()}`;
+        const aiHtml = `
+            <div class="flex gap-4 max-w-2xl">
+                <div class="w-8 h-8 rounded-full bg-[#cc6b49] flex items-center justify-center text-white text-xs shrink-0 font-bold">S</div>
+                <div id="${aiWrapperId}" class="text-[15px] leading-relaxed text-[#191919]"></div>
+            </div>
+        `;
+        chatContainer.insertAdjacentHTML('beforeend', aiHtml);
+        const aiTextEl = document.getElementById(aiWrapperId);
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n");
+
+            for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                    const dataStr = line.slice(6).trim();
+                    if (dataStr === "[DONE]") break;
+
+                    try {
+                        const parsed = JSON.parse(dataStr);
+                        if (parsed.text) {
+                            aiResponseText += parsed.text;
+                            aiTextEl.textContent = aiResponseText;
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
                         }
+                    } catch (e) {
+                        console.error("Chunk parse error:", e);
                     }
                 }
             }
-        } catch (error) {
-            console.error("Error:", error);
         }
+    } catch (error) {
+        console.error("Fetch Connection Error:", error);
+        showError("Connection lost with Groq background server.");
     }
-    
+}
+
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
