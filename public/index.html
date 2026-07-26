@@ -1020,9 +1020,10 @@
 const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
 
 
-const endpoint = landingAuthMode === 'login' 
-  ? `${workerURL}/api/signin` 
+const endpoint = landingAuthMode === 'login'
+  ? `${workerURL}/api/signin`
   : `${workerURL}/api/signup`;
+
 
             submitBtn.innerText = "Connecting...";
 
