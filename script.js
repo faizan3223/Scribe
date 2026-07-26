@@ -1,3 +1,5 @@
+const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
+
 const chatContainer = document.getElementById('chat-container');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
@@ -85,7 +87,8 @@ async function sendMessage() {
       
         // 2. Fetch Response from Backend (Sahi Bracket Structure)
         try {
-            const response = await fetch(`${workerURL}/api/ask-question`, { 
+           const response = await fetch(`${workerURL}/api/ask-question`, { 
+
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ question: text }) 
