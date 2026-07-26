@@ -1017,7 +1017,8 @@
             const emailVal = document.getElementById('landing-email').value.trim();
             const passwordVal = document.getElementById('landing-password').value.trim();
 // api/signin ki jagah apna real Cloudflare Worker URL dalein
-const workerURL = "https://scribe.mworkspace123.workers.dev"; 
+const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
+
 
 const endpoint = landingAuthMode === 'login' 
   ? `${workerURL}/api/signin` 
