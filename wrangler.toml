@@ -1,0 +1,4 @@
+name = "scribe-backend"
+main = "server.js"
+compatibility_date = "2026-07-26"
+compatibility_flags = [ "nodejs_compat" ]
