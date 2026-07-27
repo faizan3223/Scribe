@@ -212,8 +212,6 @@
         }
         .btn-preview-chat:hover { background-color: #000; }
 
-        /* Small brand rail pinned to the corner on marketing/auth pages,
-           so the identity stays visible and consistent across every screen */
         .corner-rail {
             position: fixed;
             top: 18px;
@@ -664,10 +662,6 @@
 </head>
 <body>
 
-    <!-- ORIGINAL LOGO MARK: a rounded squircle badge with a deep-to-warm
-         diagonal gradient, a soft glass highlight, and a signature "spark
-         quill" glyph — a nib-stroke that lifts into a four-point spark.
-         Reused everywhere via <use>. -->
     <svg width="0" height="0" style="position:absolute;">
         <defs>
             <linearGradient id="scribeLogoGrad" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
@@ -686,10 +680,8 @@
             <symbol id="scribe-logo-mark" viewBox="0 0 40 40">
                 <rect x="1" y="1" width="38" height="38" rx="13" fill="url(#scribeLogoGrad)"/>
                 <rect x="1" y="1" width="38" height="17" rx="13" fill="url(#scribeLogoGradSoft)"/>
-                <!-- nib stroke, curling upward like a pen lifting off the page -->
                 <path d="M11.5 27.5C11.5 23 15 21.5 18.5 20C23 18 25 15.5 24 12.5"
                       fill="none" stroke="white" stroke-opacity="0.92" stroke-width="2.6" stroke-linecap="round"/>
-                <!-- signature four-point spark where the stroke lifts off -->
                 <g fill="url(#scribeLogoSpark)">
                     <path d="M27 8.4C27.35 10.4 28 11.6 30 12C28 12.4 27.35 13.6 27 15.6C26.65 13.6 26 12.4 24 12C26 11.6 26.65 10.4 27 8.4Z"/>
                 </g>
@@ -736,7 +728,7 @@
         </main>
     </div>
 
-    <!-- SCREEN 1: LANDING / AUTH PAGE (brand rail pinned to the corner) -->
+    <!-- SCREEN 1: LANDING / AUTH PAGE -->
     <div id="landing-page-screen">
         <div class="corner-rail on-light" onclick="location.reload()" title="Scribe AI">
             <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
@@ -955,6 +947,9 @@
         const greetingBanner = document.getElementById('greeting-banner-hub');
         const greetingText = document.getElementById('greeting-txt-hook');
 
+        // Real Cloudflare Worker URL — used for all backend calls (chat, auth, checkout)
+        const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
+
         let landingAuthMode = 'login';
         let currentNickname = '';
 
@@ -1016,14 +1011,10 @@
             const nicknameVal = document.getElementById('landing-nickname').value.trim();
             const emailVal = document.getElementById('landing-email').value.trim();
             const passwordVal = document.getElementById('landing-password').value.trim();
-// api/signin ki jagah apna real Cloudflare Worker URL dalein
-const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
 
-
-const endpoint = landingAuthMode === 'login'
-  ? `${workerURL}/api/signin`
-  : `${workerURL}/api/signup`;
-
+            const endpoint = landingAuthMode === 'login'
+              ? `${workerURL}/api/signin`
+              : `${workerURL}/api/signup`;
 
             submitBtn.innerText = "Connecting...";
 
@@ -1121,10 +1112,6 @@ const endpoint = landingAuthMode === 'login'
 
         function removeAttachment(i) { pendingAttachments.splice(i, 1); renderAttachmentPreviews(); }
 
-        // NOTE: Scribe AI has no real image-generation model wired up here —
-        // this paints an abstract "mood art" cover from the prompt text
-        // (same words always produce the same piece) so the attachment at
-        // least looks intentional instead of a flat gradient + caption.
         function triggerGenerateImage() {
             attachMenu.classList.remove('open');
             const prompt = promptInput.value.trim() || 'Scribe AI';
@@ -1141,13 +1128,11 @@ const endpoint = landingAuthMode === 'login'
             const h2 = (h1 + 40 + rand(1) * 60) % 360;
             const h3 = (h1 + 200 + rand(2) * 60) % 360;
 
-            // base wash
             const base = ctx.createLinearGradient(0, 0, size, size);
             base.addColorStop(0, `hsl(${h1},60%,14%)`);
             base.addColorStop(1, `hsl(${h3},55%,10%)`);
             ctx.fillStyle = base; ctx.fillRect(0, 0, size, size);
 
-            // soft glowing blobs, layered with additive blending
             ctx.globalCompositeOperation = 'lighter';
             const blobs = 6;
             for (let i = 0; i < blobs; i++) {
@@ -1163,19 +1148,16 @@ const endpoint = landingAuthMode === 'login'
             }
             ctx.globalCompositeOperation = 'source-over';
 
-            // fine grain for texture
             for (let i = 0; i < 2200; i++) {
                 ctx.fillStyle = `rgba(255,255,255,${rand(i) * 0.05})`;
                 ctx.fillRect(rand(i + 0.5) * size, rand(i + 0.7) * size, 1, 1);
             }
 
-            // vignette
             const vg = ctx.createRadialGradient(size/2, size/2, size*0.35, size/2, size/2, size*0.72);
             vg.addColorStop(0, 'rgba(0,0,0,0)');
             vg.addColorStop(1, 'rgba(0,0,0,0.45)');
             ctx.fillStyle = vg; ctx.fillRect(0, 0, size, size);
 
-            // caption pill
             const label = prompt.length > 42 ? prompt.slice(0, 42) + '…' : prompt;
             ctx.font = '600 17px -apple-system, Segoe UI, sans-serif';
             const padX = 16, textW = ctx.measureText(label).width;
@@ -1191,13 +1173,6 @@ const endpoint = landingAuthMode === 'login'
             renderAttachmentPreviews();
         }
 
-        // NOTE: same honesty note as the image function — there is no real
-        // AI video model behind this. It renders a looping abstract particle
-        // scene from the prompt and records the canvas to a .webm clip.
-        // Browsers don't let us bake synthesized speech directly into that
-        // file, so instead we tag the clip with promptText and speak it out
-        // loud (via speakText) whenever the clip is played back in the UI —
-        // see wireVoiceOnPlay() below.
         function triggerGenerateVideo() {
             attachMenu.classList.remove('open');
             if (!('MediaRecorder' in window) || !HTMLCanvasElement.prototype.captureStream) {
@@ -1232,7 +1207,7 @@ const endpoint = landingAuthMode === 'login'
             recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
 
             let frame = 0;
-            const totalFrames = 90; // ~3 seconds at 30fps
+            const totalFrames = 90;
             const label = prompt.length > 34 ? prompt.slice(0, 34) + '…' : prompt;
 
             const drawFrame = () => {
@@ -1283,10 +1258,6 @@ const endpoint = landingAuthMode === 'login'
             drawFrame();
         }
 
-        // Attaches a play handler to every <video> under the given root so
-        // that, since the prompt's spoken narration can't be muxed into the
-        // .webm file itself in-browser, it plays in sync live instead —
-        // reading out exactly what the user typed as the prompt.
         function wireVoiceOnPlay(root) {
             root.querySelectorAll('video[data-narrate]').forEach((v) => {
                 if (v.dataset.wired) return;
@@ -1296,7 +1267,6 @@ const endpoint = landingAuthMode === 'login'
             });
         }
 
-        // ---------------- Voice input (speech-to-text) + voice output (text-to-speech) ----------------
         let cachedVoices = [];
         function loadVoices() { cachedVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
         if ('speechSynthesis' in window) {
@@ -1390,12 +1360,56 @@ const endpoint = landingAuthMode === 'login'
             const targetOutputBox = document.getElementById(targetId);
             const avatarNode = document.getElementById(avatarId);
 
+            // NOTE: the Worker's /api/ask-question endpoint streams the answer back
+            // as Server-Sent Events (Content-Type: text/event-stream), NOT plain JSON.
+            // So we must read it with a stream reader instead of response.json().
             try {
-               const response = await fetch('https://scribe-backend.mworkspace123.workers.dev/api/ask-question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: promptPayload }) });
-                const data = await response.json();
+                const response = await fetch(`${workerURL}/api/ask-question`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: promptPayload })
+                });
+
+                if (!response.ok) throw new Error("Server rejected request");
+
                 avatarNode.classList.remove('thinking');
-                if (data.success && data.answer) { animateWords(targetOutputBox, data.answer, 0, 60); speakText(data.answer); }
-                else { animateWords(targetOutputBox, "Error compilation model response.", 0, 60); }
+                targetOutputBox.textContent = '';
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let aiResponseText = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split("\n");
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            const dataStr = line.slice(6).trim();
+                            if (dataStr === "[DONE]") continue;
+
+                            try {
+                                const parsed = JSON.parse(dataStr);
+                                if (parsed.text) {
+                                    aiResponseText += parsed.text;
+                                    targetOutputBox.textContent = aiResponseText;
+                                    chatConsole.scrollTop = chatConsole.scrollHeight;
+                                }
+                            } catch (e) {
+                                // ignore parse errors on partial/incomplete chunks
+                            }
+                        }
+                    }
+                }
+
+                if (aiResponseText) {
+                    speakText(aiResponseText);
+                } else {
+                    targetOutputBox.textContent = "Error compilation model response.";
+                }
             } catch (err) {
                 avatarNode.classList.remove('thinking');
                 animateWords(targetOutputBox, "Connection lost with Groq background server.", 0, 60);
@@ -1410,7 +1424,7 @@ const endpoint = landingAuthMode === 'login'
             const original = btn.innerText;
             btn.innerText = "Connecting...";
             try {
-                const r = await fetch('https://scribe-backend.mworkspace123.workers.dev/api/create-checkout-session', {
+                const r = await fetch(`${workerURL}/api/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tier })
