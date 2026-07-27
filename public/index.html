@@ -1391,7 +1391,7 @@ const endpoint = landingAuthMode === 'login'
             const avatarNode = document.getElementById(avatarId);
 
             try {
-                const response = await fetch('/api/ask-question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: promptPayload }) });
+               const response = await fetch('https://scribe-backend.mworkspace123.workers.dev/api/ask-question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: promptPayload }) });
                 const data = await response.json();
                 avatarNode.classList.remove('thinking');
                 if (data.success && data.answer) { animateWords(targetOutputBox, data.answer, 0, 60); speakText(data.answer); }
@@ -1410,7 +1410,7 @@ const endpoint = landingAuthMode === 'login'
             const original = btn.innerText;
             btn.innerText = "Connecting...";
             try {
-                const r = await fetch('/api/create-checkout-session', {
+                const r = await fetch('https://scribe-backend.mworkspace123.workers.dev/api/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tier })
