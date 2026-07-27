@@ -87,7 +87,25 @@ export default {
           }
         });
       }
+     // 3.5 IMAGE GENERATION ENDPOINT
+      if (request.method === "POST" && url.pathname === "/api/generate-image") {
+        const body = await request.json();
+        const { prompt } = body;
 
+        if (!prompt) {
+          return new Response(JSON.stringify({ success: false, error: 'Prompt text is required' }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        const aiResponse = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt });
+
+        return new Response(JSON.stringify({ success: true, image: aiResponse.image }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
       // 4. STRIPE CHECKOUT ENDPOINT
       if (request.method === "POST" && url.pathname === "/api/create-checkout-session") {
         const session = await stripe.checkout.sessions.create({
