@@ -827,7 +827,37 @@
                                     <div class="attach-menu" id="attach-menu">
                                         <div class="attach-menu-item" onclick="triggerFileSelect('image')">🖼️ <span>Upload image</span></div>
                                         <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
-                                        <div class="attach-menu-item" onclick="triggerGenerateImage()">✨ <span>Generate image</span></div>
+                                        async function triggerGenerateImage() {
+    attachMenu.classList.remove('open');
+    const prompt = promptInput.value.trim();
+    if (!prompt) { alert("Pehle image ke liye kuch likho (jaise: 'a cat on the moon')"); return; }
+
+    const placeholderId = 'imgplaceholder-' + Date.now();
+    pendingAttachments.push({ name: 'Generating...', isImage: true, url: '', id: placeholderId, loading: true });
+    renderAttachmentPreviews();
+
+    try {
+        const res = await fetch(`${workerURL}/api/generate-image`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+
+        const idx = pendingAttachments.findIndex(a => a.id === placeholderId);
+        if (data.success && data.image) {
+            pendingAttachments[idx] = { name: 'Generated image', isImage: true, url: `data:image/png;base64,${data.image}`, promptText: prompt };
+        } else {
+            pendingAttachments.splice(idx, 1);
+            alert("Image generate nahi ho saki. Dobara try karo.");
+        }
+        renderAttachmentPreviews();
+    } catch (err) {
+        pendingAttachments = pendingAttachments.filter(a => a.id !== placeholderId);
+        renderAttachmentPreviews();
+        alert("Server se connection nahi ho saka.");
+    }
+}
                                         <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
                                     </div>
                                 </div>
