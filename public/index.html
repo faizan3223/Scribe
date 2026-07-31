@@ -767,7 +767,7 @@
             cursor: pointer;
         }
         .btn-prompt-deliver.active-ready {
-            background-color: #111111;
+            background-color: #4f46e5;
             color: white;
         }
 
@@ -861,11 +861,109 @@
             50% { transform: scale(1.14); box-shadow: 0 2px 18px rgba(79,70,229,0.55); }
         }
         .console-text-payload {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #333;
+            font-size: 15.5px;
+            line-height: 1.65;
+            color: #222;
             width: 100%;
-            padding-top: 6px;
+            padding-top: 4px;
+            word-break: break-word;
+        }
+        .console-text-payload p {
+            margin: 0 0 12px;
+        }
+        .console-text-payload p:last-child { margin-bottom: 0; }
+        .console-text-payload strong { font-weight: 700; color: #111; }
+        .console-text-payload ul, .console-text-payload ol {
+            margin: 8px 0 12px 20px;
+            padding: 0;
+        }
+        .console-text-payload li {
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+        .console-text-payload h3, .console-text-payload h4 {
+            margin: 14px 0 8px;
+            font-size: 16px;
+            color: #111;
+        }
+        .msg-code-block {
+            margin: 12px 0;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0f0f12;
+        }
+        .msg-code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #1a1a1f;
+            border-bottom: 1px solid #2a2a30;
+        }
+        .msg-code-lang {
+            font-size: 12px;
+            color: #a3a3a3;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .msg-code-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .msg-code-btn {
+            background: #2a2a30;
+            border: none;
+            color: #e5e5e5;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .msg-code-btn:hover { background: #3a3a42; color: #fff; }
+        .msg-code-block pre {
+            margin: 0;
+            padding: 14px 16px;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.55;
+            color: #e8e8ec;
+        }
+        .msg-code-block code {
+            font-family: inherit;
+            white-space: pre;
+        }
+        .msg-inline-code {
+            background: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            border-radius: 5px;
+            padding: 1px 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #111;
+        }
+        .msg-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 4px;
+        }
+        .msg-action-btn {
+            background: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            color: #555;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: inherit;
+        }
+        .msg-action-btn:hover {
+            background: #e8e8e6;
+            color: #111;
         }
 
         .user-avatar-bubble {
@@ -1717,13 +1815,14 @@
             chatConsole.innerHTML = '';
 
             const userInitial = (currentNickname || currentUserEmail || 'U').trim().charAt(0).toUpperCase();
-            currentChatMessages.forEach(m => {
+            currentChatMessages.forEach((m, i) => {
                 if (m.role === 'user') {
                     chatConsole.insertAdjacentHTML('beforeend',
-                        `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${m.text}</div><div class="user-avatar-bubble">${userInitial}</div></div>`);
+                        `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${escapeHtml(m.text)}</div><div class="user-avatar-bubble">${userInitial}</div></div>`);
                 } else {
+                    const boxId = 'hist-ai-' + i + '-' + Date.now();
                     chatConsole.insertAdjacentHTML('beforeend',
-                        `<div class="console-stream-row"><div class="console-avatar-bubble"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload">${m.text}</div></div>`);
+                        `<div class="console-stream-row"><div class="console-avatar-bubble"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
                 }
             });
             chatConsole.scrollTop = chatConsole.scrollHeight;
@@ -2075,6 +2174,146 @@
             window.speechSynthesis.speak(utterance);
         }
 
+        // ---- Format AI answers: code blocks, bold, lists (Claude-style) ----
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function formatInline(text) {
+            let s = escapeHtml(text);
+            // inline code `code`
+            s = s.replace(/`([^`]+)`/g, '<code class="msg-inline-code">$1</code>');
+            // **bold**
+            s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            // *italic* (simple)
+            s = s.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>');
+            return s;
+        }
+
+        function formatMessageHtml(raw) {
+            if (!raw) return '';
+            const text = String(raw).replace(/\r\n/g, '\n');
+            const parts = [];
+            const codeRegex = /```(\w*)\n?([\s\S]*?)```/g;
+            let last = 0;
+            let m;
+            let codeIdx = 0;
+
+            while ((m = codeRegex.exec(text)) !== null) {
+                if (m.index > last) {
+                    parts.push({ type: 'text', value: text.slice(last, m.index) });
+                }
+                parts.push({ type: 'code', lang: m[1] || 'code', value: m[2].replace(/\n$/, '') });
+                last = m.index + m[0].length;
+            }
+            if (last < text.length) parts.push({ type: 'text', value: text.slice(last) });
+
+            let html = '';
+            parts.forEach(part => {
+                if (part.type === 'code') {
+                    const id = 'codeblk-' + Date.now() + '-' + (codeIdx++);
+                    const lang = part.lang || 'code';
+                    const ext = ({ html: 'html', css: 'css', javascript: 'js', js: 'js', python: 'py', java: 'java', cpp: 'cpp', c: 'c', json: 'json', txt: 'txt' })[lang.toLowerCase()] || 'txt';
+                    html += `<div class="msg-code-block">
+                        <div class="msg-code-header">
+                            <span class="msg-code-lang">${escapeHtml(lang)}</span>
+                            <div class="msg-code-actions">
+                                <button type="button" class="msg-code-btn" onclick="copyCodeBlock('${id}')">Copy</button>
+                                <button type="button" class="msg-code-btn" onclick="downloadCodeBlock('${id}', '${ext}')">⬇ Download</button>
+                            </div>
+                        </div>
+                        <pre><code id="${id}">${escapeHtml(part.value)}</code></pre>
+                    </div>`;
+                } else {
+                    html += formatTextBlocks(part.value);
+                }
+            });
+            return html;
+        }
+
+        function formatTextBlocks(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inUl = false, inOl = false;
+            let para = [];
+
+            function flushPara() {
+                if (!para.length) return;
+                const joined = para.join(' ').trim();
+                if (joined) html += `<p>${formatInline(joined)}</p>`;
+                para = [];
+            }
+            function closeLists() {
+                if (inUl) { html += '</ul>'; inUl = false; }
+                if (inOl) { html += '</ol>'; inOl = false; }
+            }
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const ul = trimmed.match(/^[-*•]\s+(.+)/);
+                const ol = trimmed.match(/^\d+[.)]\s+(.+)/);
+                const heading = trimmed.match(/^#{1,3}\s+(.+)/);
+
+                if (ul) {
+                    flushPara();
+                    if (inOl) { html += '</ol>'; inOl = false; }
+                    if (!inUl) { html += '<ul>'; inUl = true; }
+                    html += `<li>${formatInline(ul[1])}</li>`;
+                } else if (ol) {
+                    flushPara();
+                    if (inUl) { html += '</ul>'; inUl = false; }
+                    if (!inOl) { html += '<ol>'; inOl = true; }
+                    html += `<li>${formatInline(ol[1])}</li>`;
+                } else if (heading) {
+                    flushPara();
+                    closeLists();
+                    html += `<h3>${formatInline(heading[1])}</h3>`;
+                } else if (trimmed === '') {
+                    flushPara();
+                    closeLists();
+                } else {
+                    closeLists();
+                    para.push(trimmed);
+                }
+            });
+            flushPara();
+            closeLists();
+            return html;
+        }
+
+        function copyCodeBlock(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.textContent || '').then(() => {
+                // brief feedback via title
+            }).catch(() => {});
+        }
+
+        function downloadCodeBlock(id, ext) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const blob = new Blob([el.textContent || ''], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'code.' + (ext || 'txt');
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function buildAiMessageHtml(rawText, boxId) {
+            const body = formatMessageHtml(rawText);
+            const safeAttr = escapeHtml(rawText).replace(/'/g, '&#39;');
+            return `${body}
+                <div class="msg-actions">
+                    <button type="button" class="msg-action-btn" onclick="speakText(document.getElementById('${boxId}').dataset.speak || '')">🔊 Suno</button>
+                    <button type="button" class="msg-action-btn" onclick="navigator.clipboard.writeText(document.getElementById('${boxId}').dataset.speak || '')">Copy answer</button>
+                </div>`;
+        }
+
         promptInput.addEventListener('input', () => {
             submitBtn.classList.toggle('active-ready', promptInput.value.trim() !== '');
             promptInput.style.height = 'auto';
@@ -2199,6 +2438,7 @@
                                 const parsed = JSON.parse(dataStr);
                                 if (parsed.text) {
                                     aiResponseText += parsed.text;
+                                    // live stream as plain text; format when complete
                                     targetOutputBox.textContent = aiResponseText;
                                     chatConsole.scrollTop = chatConsole.scrollHeight;
                                 }
@@ -2208,7 +2448,8 @@
                 }
 
                 if (aiResponseText) {
-                    speakText(aiResponseText);
+                    targetOutputBox.dataset.speak = aiResponseText;
+                    targetOutputBox.innerHTML = buildAiMessageHtml(aiResponseText, targetId);
                     persistCurrentChat(promptPayload, aiResponseText);
                 } else {
                     targetOutputBox.textContent = "Error compiling model response.";
@@ -2217,7 +2458,7 @@
             } catch (err) {
                 avatarNode.classList.remove('thinking');
                 const errMsg = "Connection lost with background server.";
-                animateWords(targetOutputBox, errMsg, 0, 60);
+                targetOutputBox.textContent = errMsg;
                 persistCurrentChat(promptPayload, errMsg);
             }
             chatConsole.scrollTop = chatConsole.scrollHeight;
