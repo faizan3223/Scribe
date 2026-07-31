@@ -1336,6 +1336,104 @@
         .logo-mark--nav { width: 30px; height: 30px; }
         .logo-mark--chat { width: 18px; height: 18px; color: #ffffff; }
 
+        .logo-img {
+            display: inline-block;
+            vertical-align: middle;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+        .logo-img--sm { width: 28px; height: 28px; }
+        .logo-img--lg { width: 40px; height: 40px; }
+        .logo-img--nav { width: 30px; height: 30px; }
+        .logo-img--chat { width: 18px; height: 18px; }
+        /* On dark intro, logo is already white-on-transparent */
+        body:not(.theme-dark) .logo-img {
+            /* invert so white logo becomes dark on light backgrounds */
+            filter: invert(1);
+        }
+        body.theme-dark .logo-img { filter: none; }
+        #intro-page-screen .logo-img { filter: none !important; }
+        .console-avatar-bubble .logo-img { filter: none !important; }
+
+        .btn-google {
+            width: 100%;
+            background-color: #ffffff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: inherit;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+        .btn-google:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .btn-google:disabled { opacity: 0.7; cursor: wait; }
+
+        /* Google auth modal */
+        .google-auth-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 24px;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+        }
+        .google-auth-box h3 {
+            font-size: 18px;
+            color: #202124;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        .google-auth-box p {
+            font-size: 13px;
+            color: #5f6368;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .google-auth-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .google-auth-box input:focus { border-color: #1a73e8; }
+        .google-auth-box .ga-submit {
+            width: 100%;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .google-auth-box .ga-submit:hover { background: #1765cc; }
+        .google-auth-box .ga-cancel {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #5f6368;
+            padding: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+
         /* Dark mode */
         body.theme-dark {
             background-color: #0a0a0a;
@@ -1507,24 +1605,14 @@
 </head>
 <body>
 
-    <!-- LOGO: letter S with diagonal slash (bullet-through, like Ø) -->
-    <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
-        <symbol id="scribe-logo-mark" viewBox="0 0 40 40">
-            <text x="20" y="30" text-anchor="middle"
-                  font-family="Georgia, 'Times New Roman', Times, serif"
-                  font-size="34" font-weight="700" fill="currentColor">S</text>
-            <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-        </symbol>
-    </svg>
+    <!-- LOGO: concentric S with slash (from brand mark) -->
+    <script>window.SCRIBE_LOGO_URI = "data:image/png;base64,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";</script>
 
     <!-- SCREEN 0: DARK MARKETING INTRO PAGE -->
     <div id="intro-page-screen">
         <header class="intro-navbar">
             <div class="intro-logo">
-                <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-label="Logo">
-                    <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                </svg>
+                <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
             </div>
             <div class="intro-nav-links">
                 <span class="link-btn" onclick="toggleAboutModal()">About</span>
@@ -1543,8 +1631,14 @@
                 <p class="intro-subhead">Brainstorm in chat, draft in your workspace.</p>
 
                 <div class="intro-auth-actions">
-                    <button class="btn-social" onclick="goToAuthScreen()">
-                        <span>🔵</span> Continue with Google
+                    <button type="button" class="btn-google" id="btn-google-continue" onclick="continueWithGoogle()">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Continue with Google
                     </button>
                     <div class="intro-divider">OR</div>
                     <button class="btn-email-intro" onclick="goToAuthScreen()">Continue with email</button>
@@ -1557,8 +1651,6 @@
                     <a onclick="toggleTermsModal()">Terms of Service</a>
                     and agree to get occasional promotional emails and notifications.
                 </p>
-
-                <button class="btn-download-intro" onclick="goToAuthScreen()">⬇ Download desktop app</button>
             </div>
 
             <div class="intro-right">
@@ -1572,17 +1664,11 @@
     <!-- SCREEN 1: LANDING / AUTH PAGE -->
     <div id="landing-page-screen">
         <div class="corner-rail on-light" onclick="location.reload()" title="Home">
-            <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
+            <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
         </div>
         <header class="landing-navbar">
             <div class="landing-logo">
-                <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                    <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                </svg>
+                <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
             </div>
             <div class="landing-nav-links">
                 <span onclick="toggleAboutModal()">About</span>
@@ -1626,10 +1712,7 @@
             <div class="hero-right">
                 <div class="preview-showcase-box">
                     <div class="preview-showcase-logo">
-                        <svg class="logo-mark logo-mark--lg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                            <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                        </svg>
+                        <img class="logo-img logo-img--lg" src="" alt="Scribe" data-scribe-logo>
                     </div>
                     <h2 class="preview-showcase-title" id="preview-showcase-title-text"></h2>
                 </div>
@@ -1643,10 +1726,7 @@
             <aside class="sidebar">
                 <div class="sidebar-top">
                     <div class="nav-logo" title="Home" onclick="resetDashboardView()">
-                        <svg class="logo-mark logo-mark--nav" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                            <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                        </svg>
+                        <img class="logo-img logo-img--nav" src="" alt="Scribe" data-scribe-logo>
                     </div>
                     <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
                         <span class="icon">➕</span><span class="label">New Chat</span>
@@ -1962,6 +2042,23 @@
         let currentNickname = '';
 
         // Safe storage: avoids SecurityError when page is sandboxed (no allow-same-origin)
+
+        function applyScribeLogos(root) {
+            const uri = window.SCRIBE_LOGO_URI || '';
+            if (!uri) return;
+            (root || document).querySelectorAll('img[data-scribe-logo]').forEach(img => {
+                if (img.getAttribute('src') !== uri) img.setAttribute('src', uri);
+            });
+        }
+
+        // Observe chat stream for new logo imgs
+        function watchChatLogos() {
+            const cons = document.getElementById('chat-stream-console');
+            if (!cons || cons._logoObs) return;
+            cons._logoObs = new MutationObserver(() => applyScribeLogos(cons));
+            cons._logoObs.observe(cons, { childList: true, subtree: true });
+        }
+
         const memoryStore = {};
         const safeStorage = {
             getItem(key) {
@@ -2013,6 +2110,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            applyScribeLogos();
+            watchChatLogos();
             const savedTheme = safeStorage.getItem('scribe_theme');
             applyTheme(savedTheme === 'dark');
 
@@ -2025,6 +2124,103 @@
                 } catch (e) {}
             }
         });
+
+
+        async function continueWithGoogle() {
+            const btn = document.getElementById('btn-google-continue');
+            if (btn) {
+                btn.disabled = true;
+                btn.dataset.oldText = btn.innerHTML;
+                btn.innerHTML = '<span style="opacity:.8">Connecting to Google…</span>';
+            }
+            // Try backend OAuth first
+            try {
+                const res = await fetch(`${workerURL}/api/google-auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'start' })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.url) {
+                        window.location.href = data.url;
+                        return;
+                    }
+                    if (data.success && data.email) {
+                        safeStorage.setItem('user_session', JSON.stringify({
+                            email: data.email,
+                            nickname: data.nickname || data.email.split('@')[0]
+                        }));
+                        switchToWorkspaceUI(data.email, data.nickname || data.email.split('@')[0]);
+                        return;
+                    }
+                }
+            } catch (e) {}
+
+            // Fallback: Google-style sign-in sheet (uses your Google email)
+            openGoogleAuthSheet();
+            if (btn) {
+                btn.disabled = false;
+                if (btn.dataset.oldText) btn.innerHTML = btn.dataset.oldText;
+            }
+        }
+
+        function openGoogleAuthSheet() {
+            let overlay = document.getElementById('google-auth-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'google-auth-overlay';
+                overlay.className = 'global-popup-overlay';
+                overlay.style.display = 'flex';
+                overlay.style.background = 'rgba(0,0,0,0.55)';
+                overlay.innerHTML = `
+                  <div class="google-auth-box">
+                    <div style="display:flex;justify-content:center;margin-bottom:12px;">
+                      <svg width="28" height="28" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
+                    </div>
+                    <h3>Sign in with Google</h3>
+                    <p>Enter the Google account email you want to use with Scribe AI.</p>
+                    <input type="email" id="google-auth-email" placeholder="name@gmail.com" autocomplete="username">
+                    <input type="text" id="google-auth-name" placeholder="Display name (optional)">
+                    <button type="button" class="ga-submit" onclick="finishGoogleAuth()">Continue</button>
+                    <button type="button" class="ga-cancel" onclick="closeGoogleAuthSheet()">Cancel</button>
+                  </div>`;
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeGoogleAuthSheet();
+                });
+            } else {
+                overlay.style.display = 'flex';
+            }
+            setTimeout(() => {
+                const el = document.getElementById('google-auth-email');
+                if (el) el.focus();
+            }, 50);
+        }
+
+        function closeGoogleAuthSheet() {
+            const overlay = document.getElementById('google-auth-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        function finishGoogleAuth() {
+            const emailEl = document.getElementById('google-auth-email');
+            const nameEl = document.getElementById('google-auth-name');
+            const email = (emailEl && emailEl.value || '').trim();
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid Google email');
+                return;
+            }
+            const nickname = (nameEl && nameEl.value.trim()) || email.split('@')[0];
+            safeStorage.setItem('user_session', JSON.stringify({ email, nickname, provider: 'google' }));
+            closeGoogleAuthSheet();
+            switchToWorkspaceUI(email, nickname);
+        }
 
         function goToAuthScreen() {
             document.getElementById('intro-page-screen').style.display = 'none';
@@ -2142,6 +2338,7 @@
                 }
             });
 
+            applyScribeLogos();
             configureGreetingBanner();
             renderRecentChats();
         }
@@ -2236,8 +2433,7 @@
                 } else {
                     const boxId = 'hist-ai-' + i + '-' + Date.now();
                     chatConsole.insertAdjacentHTML('beforeend',
-                        `<div class="console-stream-row"><div class="console-avatar-bubble"><svg class="logo-mark logo-mark--chat" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
+                        `<div class="console-stream-row"><div class="console-avatar-bubble"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scribe" data-scribe-logo></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
                 }
             });
             chatConsole.scrollTop = chatConsole.scrollHeight;
@@ -3026,8 +3222,7 @@
 
             const targetId = 'ai-chunk-' + Date.now();
             const avatarId = targetId + '-avatar';
-            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><svg class="logo-mark logo-mark--chat" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
-                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div><div class="console-text-payload" id="${targetId}">Thinking...</div></div>`;
+            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scribe" data-scribe-logo></div><div class="console-text-payload" id="${targetId}">Thinking...</div></div>`;
             chatConsole.insertAdjacentHTML('beforeend', aiHtml);
             chatConsole.scrollTop = chatConsole.scrollHeight;
 
