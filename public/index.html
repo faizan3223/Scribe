@@ -665,6 +665,25 @@
             width: 100%;
             margin: 0 auto;
             transform: translateY(-40px);
+            min-width: 0;
+            overflow: hidden;
+        }
+        #chat-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            min-width: 0;
+            overflow: hidden;
+            transform: translateY(-20px);
+        }
+        #chat-column .master-prompt-enclosure,
+        #chat-column #chat-stream-console,
+        #chat-column #greeting-banner-hub {
+            max-width: 800px;
+            width: 100%;
         }
 
         .chat-console-body {
@@ -966,6 +985,77 @@
             color: #111;
         }
 
+        /* Artifact / code side panel */
+        .workspace-split {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        .artifact-panel {
+            display: none;
+            width: 48%;
+            min-width: 320px;
+            max-width: 560px;
+            border-left: 1px solid #e5e5e5;
+            background: #0f0f12;
+            flex-direction: column;
+            height: 100%;
+        }
+        .artifact-panel.open {
+            display: flex;
+        }
+        .artifact-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #1a1a1f;
+            border-bottom: 1px solid #2a2a30;
+            gap: 10px;
+        }
+        .artifact-title {
+            color: #e5e5e5;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .artifact-header-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .artifact-btn {
+            background: #2a2a30;
+            border: none;
+            color: #ddd;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .artifact-btn:hover { background: #3a3a42; color: #fff; }
+        .artifact-body {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+        }
+        .artifact-body pre {
+            margin: 0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.55;
+            color: #e8e8ec;
+            white-space: pre;
+        }
+        .main-workspace.has-artifact .dashboard-content-stream {
+            max-width: 100%;
+        }
+
         .user-avatar-bubble {
             width: 34px;
             height: 34px;
@@ -1203,7 +1293,17 @@
     <div id="intro-page-screen">
         <header class="intro-navbar">
             <div class="intro-logo">
-                <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
+                <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lg1" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#6366f1"/><stop offset="0.5" stop-color="#4f46e5"/><stop offset="1" stop-color="#312e81"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#lg1)"/>
+                    <path d="M12 28 L18 14 L22 14 L28 28" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15.5 22 H24.5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                    <circle cx="20" cy="11" r="2" fill="white"/>
+                </svg>
                 <span>Scribe AI</span>
             </div>
             <div class="intro-nav-links">
@@ -1316,7 +1416,17 @@
             <aside class="sidebar">
                 <div class="sidebar-top">
                     <div class="nav-logo" title="Scribe AI" onclick="resetDashboardView()">
-                        <svg class="logo-mark logo-mark--nav"><use href="#scribe-logo-mark"></use></svg>
+                        <svg class="logo-mark logo-mark--nav" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="lg2" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#6366f1"/><stop offset="0.5" stop-color="#4f46e5"/><stop offset="1" stop-color="#312e81"/>
+                                </linearGradient>
+                            </defs>
+                            <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#lg2)"/>
+                            <path d="M12 28 L18 14 L22 14 L28 28" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15.5 22 H24.5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                            <circle cx="20" cy="11" r="2" fill="white"/>
+                        </svg>
                         <span class="nav-logo-text">Scribe AI</span>
                     </div>
                     <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
@@ -1341,45 +1451,62 @@
                 </div>
             </aside>
 
-            <main class="main-workspace">
+            <main class="main-workspace" id="main-workspace">
                 <header class="top-subnav">
                     <span class="badge-tier">Free Trial</span>
                     <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
                 </header>
 
-                <div class="dashboard-content-stream">
-                    <div id="greeting-banner-hub" class="greeting-header-title">
-                        <span class="icon">✨</span>
-                        <span id="greeting-txt-hook">What can I help with?</span>
+                <div class="workspace-split">
+                    <div class="dashboard-content-stream" id="chat-column">
+                        <div id="greeting-banner-hub" class="greeting-header-title">
+                            <span class="icon">✨</span>
+                            <span id="greeting-txt-hook">What can I help with?</span>
+                        </div>
+
+                        <div id="chat-stream-console" class="chat-console-body"></div>
+
+                        <div class="master-prompt-enclosure">
+                            <div id="attachment-preview-row" class="attachment-preview-row"></div>
+                            <textarea id="prompt-input" placeholder="Ask Scribe" rows="1"></textarea>
+                            <div class="prompt-controls-dock">
+                                <div class="controls-left-group">
+                                    <div class="attach-menu-wrap">
+                                        <div class="action-icon-node" id="attach-plus-btn" title="Add">+</div>
+                                        <div class="attach-menu" id="attach-menu">
+                                            <div class="attach-menu-item" onclick="triggerFileSelect('image')">🖼️ <span>Upload image</span></div>
+                                            <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
+                                            <div class="attach-menu-item" onclick="triggerGenerateImage()">🎨 <span>Generate image</span></div>
+                                            <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="hidden-file-image" accept="image/*" style="display:none;">
+                                    <input type="file" id="hidden-file-any" style="display:none;">
+                                    <select class="engine-picker-selector">
+                                        <option>Scribe Ultra (Llama 3.3)</option>
+                                        <option>Analytical Logic Model</option>
+                                    </select>
+                                </div>
+                                <div class="controls-right-group">
+                                    <div class="action-icon-node" id="mic-btn" title="Voice input">🎙️</div>
+                                    <button id="submit-prompt-btn" class="btn-prompt-deliver">➤</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div id="chat-stream-console" class="chat-console-body"></div>
-
-                    <div class="master-prompt-enclosure">
-                        <div id="attachment-preview-row" class="attachment-preview-row"></div>
-                        <textarea id="prompt-input" placeholder="Ask Scribe" rows="1"></textarea>
-                        <div class="prompt-controls-dock">
-                            <div class="controls-left-group">
-                                <div class="attach-menu-wrap">
-                                    <div class="action-icon-node" id="attach-plus-btn" title="Add">+</div>
-                                    <div class="attach-menu" id="attach-menu">
-                                        <div class="attach-menu-item" onclick="triggerFileSelect('image')">🖼️ <span>Upload image</span></div>
-                                        <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
-                                        <div class="attach-menu-item" onclick="triggerGenerateImage()">🎨 <span>Generate image</span></div>
-                                        <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
-                                    </div>
-                                </div>
-                                <input type="file" id="hidden-file-image" accept="image/*" style="display:none;">
-                                <input type="file" id="hidden-file-any" style="display:none;">
-                                <select class="engine-picker-selector">
-                                    <option>Scribe Ultra (Llama 3.3)</option>
-                                    <option>Analytical Logic Model</option>
-                                </select>
+                    <!-- Side code / artifact panel -->
+                    <div class="artifact-panel" id="artifact-panel">
+                        <div class="artifact-header">
+                            <span class="artifact-title" id="artifact-title">Code</span>
+                            <div class="artifact-header-actions">
+                                <button type="button" class="artifact-btn" onclick="copyArtifact()">Copy</button>
+                                <button type="button" class="artifact-btn" onclick="downloadArtifact()">⬇ Download</button>
+                                <button type="button" class="artifact-btn" onclick="closeArtifact()">✕</button>
                             </div>
-                            <div class="controls-right-group">
-                                <div class="action-icon-node" id="mic-btn" title="Voice input">🎙️</div>
-                                <button id="submit-prompt-btn" class="btn-prompt-deliver">➤</button>
-                            </div>
+                        </div>
+                        <div class="artifact-body">
+                            <pre id="artifact-code"></pre>
                         </div>
                     </div>
                 </div>
@@ -2218,10 +2345,15 @@
                     const id = 'codeblk-' + Date.now() + '-' + (codeIdx++);
                     const lang = part.lang || 'code';
                     const ext = ({ html: 'html', css: 'css', javascript: 'js', js: 'js', python: 'py', java: 'java', cpp: 'cpp', c: 'c', json: 'json', txt: 'txt' })[lang.toLowerCase()] || 'txt';
+                    // store for side panel (last / largest code wins via openArtifact call after render)
+                    if (!window._pendingArtifact || part.value.length > (window._pendingArtifact.code || '').length) {
+                        window._pendingArtifact = { lang, code: part.value, ext, id };
+                    }
                     html += `<div class="msg-code-block">
                         <div class="msg-code-header">
                             <span class="msg-code-lang">${escapeHtml(lang)}</span>
                             <div class="msg-code-actions">
+                                <button type="button" class="msg-code-btn" onclick="openArtifactFromBlock('${id}', '${escapeHtml(lang)}', '${ext}')">▣ Side view</button>
                                 <button type="button" class="msg-code-btn" onclick="copyCodeBlock('${id}')">Copy</button>
                                 <button type="button" class="msg-code-btn" onclick="downloadCodeBlock('${id}', '${ext}')">⬇ Download</button>
                             </div>
@@ -2300,6 +2432,49 @@
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'code.' + (ext || 'txt');
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        let artifactState = { code: '', lang: 'code', ext: 'txt' };
+
+        function openArtifact(code, lang, ext) {
+            artifactState = { code: code || '', lang: lang || 'code', ext: ext || 'txt' };
+            const panel = document.getElementById('artifact-panel');
+            const pre = document.getElementById('artifact-code');
+            const title = document.getElementById('artifact-title');
+            if (!panel || !pre) return;
+            pre.textContent = artifactState.code;
+            title.textContent = (artifactState.lang || 'Code').toUpperCase() + ' preview';
+            panel.classList.add('open');
+            const main = document.getElementById('main-workspace');
+            if (main) main.classList.add('has-artifact');
+        }
+
+        function openArtifactFromBlock(id, lang, ext) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            openArtifact(el.textContent || '', lang, ext);
+        }
+
+        function closeArtifact() {
+            const panel = document.getElementById('artifact-panel');
+            if (panel) panel.classList.remove('open');
+            const main = document.getElementById('main-workspace');
+            if (main) main.classList.remove('has-artifact');
+        }
+
+        function copyArtifact() {
+            if (!artifactState.code) return;
+            navigator.clipboard.writeText(artifactState.code).catch(() => {});
+        }
+
+        function downloadArtifact() {
+            if (!artifactState.code) return;
+            const blob = new Blob([artifactState.code], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'code.' + (artifactState.ext || 'txt');
             a.click();
             URL.revokeObjectURL(a.href);
         }
@@ -2448,8 +2623,16 @@
                 }
 
                 if (aiResponseText) {
+                    window._pendingArtifact = null;
                     targetOutputBox.dataset.speak = aiResponseText;
                     targetOutputBox.innerHTML = buildAiMessageHtml(aiResponseText, targetId);
+                    if (window._pendingArtifact && window._pendingArtifact.code) {
+                        openArtifact(
+                            window._pendingArtifact.code,
+                            window._pendingArtifact.lang,
+                            window._pendingArtifact.ext
+                        );
+                    }
                     persistCurrentChat(promptPayload, aiResponseText);
                 } else {
                     targetOutputBox.textContent = "Error compiling model response.";
