@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   
     <meta charset="UTF-8">
-  <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
     <title>Scribe AI Workspace</title>
     <style>
         * {
@@ -14,19 +14,20 @@
         }
 
         body {
-            background-color: #fbfaf7;
-            color: #191919;
+            background-color: #f7f7f5;
+            color: #111111;
             height: 100vh;
             overflow: hidden;
         }
 
+        /* ========== INTRO (DARK) ========== */
         #intro-page-screen {
             display: flex;
             flex-direction: column;
             width: 100%;
             height: 100vh;
-            background-color: #0b0b0c;
-            color: #f3f4f6;
+            background-color: #0a0a0a;
+            color: #f5f5f5;
             overflow-y: auto;
             position: relative;
         }
@@ -37,34 +38,45 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 40px;
-            border-bottom: 1px solid #1f1f23;
+            border-bottom: 1px solid #1c1c1c;
         }
 
         .intro-logo {
             font-size: 22px;
             font-weight: 700;
-            color: #f3f4f6;
+            color: #f5f5f5;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .intro-logo span { color: #ff6600; }
+        .intro-logo span { color: #ffffff; }
 
         .intro-nav-links {
             display: flex;
-            gap: 28px;
+            gap: 22px;
             font-size: 14px;
-            color: #9ca3af;
+            color: #a3a3a3;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-        .intro-nav-links a { color: inherit; text-decoration: none; }
-        .intro-nav-links a:hover { color: #f3f4f6; }
+        .intro-nav-links a,
+        .intro-nav-links span.link-btn {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .intro-nav-links a:hover,
+        .intro-nav-links span.link-btn:hover { color: #ffffff; }
 
         .btn-try-intro {
-            background-color: #ff6600;
-            color: white;
+            background-color: #ffffff;
+            color: #0a0a0a;
             padding: 9px 18px;
             border-radius: 20px;
             font-weight: 600;
@@ -72,6 +84,7 @@
             border: none;
             cursor: pointer;
         }
+        .btn-try-intro:hover { background-color: #e5e5e5; }
 
         .intro-hero-container {
             flex: 1;
@@ -92,13 +105,13 @@
             font-weight: 400;
             line-height: 1.1;
             letter-spacing: -1px;
-            color: #f3f4f6;
+            color: #f5f5f5;
             margin-bottom: 20px;
         }
 
         .intro-subhead {
             font-size: 17px;
-            color: #9ca3af;
+            color: #a3a3a3;
             margin-bottom: 32px;
         }
 
@@ -111,8 +124,8 @@
 
         .btn-social {
             width: 100%;
-            background-color: #f3f4f6;
-            color: #191919;
+            background-color: #f5f5f5;
+            color: #111111;
             border: none;
             padding: 13px;
             border-radius: 12px;
@@ -124,49 +137,52 @@
             justify-content: center;
             gap: 10px;
         }
-
-        .btn-social:hover { background-color: #e5e2da; }
+        .btn-social:hover { background-color: #e0e0e0; }
 
         .intro-divider {
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #6b7280;
+            color: #737373;
             font-size: 12px;
         }
         .intro-divider::before, .intro-divider::after {
             content: "";
             flex: 1;
             height: 1px;
-            background-color: #23232a;
+            background-color: #262626;
         }
 
         .btn-email-intro {
             width: 100%;
-            background-color: #1a1a1f;
-            border: 1px solid #282830;
-            color: #f3f4f6;
+            background-color: #141414;
+            border: 1px solid #2a2a2a;
+            color: #f5f5f5;
             padding: 13px;
             border-radius: 12px;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
         }
-        .btn-email-intro:hover { background-color: #22222a; }
+        .btn-email-intro:hover { background-color: #1f1f1f; }
 
         .intro-fine-print {
             font-size: 12px;
-            color: #6b7280;
+            color: #737373;
             margin-top: 14px;
             line-height: 1.5;
         }
-        .intro-fine-print a { color: #ff6600; text-decoration: underline; }
+        .intro-fine-print a {
+            color: #ffffff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
 
         .btn-download-intro {
             margin-top: 24px;
             background: transparent;
-            border: 1px solid #282830;
-            color: #f3f4f6;
+            border: 1px solid #2a2a2a;
+            color: #f5f5f5;
             padding: 11px 18px;
             border-radius: 20px;
             font-weight: 600;
@@ -176,7 +192,7 @@
             align-items: center;
             gap: 8px;
         }
-        .btn-download-intro:hover { background-color: #1a1a1f; }
+        .btn-download-intro:hover { background-color: #141414; }
 
         .intro-right {
             flex: 0 1 520px;
@@ -185,8 +201,8 @@
         }
 
         .intro-preview-box {
-            background-color: #fbfaf7;
-            border: 1px solid #23232a;
+            background-color: #f7f7f5;
+            border: 1px solid #262626;
             border-radius: 24px;
             width: 100%;
             height: 460px;
@@ -196,12 +212,12 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            background-image: radial-gradient(#e5e2da 1px, transparent 1px);
+            background-image: radial-gradient(#d4d4d4 1px, transparent 1px);
             background-size: 16px 16px;
         }
 
         .btn-preview-chat {
-            background-color: #191919;
+            background-color: #111111;
             color: white;
             border: none;
             padding: 16px 40px;
@@ -209,7 +225,7 @@
             font-weight: 600;
             font-size: 20px;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .btn-preview-chat:hover { background-color: #000; }
 
@@ -222,30 +238,31 @@
             gap: 8px;
             z-index: 30;
             background-color: rgba(255,255,255,0.06);
-            border: 1px solid #23232a;
+            border: 1px solid #262626;
             padding: 6px 14px 6px 8px;
             border-radius: 30px;
             backdrop-filter: blur(6px);
             cursor: pointer;
         }
         .corner-rail.on-light {
-            background-color: rgba(255,255,255,0.9);
-            border: 1px solid #e5e2da;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+            background-color: rgba(255,255,255,0.95);
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
         }
         .corner-rail span.crail-txt {
             font-size: 13px;
             font-weight: 700;
-            color: #f3f4f6;
+            color: #f5f5f5;
         }
-        .corner-rail.on-light span.crail-txt { color: #191919; }
+        .corner-rail.on-light span.crail-txt { color: #111111; }
 
+        /* ========== LANDING / AUTH ========== */
         #landing-page-screen {
             display: none;
             flex-direction: column;
             width: 100%;
             height: 100vh;
-            background-color: #fbfaf7;
+            background-color: #f7f7f5;
             overflow-y: auto;
             position: relative;
         }
@@ -256,17 +273,16 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 40px;
-            border-bottom: 1px solid #e5e2da;
+            border-bottom: 1px solid #e5e5e5;
         }
 
         .landing-logo {
             font-size: 22px;
             font-weight: 700;
-            color: #191919;
-        }
-
-        .landing-logo span {
-            color: #cc6b49;
+            color: #111111;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .landing-nav-links {
@@ -276,9 +292,11 @@
             color: #666;
             align-items: center;
         }
+        .landing-nav-links span { cursor: pointer; }
+        .landing-nav-links span:hover { color: #111; }
 
         .btn-try-scribe {
-            background-color: #191919;
+            background-color: #111111;
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -296,24 +314,23 @@
             justify-content: space-between;
             padding: 40px;
             width: 100%;
+            gap: 40px;
         }
 
-        .hero-left {
-            flex: 0 1 460px;
-        }
+        .hero-left { flex: 0 1 460px; }
 
         .auth-card {
             background: white;
-            border: 1px solid #e5e2da;
+            border: 1px solid #e5e5e5;
             border-radius: 24px;
             padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             width: 100%;
         }
 
         .auth-tabs {
             display: flex;
-            border-bottom: 1px solid #e5e2da;
+            border-bottom: 1px solid #e5e5e5;
             margin-bottom: 24px;
         }
 
@@ -328,16 +345,12 @@
             text-align: center;
             font-size: 15px;
         }
-
         .auth-tab-btn.active {
-            color: #cc6b49;
-            border-bottom: 2px solid #cc6b49;
+            color: #111111;
+            border-bottom: 2px solid #111111;
         }
 
-        .input-group {
-            margin-bottom: 16px;
-        }
-
+        .input-group { margin-bottom: 16px; }
         .input-group label {
             display: block;
             font-size: 12px;
@@ -345,25 +358,23 @@
             color: #666;
             margin-bottom: 6px;
         }
-
         .input-group input {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid #e5e2da;
+            border: 1px solid #e5e5e5;
             border-radius: 12px;
             outline: none;
-            background-color: #fbfaf7;
+            background-color: #f7f7f5;
             font-size: 14px;
         }
-
         .input-group input:focus {
-            border-color: #cc6b49;
+            border-color: #111111;
             background-color: white;
         }
 
         .landing-submit-btn {
             width: 100%;
-            background-color: #cc6b49;
+            background-color: #111111;
             color: white;
             border: none;
             padding: 14px;
@@ -373,6 +384,7 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        .landing-submit-btn:hover { background-color: #000; }
 
         .hero-right {
             flex: 0 1 550px;
@@ -382,32 +394,30 @@
 
         .preview-showcase-box {
             background-color: white;
-            border: 1px solid #e5e2da;
+            border: 1px solid #e5e5e5;
             border-radius: 24px;
             width: 100%;
             height: 480px;
             padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            background-image: radial-gradient(#e5e2da 1px, transparent 1px);
+            background-image: radial-gradient(#e5e5e5 1px, transparent 1px);
             background-size: 16px 16px;
         }
 
         .preview-showcase-logo {
             font-size: 24px;
             font-weight: bold;
-            color: #191919;
+            color: #111111;
             margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
-        .preview-showcase-logo span { color: #cc6b49; }
 
         .preview-showcase-title {
             font-size: 42px;
@@ -418,72 +428,188 @@
             letter-spacing: -0.5px;
         }
 
+        /* ========== WORKSPACE ========== */
         #workspace-screen {
             display: none;
-            background-color: #fbfaf7;
-            color: #191919;
+            background-color: #f7f7f5;
+            color: #111111;
             height: 100vh;
             width: 100%;
         }
 
         .sidebar {
-            width: 64px;
+            width: 260px;
+            min-width: 260px;
             background-color: #ffffff;
-            border-right: 1px solid #e5e2da;
+            border-right: 1px solid #e5e5e5;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 0;
+            padding: 16px 12px;
             z-index: 20;
-            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .sidebar:hover {
-            width: 240px;
-        }
-
-        .sidebar-top, .sidebar-bottom {
+        .sidebar-top {
             display: flex;
             flex-direction: column;
             width: 100%;
-            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-mid {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 16px;
+            padding-right: 2px;
+        }
+        .sidebar-mid::-webkit-scrollbar { width: 4px; }
+        .sidebar-mid::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 4px;
+        }
+
+        .sidebar-bottom {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
             gap: 6px;
+            flex-shrink: 0;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+            margin-top: 8px;
         }
 
         .nav-item {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 100%;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            padding-left: 13px;
-            color: #666;
+            padding: 0 12px;
+            color: #555;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             text-decoration: none;
-            overflow: hidden;
             white-space: nowrap;
-            gap: 16px;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            font-family: inherit;
         }
-
-        .sidebar:hover .nav-item { width: calc(100% - 24px); }
-        .nav-item span.label { display: none; font-size: 14px; font-weight: 500; }
-        .sidebar:hover .nav-item span.label { display: inline; }
-
+        .nav-item span.label { display: inline; font-size: 14px; font-weight: 500; }
         .nav-item:hover, .nav-item.active {
-            background-color: rgba(204, 107, 73, 0.1); color: #cc6b49;
+            background-color: rgba(0, 0, 0, 0.06);
+            color: #111111;
         }
+        .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
 
         .nav-logo {
-            width: 44px;
+            width: 100%;
             height: 44px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
+            gap: 10px;
+            padding: 0 10px;
+            margin-bottom: 10px;
             cursor: pointer;
+            border-radius: 10px;
+        }
+        .nav-logo:hover { background: rgba(0,0,0,0.04); }
+        .nav-logo-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 8px 12px 6px;
+        }
+
+        .recent-chat-item {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #444;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-family: inherit;
+            display: block;
+            transition: background 0.15s;
+        }
+        .recent-chat-item:hover {
+            background: rgba(0,0,0,0.05);
+            color: #111;
+        }
+        .recent-chat-item.active-chat {
+            background: rgba(0,0,0,0.07);
+            color: #111;
+            font-weight: 500;
+        }
+        .recent-empty {
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .profile-block {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .profile-block:hover { background: rgba(0,0,0,0.05); }
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #312e81);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .profile-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-email {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .main-workspace {
@@ -491,59 +617,135 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            background-image: radial-gradient(circle at 50% 30%, rgba(204, 107, 73, 0.05), transparent 60%);
+            background-image: radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.03), transparent 60%);
         }
 
         .top-subnav {
-            height: 60px; display: flex; align-items: center; justify-content: center; padding: 0 32px; gap: 16px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 32px;
+            gap: 16px;
         }
 
         .badge-tier {
-            background-color: #f3f1ec; border: 1px solid #e5e2da; color: #666; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            background-color: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .btn-upgrade-top {
-            background: transparent; border: 1px solid rgba(204, 107, 73, 0.4); color: #cc6b49;
-            padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            color: #111111;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
         }
-        .btn-upgrade-top:hover { background-color: #cc6b49; color: white; }
+        .btn-upgrade-top:hover {
+            background-color: #111111;
+            color: white;
+        }
 
         .dashboard-content-stream {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; max-width: 800px; width: 100%; margin: 0 auto; transform: translateY(-40px);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            transform: translateY(-40px);
         }
 
         .chat-console-body {
-            width: 100%; display: none; flex-direction: column; overflow-y: auto;
-            padding-bottom: 20px; margin-bottom: 20px; height: calc(100vh - 240px);
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            height: calc(100vh - 240px);
         }
 
         .greeting-header-title {
-            font-size: 40px; font-weight: 400; color: #191919; margin-bottom: 40px; display: flex; align-items: center; gap: 14px;
+            font-size: 40px;
+            font-weight: 400;
+            color: #111111;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
-        .greeting-header-title span.icon { color: #cc6b49; }
+        .greeting-header-title span.icon { color: #111111; }
 
         .master-prompt-enclosure {
-            width: 100%; background-color: #ffffff; border: 1px solid #e5e2da; border-radius: 24px; padding: 16px 20px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 24px;
+            padding: 16px 20px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
         }
 
         .master-prompt-enclosure textarea {
-            width: 100%; background: transparent; border: none; outline: none; color: #191919; font-size: 16px; resize: none; min-height: 50px; max-height: 200px; line-height: 1.5;
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #111111;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 200px;
+            line-height: 1.5;
         }
 
         .prompt-controls-dock {
-            display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eeece5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #ececec;
         }
-        .controls-left-group, .controls-right-group { display: flex; align-items: center; gap: 10px; }
+        .controls-left-group, .controls-right-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
         .action-icon-node {
-            background-color: #f3f1ec; border: 1px solid #e5e2da; color: #666; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+            background-color: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            color: #666;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .action-icon-node:hover { color: #191919; background-color: #eae7de; }
+        .action-icon-node:hover {
+            color: #111111;
+            background-color: #e8e8e6;
+        }
 
         .engine-picker-selector {
-            background-color: #f3f1ec;
-            border: 1px solid #e5e2da;
+            background-color: #f0f0ee;
+            border: 1px solid #e5e5e5;
             color: #666;
             padding: 6px 14px;
             border-radius: 12px;
@@ -553,9 +755,21 @@
         }
 
         .btn-prompt-deliver {
-            background-color: #eeece5; color: #a8a29e; border: none; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            background-color: #ececec;
+            color: #a8a8a8;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
-        .btn-prompt-deliver.active-ready { background-color: #cc6b49; color: white; }
+        .btn-prompt-deliver.active-ready {
+            background-color: #111111;
+            color: white;
+        }
 
         .attach-menu-wrap { position: relative; }
         .attach-menu {
@@ -564,7 +778,7 @@
             bottom: 44px;
             left: 0;
             background: white;
-            border: 1px solid #e5e2da;
+            border: 1px solid #e5e5e5;
             border-radius: 14px;
             box-shadow: 0 12px 32px rgba(0,0,0,0.1);
             padding: 6px;
@@ -573,77 +787,259 @@
         }
         .attach-menu.open { display: block; }
         .attach-menu-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
         }
-        .attach-menu-item:hover { background-color: #f3f1ec; }
+        .attach-menu-item:hover { background-color: #f0f0ee; }
 
-        .attachment-preview-row { display: none; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        .attachment-preview-row {
+            display: none;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
         .attachment-chip {
-            display: flex; align-items: center; gap: 6px; background: #f3f1ec;
-            border: 1px solid #e5e2da; border-radius: 10px; padding: 5px 10px; font-size: 12px; color: #444;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #444;
         }
-        .attachment-chip img { width: 22px; height: 22px; border-radius: 6px; object-fit: cover; }
-        .attachment-chip .remove-chip { cursor: pointer; color: #999; font-weight: bold; padding-left: 2px; }
+        .attachment-chip img {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        .attachment-chip .remove-chip {
+            cursor: pointer;
+            color: #999;
+            font-weight: bold;
+            padding-left: 2px;
+        }
 
-        #mic-btn.listening { background-color: #cc6b49; color: white; animation: avatarPulse 1s ease-in-out infinite; }
+        #mic-btn.listening {
+            background-color: #111111;
+            color: white;
+            animation: avatarPulse 1s ease-in-out infinite;
+        }
 
-        .console-stream-row { display: flex; gap: 14px; margin-bottom: 28px; width: 100%; align-items: flex-start; }
+        .console-stream-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 28px;
+            width: 100%;
+            align-items: flex-start;
+        }
         .console-avatar-bubble {
-            width: 34px; height: 34px; min-width: 34px; border-radius: 50%;
-            background: linear-gradient(135deg, #ff9466, #cc6b49);
-            color: white; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(204,107,73,0.35);
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #312e81);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.35);
         }
-        .console-avatar-bubble.thinking { animation: avatarPulse 1.1s ease-in-out infinite; }
+        .console-avatar-bubble.thinking {
+            animation: avatarPulse 1.1s ease-in-out infinite;
+        }
         @keyframes avatarPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(204,107,73,0.35); }
-            50% { transform: scale(1.14); box-shadow: 0 2px 18px rgba(204,107,73,0.55); }
+            0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(79,70,229,0.35); }
+            50% { transform: scale(1.14); box-shadow: 0 2px 18px rgba(79,70,229,0.55); }
         }
-        .console-text-payload { font-size: 16px; line-height: 1.6; color: #333; width: 100%; padding-top: 6px; }
+        .console-text-payload {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            width: 100%;
+            padding-top: 6px;
+        }
 
         .user-avatar-bubble {
-            width: 34px; height: 34px; min-width: 34px; border-radius: 50%;
-            background-color: #191919; color: white; display: flex; align-items: center;
-            justify-content: center; font-weight: 700; font-size: 14px;
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            border-radius: 50%;
+            background-color: #111111;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
         }
 
+        /* ========== MODALS ========== */
         .global-popup-overlay {
-            display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 100;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
         }
-        .popup-window-box { background-color: #111113; border: 1px solid #222227; border-radius: 24px; width: 90%; max-width: 960px; padding: 40px; position: relative; }
-        .popup-close-trigger { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #6b7280; font-size: 26px; cursor: pointer; }
+        .popup-window-box {
+            background-color: #111113;
+            border: 1px solid #222227;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 720px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+        }
+        .popup-window-box.wide { max-width: 960px; }
+        .popup-close-trigger {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            background: none;
+            border: none;
+            color: #6b7280;
+            font-size: 26px;
+            cursor: pointer;
+        }
+        .popup-close-trigger:hover { color: #fff; }
 
         .price-tier-card {
-            background-color: #16161a; border: 1px solid #23232a; border-radius: 16px;
-            padding: 26px 22px; flex: 1; min-width: 220px; position: relative; display: flex; flex-direction: column;
+            background-color: #16161a;
+            border: 1px solid #23232a;
+            border-radius: 16px;
+            padding: 26px 22px;
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
-        .price-tier-card.featured { border: 2px solid #ff6600; }
+        .price-tier-card.featured { border: 2px solid #ffffff; }
         .price-tier-badge {
-            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-            background-color: #ff6600; color: white; font-size: 11px; font-weight: 700;
-            padding: 4px 12px; border-radius: 20px; white-space: nowrap;
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            color: #111;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
         }
         .price-tier-card h3 { color: #f3f4f6; font-size: 16px; margin-bottom: 6px; }
-        .price-tier-amount { font-size: 26px; font-weight: bold; color: #f3f4f6; margin: 8px 0 16px; }
-        .price-tier-amount span { font-size: 13px; color: #9ca3af; font-weight: 500; }
-        .price-tier-card.featured .price-tier-amount { color: #ff6600; }
+        .price-tier-amount {
+            font-size: 26px;
+            font-weight: bold;
+            color: #f3f4f6;
+            margin: 8px 0 16px;
+        }
+        .price-tier-amount span {
+            font-size: 13px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        .price-tier-card.featured .price-tier-amount { color: #ffffff; }
         .price-feature-list { list-style: none; margin-bottom: 20px; flex: 1; }
         .price-feature-list li {
-            font-size: 13px; color: #c9c9cf; padding: 6px 0 6px 20px; position: relative; line-height: 1.4;
+            font-size: 13px;
+            color: #c9c9cf;
+            padding: 6px 0 6px 20px;
+            position: relative;
+            line-height: 1.4;
         }
-        .price-feature-list li::before { content: "✓"; position: absolute; left: 0; color: #ff6600; font-weight: bold; }
+        .price-feature-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ffffff;
+            font-weight: bold;
+        }
         .price-tier-btn {
-            width: 100%; background-color: #ff6600; border: none; color: white;
-            padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 14px;
+            width: 100%;
+            background-color: #ffffff;
+            border: none;
+            color: #111;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
         }
-        .price-tier-btn:hover { background-color: #e65c00; }
+        .price-tier-btn:hover { background-color: #e5e5e5; }
+
+        .legal-content {
+            color: #c9c9cf;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .legal-content h3 {
+            color: #f3f4f6;
+            font-size: 16px;
+            margin: 20px 0 8px;
+        }
+        .legal-content p { margin-bottom: 12px; }
+        .legal-content ul {
+            margin: 8px 0 12px 20px;
+        }
+        .legal-content a { color: #ffffff; }
+
+        .contact-form-group { margin-bottom: 14px; }
+        .contact-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a3a3a3;
+            margin-bottom: 6px;
+        }
+        .contact-form-group input,
+        .contact-form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            background: #16161a;
+            color: #f5f5f5;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .contact-form-group input:focus,
+        .contact-form-group textarea:focus {
+            border-color: #ffffff;
+        }
+        .contact-submit-btn {
+            width: 100%;
+            background: #ffffff;
+            color: #111;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .contact-submit-btn:hover { background: #e5e5e5; }
 
         @keyframes wordRiseIn {
             from { opacity: 0; transform: translateY(0.4em); filter: blur(4px); }
             to   { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
-
         .anim-word {
             display: inline-block;
             opacity: 0;
@@ -659,34 +1055,48 @@
         .logo-mark--lg { width: 28px; height: 28px; vertical-align: -7px; }
         .logo-mark--nav { width: 26px; height: 26px; vertical-align: 0; }
         .logo-mark--chat { width: 20px; height: 20px; vertical-align: 0; }
+
+        #chat-container::-webkit-scrollbar { width: 6px; }
+        #chat-container::-webkit-scrollbar-thumb {
+            background-color: #e5e5e5;
+            border-radius: 10px;
+        }
+        textarea:focus { box-shadow: none; }
+
+        @media (max-width: 900px) {
+            .intro-hero-container,
+            .landing-hero-container {
+                flex-direction: column;
+                padding: 24px;
+            }
+            .intro-headline { font-size: 36px; }
+            .intro-navbar, .landing-navbar { padding: 0 16px; }
+            .intro-nav-links { gap: 12px; font-size: 13px; }
+        }
     </style>
 </head>
 <body>
 
+    <!-- SCRIBE LOGO — modern indigo pen mark -->
     <svg width="0" height="0" style="position:absolute;">
         <defs>
-            <linearGradient id="scribeLogoGrad" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stop-color="#ff9d6c"/>
-                <stop offset="0.55" stop-color="#e8623f"/>
-                <stop offset="1" stop-color="#9c2f52"/>
+            <linearGradient id="scribeLogoGrad" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#6366f1"/>
+                <stop offset="0.5" stop-color="#4f46e5"/>
+                <stop offset="1" stop-color="#312e81"/>
             </linearGradient>
-            <linearGradient id="scribeLogoGradSoft" x1="0" y1="0" x2="40" y2="26" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stop-color="#ffffff" stop-opacity="0.5"/>
+            <linearGradient id="scribeLogoShine" x1="0" y1="0" x2="40" y2="20" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
                 <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
             </linearGradient>
-            <radialGradient id="scribeLogoSpark" cx="50%" cy="50%" r="50%">
-                <stop offset="0" stop-color="#fff7ef"/>
-                <stop offset="1" stop-color="#ffd9b8"/>
-            </radialGradient>
             <symbol id="scribe-logo-mark" viewBox="0 0 40 40">
-                <rect x="1" y="1" width="38" height="38" rx="13" fill="url(#scribeLogoGrad)"/>
-                <rect x="1" y="1" width="38" height="17" rx="13" fill="url(#scribeLogoGradSoft)"/>
-                <path d="M11.5 27.5C11.5 23 15 21.5 18.5 20C23 18 25 15.5 24 12.5"
-                      fill="none" stroke="white" stroke-opacity="0.92" stroke-width="2.6" stroke-linecap="round"/>
-                <g fill="url(#scribeLogoSpark)">
-                    <path d="M27 8.4C27.35 10.4 28 11.6 30 12C28 12.4 27.35 13.6 27 15.6C26.65 13.6 26 12.4 24 12C26 11.6 26.65 10.4 27 8.4Z"/>
-                </g>
-                <circle cx="12" cy="28" r="1.6" fill="white" fill-opacity="0.92"/>
+                <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#scribeLogoGrad)"/>
+                <rect x="1" y="1" width="38" height="16" rx="12" fill="url(#scribeLogoShine)"/>
+                <!-- pen nib / scribe stroke -->
+                <path d="M12 28 L18 14 L22 14 L28 28"
+                      fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.5 22 H24.5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                <circle cx="20" cy="11" r="2" fill="white" fill-opacity="0.95"/>
             </symbol>
         </defs>
     </svg>
@@ -694,11 +1104,16 @@
     <!-- SCREEN 0: DARK MARKETING INTRO PAGE -->
     <div id="intro-page-screen">
         <header class="intro-navbar">
-            <div class="intro-logo"><svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg> <span>Scribe AI</span></div>
+            <div class="intro-logo">
+                <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
+                <span>Scribe AI</span>
+            </div>
             <div class="intro-nav-links">
-                <a href="#">Meet Scribe</a>
-                <a href="#">Platform</a>
-                <a href="#">Pricing</a>
+                <span class="link-btn" onclick="toggleAboutModal()">About</span>
+                <span class="link-btn" onclick="togglePrivacyModal()">Privacy</span>
+                <span class="link-btn" onclick="toggleTermsModal()">Terms</span>
+                <span class="link-btn" onclick="toggleContactModal()">Contact</span>
+                <span class="link-btn" onclick="togglePricingModal()">Pricing</span>
                 <button class="btn-try-intro" onclick="goToAuthScreen()">Try Scribe</button>
             </div>
         </header>
@@ -716,7 +1131,13 @@
                     <button class="btn-email-intro" onclick="goToAuthScreen()">Continue with email</button>
                 </div>
 
-                <p class="intro-fine-print">By continuing, you acknowledge Scribe AI's <a href="#">Privacy Policy</a> and agree to get occasional promotional emails and notifications.</p>
+                <p class="intro-fine-print">
+                    By continuing, you acknowledge Scribe AI's
+                    <a onclick="togglePrivacyModal()">Privacy Policy</a>
+                    and
+                    <a onclick="toggleTermsModal()">Terms of Service</a>
+                    and agree to get occasional promotional emails and notifications.
+                </p>
 
                 <button class="btn-download-intro" onclick="goToAuthScreen()">⬇ Download desktop app</button>
             </div>
@@ -736,11 +1157,16 @@
             <span class="crail-txt">Scribe AI</span>
         </div>
         <header class="landing-navbar">
-            <div class="landing-logo"><svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg> <span>Scribe AI</span></div>
+            <div class="landing-logo">
+                <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
+                <span>Scribe AI</span>
+            </div>
             <div class="landing-nav-links">
-                <span style="cursor:pointer;" onclick="toggleMeetScribeModal()">Meet Scribe</span>
-                <span style="cursor:pointer;" onclick="toggleSolutionsModal()">Solutions</span>
-                <span style="cursor:pointer;" onclick="togglePricingModal()">Pricing</span>
+                <span onclick="toggleAboutModal()">About</span>
+                <span onclick="togglePrivacyModal()">Privacy</span>
+                <span onclick="toggleTermsModal()">Terms</span>
+                <span onclick="toggleContactModal()">Contact</span>
+                <span onclick="togglePricingModal()">Pricing</span>
                 <button class="btn-try-scribe" onclick="document.getElementById('landing-email').focus()">Try Scribe</button>
             </div>
         </header>
@@ -776,28 +1202,41 @@
 
             <div class="hero-right">
                 <div class="preview-showcase-box">
-                    <div class="preview-showcase-logo"><svg class="logo-mark logo-mark--lg"><use href="#scribe-logo-mark"></use></svg> <span>Scribe AI</span></div>
+                    <div class="preview-showcase-logo">
+                        <svg class="logo-mark logo-mark--lg"><use href="#scribe-logo-mark"></use></svg>
+                        <span>Scribe AI</span>
+                    </div>
                     <h2 class="preview-showcase-title" id="preview-showcase-title-text"></h2>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- SCREEN 2: MAIN WORKSPACE (POST LOGIN) -->
+    <!-- SCREEN 2: MAIN WORKSPACE -->
     <div id="workspace-screen">
         <div style="display: flex; width: 100%; height: 100vh;">
             <aside class="sidebar">
                 <div class="sidebar-top">
-                    <div class="nav-logo" title="Scribe AI" onclick="resetDashboardView()"><svg class="logo-mark logo-mark--nav"><use href="#scribe-logo-mark"></use></svg></div>
-                    <a href="#" class="nav-item active" title="New Chat" onclick="resetDashboardView()">
+                    <div class="nav-logo" title="Scribe AI" onclick="resetDashboardView()">
+                        <svg class="logo-mark logo-mark--nav"><use href="#scribe-logo-mark"></use></svg>
+                        <span class="nav-logo-text">Scribe AI</span>
+                    </div>
+                    <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
                         <span class="icon">➕</span><span class="label">New Chat</span>
-                    </a>
-                    <a href="#" class="nav-item" title="Search chats" onclick="alert('Chat search is coming soon.')">
+                    </button>
+                    <button type="button" class="nav-item" id="nav-search" title="Search chats" onclick="toggleChatSearch()">
                         <span class="icon">🔍</span><span class="label">Search chats</span>
-                    </a>
-                    <a href="#" class="nav-item" title="Pricing" onclick="togglePricingModal()">
+                    </button>
+                    <button type="button" class="nav-item" title="Pricing" onclick="togglePricingModal()">
                         <span class="icon">💳</span><span class="label">Pricing</span>
-                    </a>
+                    </button>
+                    <input type="text" id="chat-search-input" placeholder="Search chats..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
+                </div>
+                <div class="sidebar-mid">
+                    <div class="sidebar-section-label">Recent chats</div>
+                    <div id="recent-chats-list">
+                        <div class="recent-empty">No chats yet</div>
+                    </div>
                 </div>
                 <div class="sidebar-bottom">
                     <div id="sidebar-profile-node"></div>
@@ -812,7 +1251,8 @@
 
                 <div class="dashboard-content-stream">
                     <div id="greeting-banner-hub" class="greeting-header-title">
-                        <span class="icon">✨</span> <span id="greeting-txt-hook">What can I help with?</span>
+                        <span class="icon">✨</span>
+                        <span id="greeting-txt-hook">What can I help with?</span>
                     </div>
 
                     <div id="chat-stream-console" class="chat-console-body"></div>
@@ -827,37 +1267,7 @@
                                     <div class="attach-menu" id="attach-menu">
                                         <div class="attach-menu-item" onclick="triggerFileSelect('image')">🖼️ <span>Upload image</span></div>
                                         <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
-                                        async function triggerGenerateImage() {
-    attachMenu.classList.remove('open');
-    const prompt = promptInput.value.trim();
-    if (!prompt) { alert("Pehle image ke liye kuch likho (jaise: 'a cat on the moon')"); return; }
-
-    const placeholderId = 'imgplaceholder-' + Date.now();
-    pendingAttachments.push({ name: 'Generating...', isImage: true, url: '', id: placeholderId, loading: true });
-    renderAttachmentPreviews();
-
-    try {
-        const res = await fetch(`${workerURL}/api/generate-image`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
-        });
-        const data = await res.json();
-
-        const idx = pendingAttachments.findIndex(a => a.id === placeholderId);
-        if (data.success && data.image) {
-            pendingAttachments[idx] = { name: 'Generated image', isImage: true, url: `data:image/png;base64,${data.image}`, promptText: prompt };
-        } else {
-            pendingAttachments.splice(idx, 1);
-            alert("Image generate nahi ho saki. Dobara try karo.");
-        }
-        renderAttachmentPreviews();
-    } catch (err) {
-        pendingAttachments = pendingAttachments.filter(a => a.id !== placeholderId);
-        renderAttachmentPreviews();
-        alert("Server se connection nahi ho saka.");
-    }
-}
+                                        <div class="attach-menu-item" onclick="triggerGenerateImage()">🎨 <span>Generate image</span></div>
                                         <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
                                     </div>
                                 </div>
@@ -879,11 +1289,11 @@
         </div>
     </div>
 
-    <!-- SUBSCRIPTION POPUP CARD MODAL -->
+    <!-- PRICING MODAL -->
     <div id="pricing-popup-card" class="global-popup-overlay">
-        <div class="popup-window-box">
+        <div class="popup-window-box wide">
             <button class="popup-close-trigger" onclick="togglePricingModal()">×</button>
-            <h2 style="text-align: center; color: white; margin-bottom: 30px;">Scribe AI <span style="color: #ff6600;">Pricing Tiers</span></h2>
+            <h2 style="text-align: center; color: white; margin-bottom: 30px;">Scribe AI <span style="color: #fff;">Pricing Tiers</span></h2>
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="price-tier-card">
                     <h3>Free</h3>
@@ -894,7 +1304,7 @@
                         <li>File upload</li>
                         <li>Standard response speed</li>
                     </ul>
-                    <button class="price-tier-btn" style="background-color:#2a2a30; cursor:default;" disabled>Current Plan</button>
+                    <button class="price-tier-btn" style="background-color:#2a2a30; color:#999; cursor:default;" disabled>Current Plan</button>
                 </div>
                 <div class="price-tier-card featured">
                     <div class="price-tier-badge">Most Popular</div>
@@ -923,11 +1333,120 @@
         </div>
     </div>
 
-    <!-- MEET SCRIBE INFO MODAL -->
+    <!-- ABOUT MODAL -->
+    <div id="about-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleAboutModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">About <span style="color: #fff;">Scribe AI</span></h2>
+            <div class="legal-content">
+                <p>Scribe AI is your everyday writing and thinking partner. Draft emails, summarize documents, brainstorm ideas, and get quick answers — all from one simple chat window.</p>
+                <h3>What we offer</h3>
+                <ul>
+                    <li>Fast, clear AI chat for writing and research</li>
+                    <li>Voice input and spoken replies</li>
+                    <li>Image and file attachments</li>
+                    <li>Optional AI image &amp; video generation (Pro / Ultra)</li>
+                </ul>
+                <h3>Our mission</h3>
+                <p>We help people write faster and think clearer — without unnecessary complexity. Scribe is built for students, creators, teams, and anyone who works with words every day.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="privacy-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePrivacyModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Privacy <span style="color: #fff;">Policy</span></h2>
+            <div class="legal-content">
+                <p><strong>Last updated:</strong> July 2026</p>
+                <p>Scribe AI (“we”, “our”, or “us”) respects your privacy. This policy explains what information we collect and how we use it.</p>
+                <h3>1. Information we collect</h3>
+                <ul>
+                    <li>Account details (name, nickname, email) when you sign up</li>
+                    <li>Messages and prompts you send in chat</li>
+                    <li>Basic usage data (device type, approximate location, logs)</li>
+                </ul>
+                <h3>2. How we use information</h3>
+                <ul>
+                    <li>To provide and improve the Scribe AI service</li>
+                    <li>To authenticate your account and prevent abuse</li>
+                    <li>To process payments if you upgrade to a paid plan</li>
+                </ul>
+                <h3>3. Data sharing</h3>
+                <p>We do not sell your personal data. We may use trusted processors (hosting, AI inference, payment) who process data only to provide the service.</p>
+                <h3>4. Your choices</h3>
+                <p>You can request access, correction, or deletion of your account data by contacting us via the Contact page.</p>
+                <h3>5. Contact</h3>
+                <p>For privacy questions, use the Contact form on this site.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS OF SERVICE MODAL -->
+    <div id="terms-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleTermsModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Terms of <span style="color: #fff;">Service</span></h2>
+            <div class="legal-content">
+                <p><strong>Last updated:</strong> July 2026</p>
+                <p>By using Scribe AI you agree to these terms.</p>
+                <h3>1. The service</h3>
+                <p>Scribe AI provides AI-assisted writing, chat, and related tools. Features may change over time. Free and paid plans have different limits.</p>
+                <h3>2. Accounts</h3>
+                <p>You are responsible for keeping your login details secure and for activity under your account. You must provide accurate information when registering.</p>
+                <h3>3. Acceptable use</h3>
+                <ul>
+                    <li>Do not use Scribe for illegal activity or to harm others</li>
+                    <li>Do not attempt to abuse, overload, or reverse-engineer the service</li>
+                    <li>Do not upload content you do not have rights to</li>
+                </ul>
+                <h3>4. AI outputs</h3>
+                <p>AI responses may be inaccurate or incomplete. You are responsible for checking important information before using it. Scribe is not a substitute for professional legal, medical, or financial advice.</p>
+                <h3>5. Payments</h3>
+                <p>Paid plans are billed according to the plan you choose. Refunds are handled according to our payment provider’s policies where applicable.</p>
+                <h3>6. Limitation of liability</h3>
+                <p>To the maximum extent allowed by law, Scribe AI is provided “as is” without warranties. We are not liable for indirect or consequential damages arising from use of the service.</p>
+                <h3>7. Contact</h3>
+                <p>Questions about these terms can be sent via the Contact form.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT MODAL -->
+    <div id="contact-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleContactModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Contact <span style="color: #fff;">Us</span></h2>
+            <div class="legal-content" style="margin-bottom: 16px;">
+                <p style="text-align:center;">Questions, feedback, or support — send us a message.</p>
+            </div>
+            <form onsubmit="handleContactSubmit(event)">
+                <div class="contact-form-group">
+                    <label>Your name</label>
+                    <input type="text" id="contact-name" placeholder="Your name" required>
+                </div>
+                <div class="contact-form-group">
+                    <label>Email</label>
+                    <input type="email" id="contact-email" placeholder="you@email.com" required>
+                </div>
+                <div class="contact-form-group">
+                    <label>Message</label>
+                    <textarea id="contact-message" rows="4" placeholder="How can we help?" required></textarea>
+                </div>
+                <button type="submit" class="contact-submit-btn">Send message</button>
+            </form>
+            <p id="contact-success" style="display:none; color:#a3e635; text-align:center; margin-top:14px; font-size:14px;">
+                Thanks — your message has been noted. We’ll get back to you soon.
+            </p>
+        </div>
+    </div>
+
+    <!-- MEET SCRIBE (kept for compatibility) -->
     <div id="meet-scribe-popup-card" class="global-popup-overlay">
         <div class="popup-window-box">
             <button class="popup-close-trigger" onclick="toggleMeetScribeModal()">×</button>
-            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Meet <span style="color: #ff6600;">Scribe AI</span></h2>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Meet <span style="color: #fff;">Scribe AI</span></h2>
             <p style="color: #9ca3af; font-size: 15px; line-height: 1.7; text-align: center; max-width: 520px; margin: 0 auto 24px;">
                 Scribe AI is your everyday writing and thinking partner — draft emails, summarize documents, brainstorm ideas, and get quick answers, all from one simple chat window.
             </p>
@@ -948,29 +1467,28 @@
         </div>
     </div>
 
-    <!-- SOLUTIONS INFO MODAL -->
+    <!-- SOLUTIONS -->
     <div id="solutions-popup-card" class="global-popup-overlay">
         <div class="popup-window-box">
             <button class="popup-close-trigger" onclick="toggleSolutionsModal()">×</button>
-            <h2 style="text-align: center; color: white; margin-bottom: 24px;">Solutions <span style="color: #ff6600;">for every team</span></h2>
+            <h2 style="text-align: center; color: white; margin-bottom: 24px;">Solutions <span style="color: #fff;">for every team</span></h2>
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
-                    <h3 style="font-size: 15px; margin-bottom: 8px;">For Individuals</h3>
+                    <h3 style="font-size: 15px; margin-bottom: 8px; color:#f3f4f6;">For Individuals</h3>
                     <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">Quick answers, everyday writing help, and research on the fly.</p>
                 </div>
                 <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
-                    <h3 style="font-size: 15px; margin-bottom: 8px;">For Teams</h3>
+                    <h3 style="font-size: 15px; margin-bottom: 8px; color:#f3f4f6;">For Teams</h3>
                     <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">Shared workflows for content, support replies, and internal docs.</p>
                 </div>
                 <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
-                    <h3 style="font-size: 15px; margin-bottom: 8px;">For Developers</h3>
+                    <h3 style="font-size: 15px; margin-bottom: 8px; color:#f3f4f6;">For Developers</h3>
                     <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">API access to build Scribe into your own products and tools.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WORKFLOW -->
     <script>
         const chatConsole = document.getElementById('chat-stream-console');
         const promptInput = document.getElementById('prompt-input');
@@ -978,11 +1496,28 @@
         const greetingBanner = document.getElementById('greeting-banner-hub');
         const greetingText = document.getElementById('greeting-txt-hook');
 
-        // Real Cloudflare Worker URL — used for all backend calls (chat, auth, checkout)
+        // Backend (Cloudflare Worker) — same as your original
         const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
 
         let landingAuthMode = 'login';
         let currentNickname = '';
+
+        // Safe storage: avoids SecurityError when page is sandboxed (no allow-same-origin)
+        const memoryStore = {};
+        const safeStorage = {
+            getItem(key) {
+                try { return localStorage.getItem(key); }
+                catch (e) { return memoryStore[key] !== undefined ? memoryStore[key] : null; }
+            },
+            setItem(key, value) {
+                try { localStorage.setItem(key, value); }
+                catch (e) { memoryStore[key] = String(value); }
+            },
+            removeItem(key) {
+                try { localStorage.removeItem(key); }
+                catch (e) { delete memoryStore[key]; }
+            }
+        };
 
         function animateWords(el, text, baseDelay = 0, stepMs = 90) {
             if (!el) return;
@@ -1006,11 +1541,13 @@
         animateWords(document.getElementById('preview-showcase-title-text'), 'Scribe handles your everyday tasks');
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedSession = localStorage.getItem('user_session');
+            const savedSession = safeStorage.getItem('user_session');
             if (savedSession) {
-                const session = JSON.parse(savedSession);
-                document.getElementById('intro-page-screen').style.display = 'none';
-                switchToWorkspaceUI(session.email, session.nickname);
+                try {
+                    const session = JSON.parse(savedSession);
+                    document.getElementById('intro-page-screen').style.display = 'none';
+                    switchToWorkspaceUI(session.email, session.nickname);
+                } catch (e) {}
             }
         });
 
@@ -1024,20 +1561,24 @@
             const tabLogin = document.getElementById('landing-tab-login');
             const tabSignup = document.getElementById('landing-tab-signup');
             const nameGroup = document.getElementById('landing-name-group');
-            const submitBtn = document.getElementById('landing-submit-btn');
+            const btn = document.getElementById('landing-submit-btn');
 
             if (type === 'login') {
-                tabLogin.classList.add('active'); tabSignup.classList.remove('active');
-                nameGroup.style.display = 'none'; submitBtn.innerText = "Continue with Email";
+                tabLogin.classList.add('active');
+                tabSignup.classList.remove('active');
+                nameGroup.style.display = 'none';
+                btn.innerText = "Continue with Email";
             } else {
-                tabSignup.classList.add('active'); tabLogin.classList.remove('active');
-                nameGroup.style.display = 'block'; submitBtn.innerText = "Register Free Account";
+                tabSignup.classList.add('active');
+                tabLogin.classList.remove('active');
+                nameGroup.style.display = 'block';
+                btn.innerText = "Register Free Account";
             }
         }
 
         async function handleLandingAuth(event) {
             event.preventDefault();
-            const submitBtn = document.getElementById('landing-submit-btn');
+            const btn = document.getElementById('landing-submit-btn');
             const nameVal = document.getElementById('landing-name').value.trim();
             const nicknameVal = document.getElementById('landing-nickname').value.trim();
             const emailVal = document.getElementById('landing-email').value.trim();
@@ -1047,7 +1588,7 @@
               ? `${workerURL}/api/signin`
               : `${workerURL}/api/signup`;
 
-            submitBtn.innerText = "Connecting...";
+            btn.innerText = "Connecting...";
 
             try {
                 const res = await fetch(endpoint, {
@@ -1058,46 +1599,196 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    localStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal }));
+                    safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal }));
                     switchToWorkspaceUI(emailVal, nicknameVal);
-                } else { alert("Auth Error: " + data.error); }
-            } catch (err) { alert("Server Offline."); }
-            finally { submitBtn.innerText = landingAuthMode === 'login' ? "Continue with Email" : "Register Free Account"; }
+                } else {
+                    alert("Auth Error: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Server Offline.");
+            } finally {
+                btn.innerText = landingAuthMode === 'login' ? "Continue with Email" : "Register Free Account";
+            }
         }
+
+        let currentUserEmail = '';
+        let currentChatId = null;
+        let currentChatMessages = [];
 
         function switchToWorkspaceUI(email, nickname) {
             document.getElementById('landing-page-screen').style.display = 'none';
+            document.getElementById('intro-page-screen').style.display = 'none';
             document.getElementById('workspace-screen').style.display = 'flex';
 
             currentNickname = nickname || '';
+            currentUserEmail = email || '';
 
             const targetNode = document.getElementById('sidebar-profile-node');
             const initialLetter = (nickname || email).trim().charAt(0).toUpperCase();
+            const displayName = nickname || email.split('@')[0] || 'User';
 
             targetNode.innerHTML = `
-                <div id="logout-trigger" style="width: 38px; height: 38px; background-color: #cc6b49; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 14px;" title="Click to Logout (${nickname ? nickname + ' — ' : ''}${email})">
-                    ${initialLetter}
+                <div class="profile-block" id="logout-trigger" title="Click to logout">
+                    <div class="profile-avatar">${initialLetter}</div>
+                    <div class="profile-info">
+                        <div class="profile-name">${displayName}</div>
+                        <div class="profile-email">${email || ''}</div>
+                    </div>
                 </div>
             `;
 
             document.getElementById('logout-trigger').addEventListener('click', () => {
                 if (confirm("Confirm Logout Session?")) {
-                    localStorage.removeItem('user_session'); window.location.reload();
+                    safeStorage.removeItem('user_session');
+                    window.location.reload();
                 }
             });
 
             configureGreetingBanner();
+            renderRecentChats();
         }
 
         function configureGreetingBanner() {
             let text = "What can I help with";
-            if (currentNickname) { text += `, ${currentNickname}`; }
+            if (currentNickname) text += `, ${currentNickname}`;
             text += "?";
             document.querySelector('#greeting-banner-hub .icon').innerText = "✨";
             animateWords(greetingText, text);
         }
 
-        // ---------------- Attach menu (+) : upload image / upload file / generate image ----------------
+        // ---------- Chat history (local) ----------
+        function getChatHistory() {
+            try {
+                const raw = safeStorage.getItem('scribe_chats');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveChatHistory(list) {
+            try {
+                safeStorage.setItem('scribe_chats', JSON.stringify(list.slice(0, 40)));
+            } catch (e) {}
+        }
+
+        function makeChatTitle(text) {
+            const t = (text || 'New chat').trim().replace(/\s+/g, ' ');
+            return t.length > 42 ? t.slice(0, 42) + '…' : t;
+        }
+
+        function renderRecentChats(filterText) {
+            const listEl = document.getElementById('recent-chats-list');
+            if (!listEl) return;
+            let chats = getChatHistory();
+            if (filterText) {
+                const q = filterText.toLowerCase();
+                chats = chats.filter(c => (c.title || '').toLowerCase().includes(q));
+            }
+            if (!chats.length) {
+                listEl.innerHTML = '<div class="recent-empty">No chats yet</div>';
+                return;
+            }
+            listEl.innerHTML = chats.map(c => `
+                <button type="button" class="recent-chat-item ${c.id === currentChatId ? 'active-chat' : ''}"
+                    onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
+                    ${c.title || 'Untitled chat'}
+                </button>
+            `).join('');
+        }
+
+        function startNewChat() {
+            currentChatId = null;
+            currentChatMessages = [];
+            resetDashboardView();
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const nc = document.getElementById('nav-new-chat');
+            if (nc) nc.classList.add('active');
+            renderRecentChats();
+        }
+
+        function loadChat(id) {
+            const chats = getChatHistory();
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return;
+            currentChatId = chat.id;
+            currentChatMessages = chat.messages || [];
+
+            greetingBanner.style.display = 'none';
+            chatConsole.style.display = 'flex';
+            chatConsole.innerHTML = '';
+
+            const userInitial = (currentNickname || currentUserEmail || 'U').trim().charAt(0).toUpperCase();
+            currentChatMessages.forEach(m => {
+                if (m.role === 'user') {
+                    chatConsole.insertAdjacentHTML('beforeend',
+                        `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${m.text}</div><div class="user-avatar-bubble">${userInitial}</div></div>`);
+                } else {
+                    chatConsole.insertAdjacentHTML('beforeend',
+                        `<div class="console-stream-row"><div class="console-avatar-bubble"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload">${m.text}</div></div>`);
+                }
+            });
+            chatConsole.scrollTop = chatConsole.scrollHeight;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            renderRecentChats();
+        }
+
+        function persistCurrentChat(userText, aiText) {
+            currentChatMessages.push({ role: 'user', text: userText });
+            if (aiText) currentChatMessages.push({ role: 'assistant', text: aiText });
+
+            let chats = getChatHistory();
+            if (!currentChatId) {
+                currentChatId = 'chat_' + Date.now();
+                chats.unshift({
+                    id: currentChatId,
+                    title: makeChatTitle(userText),
+                    updatedAt: Date.now(),
+                    messages: currentChatMessages.slice()
+                });
+            } else {
+                const idx = chats.findIndex(c => c.id === currentChatId);
+                if (idx >= 0) {
+                    chats[idx].messages = currentChatMessages.slice();
+                    chats[idx].updatedAt = Date.now();
+                    if (!chats[idx].title) chats[idx].title = makeChatTitle(userText);
+                    const item = chats.splice(idx, 1)[0];
+                    chats.unshift(item);
+                } else {
+                    chats.unshift({
+                        id: currentChatId,
+                        title: makeChatTitle(userText),
+                        updatedAt: Date.now(),
+                        messages: currentChatMessages.slice()
+                    });
+                }
+            }
+            saveChatHistory(chats);
+            renderRecentChats();
+        }
+
+        function toggleChatSearch() {
+            const input = document.getElementById('chat-search-input');
+            if (!input) return;
+            const show = input.style.display === 'none' || !input.style.display;
+            input.style.display = show ? 'block' : 'none';
+            if (show) {
+                input.focus();
+                input.oninput = () => renderRecentChats(input.value.trim());
+            } else {
+                input.value = '';
+                renderRecentChats();
+            }
+        }
+
+        function resetDashboardView() {
+            greetingBanner.style.display = 'flex';
+            chatConsole.style.display = 'none';
+            chatConsole.innerHTML = '';
+            currentChatId = null;
+            currentChatMessages = [];
+            renderRecentChats();
+        }
+
+        // Attach menu
         let pendingAttachments = [];
         const attachPlusBtn = document.getElementById('attach-plus-btn');
         const attachMenu = document.getElementById('attach-menu');
@@ -1116,110 +1807,112 @@
         }
 
         document.getElementById('hidden-file-image').addEventListener('change', (e) => {
-            handleFileChosen(e.target.files[0], true); e.target.value = '';
+            handleFileChosen(e.target.files[0], true);
+            e.target.value = '';
         });
         document.getElementById('hidden-file-any').addEventListener('change', (e) => {
-            handleFileChosen(e.target.files[0], false); e.target.value = '';
+            handleFileChosen(e.target.files[0], false);
+            e.target.value = '';
         });
 
         function handleFileChosen(file, isImage) {
             if (!file) return;
-            pendingAttachments.push({ name: file.name, isImage, url: isImage ? URL.createObjectURL(file) : null });
+            pendingAttachments.push({
+                name: file.name,
+                isImage,
+                url: isImage ? URL.createObjectURL(file) : null
+            });
             renderAttachmentPreviews();
         }
 
         function renderAttachmentPreviews() {
             const row = document.getElementById('attachment-preview-row');
-            if (pendingAttachments.length === 0) { row.style.display = 'none'; row.innerHTML = ''; return; }
+            if (pendingAttachments.length === 0) {
+                row.style.display = 'none';
+                row.innerHTML = '';
+                return;
+            }
             row.style.display = 'flex';
             row.innerHTML = pendingAttachments.map((a, i) => `
                 <div class="attachment-chip">
-                    ${a.isImage ? `<img src="${a.url}">` : a.isVideo ? `<video src="${a.url}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;" muted></video>` : '📄'}
+                    ${a.isImage && a.url ? `<img src="${a.url}">` : a.isVideo ? `<video src="${a.url}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;" muted></video>` : '📄'}
                     <span>${a.name}</span>
                     <span class="remove-chip" onclick="removeAttachment(${i})">×</span>
                 </div>
             `).join('');
         }
 
-        function removeAttachment(i) { pendingAttachments.splice(i, 1); renderAttachmentPreviews(); }
-
-        function triggerGenerateImage() {
-            attachMenu.classList.remove('open');
-            const prompt = promptInput.value.trim() || 'Scribe AI';
-            const size = 512;
-            const canvas = document.createElement('canvas');
-            canvas.width = size; canvas.height = size;
-            const ctx = canvas.getContext('2d');
-
-            let hash = 0;
-            for (let i = 0; i < prompt.length; i++) hash = prompt.charCodeAt(i) + ((hash << 5) - hash);
-            const seed = Math.abs(hash);
-            const rand = (n) => { const x = Math.sin(seed + n * 999.77) * 10000; return x - Math.floor(x); };
-            const h1 = seed % 360;
-            const h2 = (h1 + 40 + rand(1) * 60) % 360;
-            const h3 = (h1 + 200 + rand(2) * 60) % 360;
-
-            const base = ctx.createLinearGradient(0, 0, size, size);
-            base.addColorStop(0, `hsl(${h1},60%,14%)`);
-            base.addColorStop(1, `hsl(${h3},55%,10%)`);
-            ctx.fillStyle = base; ctx.fillRect(0, 0, size, size);
-
-            ctx.globalCompositeOperation = 'lighter';
-            const blobs = 6;
-            for (let i = 0; i < blobs; i++) {
-                const bx = rand(i * 3 + 1) * size;
-                const by = rand(i * 3 + 2) * size;
-                const br = size * (0.22 + rand(i * 3 + 3) * 0.28);
-                const hue = [h1, h2, h3][i % 3];
-                const glow = ctx.createRadialGradient(bx, by, 0, bx, by, br);
-                glow.addColorStop(0, `hsla(${hue},85%,68%,0.85)`);
-                glow.addColorStop(1, `hsla(${hue},85%,68%,0)`);
-                ctx.fillStyle = glow;
-                ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
-            }
-            ctx.globalCompositeOperation = 'source-over';
-
-            for (let i = 0; i < 2200; i++) {
-                ctx.fillStyle = `rgba(255,255,255,${rand(i) * 0.05})`;
-                ctx.fillRect(rand(i + 0.5) * size, rand(i + 0.7) * size, 1, 1);
-            }
-
-            const vg = ctx.createRadialGradient(size/2, size/2, size*0.35, size/2, size/2, size*0.72);
-            vg.addColorStop(0, 'rgba(0,0,0,0)');
-            vg.addColorStop(1, 'rgba(0,0,0,0.45)');
-            ctx.fillStyle = vg; ctx.fillRect(0, 0, size, size);
-
-            const label = prompt.length > 42 ? prompt.slice(0, 42) + '…' : prompt;
-            ctx.font = '600 17px -apple-system, Segoe UI, sans-serif';
-            const padX = 16, textW = ctx.measureText(label).width;
-            const pillW = textW + padX * 2, pillH = 38, pillX = 20, pillY = size - 58;
-            ctx.fillStyle = 'rgba(10,10,12,0.55)';
-            ctx.beginPath();
-            ctx.roundRect ? ctx.roundRect(pillX, pillY, pillW, pillH, 19) : ctx.rect(pillX, pillY, pillW, pillH);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255,255,255,0.95)';
-            ctx.fillText(label, pillX + padX, pillY + pillH / 2 + 6);
-
-            pendingAttachments.push({ name: 'Generated image', isImage: true, url: canvas.toDataURL('image/png'), promptText: prompt });
+        function removeAttachment(i) {
+            pendingAttachments.splice(i, 1);
             renderAttachmentPreviews();
+        }
+
+        async function triggerGenerateImage() {
+            attachMenu.classList.remove('open');
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert("Pehle image ke liye kuch likho (jaise: 'a cat on the moon')");
+                return;
+            }
+
+            const placeholderId = 'imgplaceholder-' + Date.now();
+            pendingAttachments.push({
+                name: 'Generating...',
+                isImage: true,
+                url: '',
+                id: placeholderId,
+                loading: true
+            });
+            renderAttachmentPreviews();
+
+            try {
+                const res = await fetch(`${workerURL}/api/generate-image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                const idx = pendingAttachments.findIndex(a => a.id === placeholderId);
+
+                if (data.success && data.image) {
+                    pendingAttachments[idx] = {
+                        name: 'Generated image',
+                        isImage: true,
+                        url: `data:image/png;base64,${data.image}`,
+                        promptText: prompt
+                    };
+                } else {
+                    if (idx >= 0) pendingAttachments.splice(idx, 1);
+                    alert("Image generate nahi ho saki. Dobara try karo.");
+                }
+                renderAttachmentPreviews();
+            } catch (err) {
+                pendingAttachments = pendingAttachments.filter(a => a.id !== placeholderId);
+                renderAttachmentPreviews();
+                alert("Server se connection nahi ho saka.");
+            }
         }
 
         function triggerGenerateVideo() {
             attachMenu.classList.remove('open');
             if (!('MediaRecorder' in window) || !HTMLCanvasElement.prototype.captureStream) {
-                alert('Video generation isn\'t supported in this browser. Please try Chrome.');
+                alert("Video generation isn't supported in this browser. Please try Chrome.");
                 return;
             }
             const prompt = promptInput.value.trim() || 'Scribe AI';
             const size = 400;
             const canvas = document.createElement('canvas');
-            canvas.width = size; canvas.height = size;
+            canvas.width = size;
+            canvas.height = size;
             const ctx = canvas.getContext('2d');
 
             let hash = 0;
             for (let i = 0; i < prompt.length; i++) hash = prompt.charCodeAt(i) + ((hash << 5) - hash);
             const seed = Math.abs(hash);
-            const rand = (n) => { const x = Math.sin(seed + n * 999.77) * 10000; return x - Math.floor(x); };
+            const rand = (n) => {
+                const x = Math.sin(seed + n * 999.77) * 10000;
+                return x - Math.floor(x);
+            };
             const h1 = seed % 360, h2 = (h1 + 130) % 360;
 
             const particles = Array.from({ length: 22 }, (_, i) => ({
@@ -1244,21 +1937,27 @@
             const drawFrame = () => {
                 const t = frame / totalFrames;
                 const bg = ctx.createLinearGradient(0, 0, size, size);
-                bg.addColorStop(0, `hsl(${h1},45%,9%)`);
-                bg.addColorStop(1, `hsl(${h2},45%,7%)`);
-                ctx.fillStyle = bg; ctx.fillRect(0, 0, size, size);
+                bg.addColorStop(0, `hsl(${h1},20%,8%)`);
+                bg.addColorStop(1, `hsl(${h2},15%,5%)`);
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, size, size);
 
                 ctx.globalCompositeOperation = 'lighter';
                 particles.forEach((p) => {
-                    p.x += p.speedX; p.y += p.speedY;
-                    if (p.x < -p.r) p.x = size + p.r; if (p.x > size + p.r) p.x = -p.r;
-                    if (p.y < -p.r) p.y = size + p.r; if (p.y > size + p.r) p.y = -p.r;
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    if (p.x < -p.r) p.x = size + p.r;
+                    if (p.x > size + p.r) p.x = -p.r;
+                    if (p.y < -p.r) p.y = size + p.r;
+                    if (p.y > size + p.r) p.y = -p.r;
                     const pulse = 0.85 + 0.15 * Math.sin(t * Math.PI * 4 + p.phase);
                     const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * pulse);
-                    glow.addColorStop(0, `hsla(${p.hue},85%,68%,0.8)`);
-                    glow.addColorStop(1, `hsla(${p.hue},85%,68%,0)`);
+                    glow.addColorStop(0, `hsla(${p.hue},40%,70%,0.7)`);
+                    glow.addColorStop(1, `hsla(${p.hue},40%,70%,0)`);
                     ctx.fillStyle = glow;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
+                    ctx.fill();
                 });
                 ctx.globalCompositeOperation = 'source-over';
 
@@ -1269,7 +1968,8 @@
                 ctx.fillStyle = `rgba(10,10,12,${0.55 * fadeIn})`;
                 ctx.beginPath();
                 const pillArgs = [16, pillY, textW + 32, 34, 17];
-                ctx.roundRect ? ctx.roundRect(...pillArgs) : ctx.rect(16, pillY, textW + 32, 34);
+                if (ctx.roundRect) ctx.roundRect(...pillArgs);
+                else ctx.rect(16, pillY, textW + 32, 34);
                 ctx.fill();
                 ctx.fillStyle = `rgba(255,255,255,${0.95 * fadeIn})`;
                 ctx.fillText(label, 32, pillY + 23);
@@ -1281,7 +1981,12 @@
 
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
-                pendingAttachments.push({ name: 'Generated video', isVideo: true, url: URL.createObjectURL(blob), promptText: prompt });
+                pendingAttachments.push({
+                    name: 'Generated video',
+                    isVideo: true,
+                    url: URL.createObjectURL(blob),
+                    promptText: prompt
+                });
                 renderAttachmentPreviews();
             };
 
@@ -1299,7 +2004,9 @@
         }
 
         let cachedVoices = [];
-        function loadVoices() { cachedVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+        function loadVoices() {
+            cachedVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+        }
         if ('speechSynthesis' in window) {
             loadVoices();
             window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -1320,14 +2027,27 @@
                 promptInput.dispatchEvent(new Event('input'));
                 processPromptSubmission();
             };
-            recognition.onend = () => { isListening = false; micBtn.classList.remove('listening'); };
-            recognition.onerror = () => { isListening = false; micBtn.classList.remove('listening'); };
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+            };
+            recognition.onerror = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+            };
         }
 
         micBtn.addEventListener('click', () => {
-            if (!recognition) { alert('Voice input isn\'t supported in this browser. Please try Chrome.'); return; }
-            if (isListening) { recognition.stop(); return; }
-            isListening = true; micBtn.classList.add('listening');
+            if (!recognition) {
+                alert("Voice input isn't supported in this browser. Please try Chrome.");
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+                return;
+            }
+            isListening = true;
+            micBtn.classList.add('listening');
             recognition.start();
         });
 
@@ -1343,8 +2063,12 @@
             if (!voice) voice = cachedVoices.find(v => v.lang.toLowerCase().startsWith(targetLang));
             if (!voice && !isUrdu) voice = cachedVoices.find(v => /google/i.test(v.name));
 
-            if (voice) { utterance.voice = voice; utterance.lang = voice.lang; }
-            else { utterance.lang = isUrdu ? 'ur-PK' : 'en-US'; }
+            if (voice) {
+                utterance.voice = voice;
+                utterance.lang = voice.lang;
+            } else {
+                utterance.lang = isUrdu ? 'ur-PK' : 'en-US';
+            }
 
             utterance.rate = 0.98;
             utterance.pitch = 1;
@@ -1353,47 +2077,97 @@
 
         promptInput.addEventListener('input', () => {
             submitBtn.classList.toggle('active-ready', promptInput.value.trim() !== '');
-            promptInput.style.height = 'auto'; promptInput.style.height = promptInput.scrollHeight + 'px';
+            promptInput.style.height = 'auto';
+            promptInput.style.height = promptInput.scrollHeight + 'px';
         });
 
-        function togglePricingModal() { const card = document.getElementById('pricing-popup-card'); card.style.display = card.style.display === 'flex' ? 'none' : 'flex'; }
-        function toggleMeetScribeModal() { const card = document.getElementById('meet-scribe-popup-card'); card.style.display = card.style.display === 'flex' ? 'none' : 'flex'; }
-        function toggleSolutionsModal() { const card = document.getElementById('solutions-popup-card'); card.style.display = card.style.display === 'flex' ? 'none' : 'flex'; }
-        function resetDashboardView() { greetingBanner.style.display = 'flex'; chatConsole.style.display = 'none'; chatConsole.innerHTML = ''; }
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'flex';
+        }
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+
+        function togglePricingModal() {
+            const card = document.getElementById('pricing-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function toggleAboutModal() {
+            const card = document.getElementById('about-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function togglePrivacyModal() {
+            const card = document.getElementById('privacy-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function toggleTermsModal() {
+            const card = document.getElementById('terms-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function toggleContactModal() {
+            const card = document.getElementById('contact-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+            document.getElementById('contact-success').style.display = 'none';
+        }
+        function toggleMeetScribeModal() {
+            const card = document.getElementById('meet-scribe-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function toggleSolutionsModal() {
+            const card = document.getElementById('solutions-popup-card');
+            card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            // Front-end only for now (no backend contact endpoint required)
+            document.getElementById('contact-success').style.display = 'block';
+            document.getElementById('contact-name').value = '';
+            document.getElementById('contact-email').value = '';
+            document.getElementById('contact-message').value = '';
+        }
 
         async function processPromptSubmission() {
-            const promptPayload = promptInput.value.trim(); if (!promptPayload) return;
+            const promptPayload = promptInput.value.trim();
+            if (!promptPayload) return;
 
-            greetingBanner.style.display = 'none'; chatConsole.style.display = 'flex';
+            greetingBanner.style.display = 'none';
+            chatConsole.style.display = 'flex';
 
-            const userInitial = (currentNickname || 'U').trim().charAt(0).toUpperCase();
+            const userInitial = (currentNickname || currentUserEmail || 'U').trim().charAt(0).toUpperCase();
             let attachmentsHtml = '';
             if (pendingAttachments.length) {
                 attachmentsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;justify-content:flex-end;">' +
-                    pendingAttachments.map(a => a.isImage
+                    pendingAttachments.map(a => a.isImage && a.url
                         ? `<img src="${a.url}" style="width:90px;height:90px;border-radius:10px;object-fit:cover;">`
                         : a.isVideo
                         ? `<video src="${a.url}" style="width:160px;border-radius:10px;" controls loop data-narrate="${(a.promptText || '').replace(/"/g, '&quot;')}"></video>`
-                        : `<span style="font-size:12px;background:#e5e2da;padding:4px 8px;border-radius:8px;">📄 ${a.name}</span>`
+                        : `<span style="font-size:12px;background:#e5e5e5;padding:4px 8px;border-radius:8px;">📄 ${a.name}</span>`
                     ).join('') + '</div>';
             }
-            const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f3f1ec; border: 1px solid #e5e2da; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #191919;">${promptPayload}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
+
+            const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${promptPayload}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
             chatConsole.insertAdjacentHTML('beforeend', userHtml);
             wireVoiceOnPlay(chatConsole);
-            promptInput.value = ''; submitBtn.classList.remove('active-ready'); promptInput.style.height = '50px';
-            pendingAttachments = []; renderAttachmentPreviews();
+
+            promptInput.value = '';
+            submitBtn.classList.remove('active-ready');
+            promptInput.style.height = '50px';
+            pendingAttachments = [];
+            renderAttachmentPreviews();
             chatConsole.scrollTop = chatConsole.scrollHeight;
 
             const targetId = 'ai-chunk-' + Date.now();
             const avatarId = targetId + '-avatar';
             const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload" id="${targetId}">Scribe AI is thinking...</div></div>`;
-            chatConsole.insertAdjacentHTML('beforeend', aiHtml); chatConsole.scrollTop = chatConsole.scrollHeight;
+            chatConsole.insertAdjacentHTML('beforeend', aiHtml);
+            chatConsole.scrollTop = chatConsole.scrollHeight;
+
             const targetOutputBox = document.getElementById(targetId);
             const avatarNode = document.getElementById(avatarId);
 
-            // NOTE: the Worker's /api/ask-question endpoint streams the answer back
-            // as Server-Sent Events (Content-Type: text/event-stream), NOT plain JSON.
-            // So we must read it with a stream reader instead of response.json().
             try {
                 const response = await fetch(`${workerURL}/api/ask-question`, {
                     method: 'POST',
@@ -1421,7 +2195,6 @@
                         if (line.startsWith("data: ")) {
                             const dataStr = line.slice(6).trim();
                             if (dataStr === "[DONE]") continue;
-
                             try {
                                 const parsed = JSON.parse(dataStr);
                                 if (parsed.text) {
@@ -1429,27 +2202,34 @@
                                     targetOutputBox.textContent = aiResponseText;
                                     chatConsole.scrollTop = chatConsole.scrollHeight;
                                 }
-                            } catch (e) {
-                                // ignore parse errors on partial/incomplete chunks
-                            }
+                            } catch (e) {}
                         }
                     }
                 }
 
                 if (aiResponseText) {
                     speakText(aiResponseText);
+                    persistCurrentChat(promptPayload, aiResponseText);
                 } else {
-                    targetOutputBox.textContent = "Error compilation model response.";
+                    targetOutputBox.textContent = "Error compiling model response.";
+                    persistCurrentChat(promptPayload, "Error compiling model response.");
                 }
             } catch (err) {
                 avatarNode.classList.remove('thinking');
-                animateWords(targetOutputBox, "Connection lost with Groq background server.", 0, 60);
+                const errMsg = "Connection lost with background server.";
+                animateWords(targetOutputBox, errMsg, 0, 60);
+                persistCurrentChat(promptPayload, errMsg);
             }
             chatConsole.scrollTop = chatConsole.scrollHeight;
         }
 
         submitBtn.addEventListener('click', processPromptSubmission);
-        promptInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); processPromptSubmission(); } });
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                processPromptSubmission();
+            }
+        });
 
         async function handleUpgradeClick(btn, tier) {
             const original = btn.innerText;
@@ -1461,9 +2241,22 @@
                     body: JSON.stringify({ tier })
                 });
                 const d = await r.json();
-                if (d.success && d.url) window.location.href = d.url; else alert("Stripe Failed");
-            } catch { alert("Error triggers."); } finally { btn.innerText = original; }
+                if (d.success && d.url) window.location.href = d.url;
+                else alert("Stripe Failed");
+            } catch {
+                alert("Error triggers.");
+            } finally {
+                btn.innerText = original;
+            }
         }
+
+        // Close modals on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card']
+                    .forEach(id => closeModal(id));
+            }
+        });
     </script>
 </body>
 </html>
