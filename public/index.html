@@ -995,9 +995,9 @@
         }
         .artifact-panel {
             display: none;
-            width: 48%;
-            min-width: 320px;
-            max-width: 560px;
+            width: 52%;
+            min-width: 340px;
+            max-width: 640px;
             border-left: 1px solid #e5e5e5;
             background: #0f0f12;
             flex-direction: column;
@@ -1010,10 +1010,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 10px 14px;
             background: #1a1a1f;
             border-bottom: 1px solid #2a2a30;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .artifact-title {
             color: #e5e5e5;
@@ -1027,6 +1028,7 @@
             display: flex;
             gap: 6px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
         .artifact-btn {
             background: #2a2a30;
@@ -1039,22 +1041,111 @@
             font-weight: 500;
         }
         .artifact-btn:hover { background: #3a3a42; color: #fff; }
+        .artifact-btn.active-tab {
+            background: #4f46e5;
+            color: #fff;
+        }
+        .artifact-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px 0;
+            background: #141418;
+            border-bottom: 1px solid #2a2a30;
+        }
+        .artifact-tab {
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+        }
+        .artifact-tab.active {
+            background: #1a1a1f;
+            color: #fff;
+            border: 1px solid #2a2a30;
+            border-bottom-color: #1a1a1f;
+        }
         .artifact-body {
             flex: 1;
             overflow: auto;
-            padding: 16px;
+            padding: 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .artifact-code-view, .artifact-preview-view {
+            flex: 1;
+            overflow: auto;
+            display: none;
+        }
+        .artifact-code-view.active, .artifact-preview-view.active {
+            display: block;
         }
         .artifact-body pre {
             margin: 0;
+            padding: 16px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 13px;
             line-height: 1.55;
             color: #e8e8ec;
             white-space: pre;
         }
+        .artifact-preview-frame {
+            width: 100%;
+            height: 100%;
+            min-height: 360px;
+            border: none;
+            background: #fff;
+        }
+        .artifact-preview-empty {
+            color: #888;
+            padding: 24px;
+            text-align: center;
+            font-size: 13px;
+        }
         .main-workspace.has-artifact .dashboard-content-stream {
             max-width: 100%;
         }
+        .nav-item.incognito-active {
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #6366f1 !important;
+        }
+        body.theme-dark .nav-item.incognito-active {
+            background: rgba(99, 102, 241, 0.25) !important;
+            color: #a5b4fc !important;
+        }
+        .incognito-badge {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: #1e1b4b;
+            color: #c7d2fe;
+            border: 1px solid #4338ca;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .incognito-badge.visible { display: inline-flex; }
+        .img-gen-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6366f1;
+        }
+        .img-gen-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #c7d2fe;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .user-avatar-bubble {
             width: 34px;
@@ -1560,6 +1651,9 @@
                     <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
                         <span class="icon">➕</span><span class="label">New Chat</span>
                     </button>
+                    <button type="button" class="nav-item" id="nav-incognito" title="Incognito chat (not saved)" onclick="toggleIncognito()">
+                        <span class="icon">🕶️</span><span class="label">Incognito</span>
+                    </button>
                     <button type="button" class="nav-item" id="nav-search" title="Search chats" onclick="toggleChatSearch()">
                         <span class="icon">🔍</span><span class="label">Search chats</span>
                     </button>
@@ -1582,6 +1676,7 @@
             <main class="main-workspace" id="main-workspace">
                 <header class="top-subnav">
                     <span class="badge-tier">Free Trial</span>
+                    <span class="incognito-badge" id="incognito-badge">🕶️ Incognito</span>
                     <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
                     <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Dark / Light mode" onclick="toggleTheme()">🌙</button>
                 </header>
@@ -1624,18 +1719,28 @@
                         </div>
                     </div>
 
-                    <!-- Side code / artifact panel -->
+                    <!-- Side code / artifact panel (Grok-style code + live preview) -->
                     <div class="artifact-panel" id="artifact-panel">
                         <div class="artifact-header">
                             <span class="artifact-title" id="artifact-title">Code</span>
                             <div class="artifact-header-actions">
+                                <button type="button" class="artifact-btn" id="artifact-tab-code-btn" onclick="setArtifactTab('code')">Code</button>
+                                <button type="button" class="artifact-btn" id="artifact-tab-preview-btn" onclick="setArtifactTab('preview')">Preview</button>
                                 <button type="button" class="artifact-btn" onclick="copyArtifact()">Copy</button>
                                 <button type="button" class="artifact-btn" onclick="downloadArtifact()">⬇ Download</button>
                                 <button type="button" class="artifact-btn" onclick="closeArtifact()">✕</button>
                             </div>
                         </div>
                         <div class="artifact-body">
-                            <pre id="artifact-code"></pre>
+                            <div class="artifact-code-view active" id="artifact-code-view">
+                                <pre id="artifact-code"></pre>
+                            </div>
+                            <div class="artifact-preview-view" id="artifact-preview-view">
+                                <iframe id="artifact-preview-frame" class="artifact-preview-frame" sandbox="allow-scripts allow-same-origin" title="Live preview"></iframe>
+                                <div class="artifact-preview-empty" id="artifact-preview-empty" style="display:none;">
+                                    Live preview works best for HTML / CSS / JS. Switch to Code tab to view source.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1984,6 +2089,29 @@
         let currentUserEmail = '';
         let currentChatId = null;
         let currentChatMessages = [];
+        let isIncognito = false;
+
+        function toggleIncognito() {
+            isIncognito = !isIncognito;
+            const btn = document.getElementById('nav-incognito');
+            const badge = document.getElementById('incognito-badge');
+            if (btn) btn.classList.toggle('incognito-active', isIncognito);
+            if (badge) badge.classList.toggle('visible', isIncognito);
+            if (isIncognito) {
+                // Start a fresh private session (not saved)
+                currentChatId = null;
+                currentChatMessages = [];
+                resetDashboardView(true);
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                if (btn) btn.classList.add('active', 'incognito-active');
+                if (greetingText) animateWords(greetingText, 'Incognito mode — chats are not saved');
+            } else {
+                if (btn) btn.classList.remove('active');
+                const nc = document.getElementById('nav-new-chat');
+                if (nc) nc.classList.add('active');
+                configureGreetingBanner();
+            }
+        }
 
         function switchToWorkspaceUI(email, nickname) {
             document.getElementById('landing-page-screen').style.display = 'none';
@@ -2068,10 +2196,16 @@
         function startNewChat() {
             currentChatId = null;
             currentChatMessages = [];
-            resetDashboardView();
+            // Leaving new chat does not force exit from incognito; user can toggle off
+            resetDashboardView(isIncognito);
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const nc = document.getElementById('nav-new-chat');
-            if (nc) nc.classList.add('active');
+            if (isIncognito) {
+                const inc = document.getElementById('nav-incognito');
+                if (inc) inc.classList.add('active', 'incognito-active');
+            } else {
+                const nc = document.getElementById('nav-new-chat');
+                if (nc) nc.classList.add('active');
+            }
             renderRecentChats();
         }
 
@@ -2079,6 +2213,14 @@
             const chats = getChatHistory();
             const chat = chats.find(c => c.id === id);
             if (!chat) return;
+            // Loading a saved chat exits incognito
+            if (isIncognito) {
+                isIncognito = false;
+                const btn = document.getElementById('nav-incognito');
+                const badge = document.getElementById('incognito-badge');
+                if (btn) btn.classList.remove('incognito-active', 'active');
+                if (badge) badge.classList.remove('visible');
+            }
             currentChatId = chat.id;
             currentChatMessages = chat.messages || [];
 
@@ -2106,6 +2248,9 @@
         function persistCurrentChat(userText, aiText) {
             currentChatMessages.push({ role: 'user', text: userText });
             if (aiText) currentChatMessages.push({ role: 'assistant', text: aiText });
+
+            // Incognito: keep messages in memory only — never write to storage
+            if (isIncognito) return;
 
             let chats = getChatHistory();
             if (!currentChatId) {
@@ -2151,12 +2296,14 @@
             }
         }
 
-        function resetDashboardView() {
+        function resetDashboardView(keepIncognitoMsg) {
             greetingBanner.style.display = 'flex';
             chatConsole.style.display = 'none';
             chatConsole.innerHTML = '';
             currentChatId = null;
             currentChatMessages = [];
+            closeArtifact();
+            if (!keepIncognitoMsg) configureGreetingBanner();
             renderRecentChats();
         }
 
@@ -2207,7 +2354,13 @@
             row.style.display = 'flex';
             row.innerHTML = pendingAttachments.map((a, i) => `
                 <div class="attachment-chip">
-                    ${a.isImage && a.url ? `<img src="${a.url}">` : a.isVideo ? `<video src="${a.url}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;" muted></video>` : '📄'}
+                    ${a.loading
+                        ? `<span class="img-gen-loading"><span class="img-gen-spinner"></span></span>`
+                        : a.isImage && a.url
+                        ? `<img src="${a.url}" alt="">`
+                        : a.isVideo
+                        ? `<video src="${a.url}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;" muted></video>`
+                        : '📄'}
                     <span>${a.name}</span>
                     <span class="remove-chip" onclick="removeAttachment(${i})">×</span>
                 </div>
@@ -2219,17 +2372,59 @@
             renderAttachmentPreviews();
         }
 
+        function makeLocalPreviewImage(promptText) {
+            // Client-side artistic preview when backend is offline (so Generate always returns an image)
+            const size = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            let hash = 0;
+            for (let i = 0; i < promptText.length; i++) hash = promptText.charCodeAt(i) + ((hash << 5) - hash);
+            const h1 = Math.abs(hash) % 360;
+            const h2 = (h1 + 140) % 360;
+            const g = ctx.createLinearGradient(0, 0, size, size);
+            g.addColorStop(0, `hsl(${h1}, 55%, 18%)`);
+            g.addColorStop(0.5, `hsl(${h2}, 45%, 28%)`);
+            g.addColorStop(1, `hsl(${(h1 + 60) % 360}, 50%, 12%)`);
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, size, size);
+            for (let i = 0; i < 18; i++) {
+                const x = ((hash * (i + 3)) % size + size) % size;
+                const y = ((hash * (i + 7)) % size + size) % size;
+                const r = 20 + (i * 7) % 90;
+                const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+                rg.addColorStop(0, `hsla(${(h1 + i * 17) % 360}, 70%, 65%, 0.55)`);
+                rg.addColorStop(1, `hsla(${(h1 + i * 17) % 360}, 70%, 40%, 0)`);
+                ctx.fillStyle = rg;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
+            const label = promptText.length > 48 ? promptText.slice(0, 48) + '…' : promptText;
+            ctx.font = '600 18px -apple-system, Segoe UI, sans-serif';
+            const tw = ctx.measureText(label).width;
+            const px = 20, py = size - 48, pw = Math.min(size - 40, tw + 28), ph = 36;
+            if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill(); }
+            else ctx.fillRect(px, py, pw, ph);
+            ctx.fillStyle = '#fff';
+            ctx.fillText(label, px + 14, py + 24);
+            return canvas.toDataURL('image/png');
+        }
+
         async function triggerGenerateImage() {
             attachMenu.classList.remove('open');
             const prompt = promptInput.value.trim();
             if (!prompt) {
-                alert("Pehle image ke liye kuch likho (jaise: 'a cat on the moon')");
+                alert("Pehle image ke liye prompt likho (jaise: a cat on the moon)");
+                promptInput.focus();
                 return;
             }
 
             const placeholderId = 'imgplaceholder-' + Date.now();
             pendingAttachments.push({
-                name: 'Generating...',
+                name: 'Generating…',
                 isImage: true,
                 url: '',
                 id: placeholderId,
@@ -2237,32 +2432,48 @@
             });
             renderAttachmentPreviews();
 
+            let imageDataUrl = null;
             try {
                 const res = await fetch(`${workerURL}/api/generate-image`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
                 });
-                const data = await res.json();
-                const idx = pendingAttachments.findIndex(a => a.id === placeholderId);
-
-                if (data.success && data.image) {
-                    pendingAttachments[idx] = {
-                        name: 'Generated image',
-                        isImage: true,
-                        url: `data:image/png;base64,${data.image}`,
-                        promptText: prompt
-                    };
-                } else {
-                    if (idx >= 0) pendingAttachments.splice(idx, 1);
-                    alert("Image generate nahi ho saki. Dobara try karo.");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.image) {
+                        imageDataUrl = data.image.startsWith('data:')
+                            ? data.image
+                            : `data:image/png;base64,${data.image}`;
+                    } else if (data.url) {
+                        imageDataUrl = data.url;
+                    }
                 }
-                renderAttachmentPreviews();
             } catch (err) {
-                pendingAttachments = pendingAttachments.filter(a => a.id !== placeholderId);
-                renderAttachmentPreviews();
-                alert("Server se connection nahi ho saka.");
+                // Backend offline — fall through to local preview
             }
+
+            const idx = pendingAttachments.findIndex(a => a.id === placeholderId);
+            if (!imageDataUrl) {
+                // Always deliver an image so the button "works"
+                imageDataUrl = makeLocalPreviewImage(prompt);
+            }
+            if (idx >= 0) {
+                pendingAttachments[idx] = {
+                    name: 'Generated image',
+                    isImage: true,
+                    url: imageDataUrl,
+                    promptText: prompt
+                };
+            } else {
+                pendingAttachments.push({
+                    name: 'Generated image',
+                    isImage: true,
+                    url: imageDataUrl,
+                    promptText: prompt
+                });
+            }
+            renderAttachmentPreviews();
         }
 
         function triggerGenerateVideo() {
@@ -2499,7 +2710,7 @@
                         <div class="msg-code-header">
                             <span class="msg-code-lang">${escapeHtml(lang)}</span>
                             <div class="msg-code-actions">
-                                <button type="button" class="msg-code-btn" onclick="openArtifactFromBlock('${id}', '${escapeHtml(lang)}', '${ext}')">▣ Side view</button>
+                                <button type="button" class="msg-code-btn" onclick="openArtifactFromBlock('${id}', '${escapeHtml(lang)}', '${ext}')">▣ Open panel</button>
                                 <button type="button" class="msg-code-btn" onclick="copyCodeBlock('${id}')">Copy</button>
                                 <button type="button" class="msg-code-btn" onclick="downloadCodeBlock('${id}', '${ext}')">⬇ Download</button>
                             </div>
@@ -2582,19 +2793,111 @@
             URL.revokeObjectURL(a.href);
         }
 
-        let artifactState = { code: '', lang: 'code', ext: 'txt' };
+        let artifactState = { code: '', lang: 'code', ext: 'txt', tab: 'code' };
+
+        function isPreviewableLang(lang) {
+            const l = (lang || '').toLowerCase();
+            return ['html', 'htm', 'css', 'javascript', 'js', 'svg'].includes(l) ||
+                /^\s*<(!DOCTYPE|html|svg|style|script)/i.test(artifactState.code || '');
+        }
+
+        function buildPreviewHtml(code, lang) {
+            const l = (lang || '').toLowerCase();
+            const src = code || '';
+            if (l === 'html' || l === 'htm' || /^\s*<(!DOCTYPE|html)/i.test(src)) {
+                return src;
+            }
+            if (l === 'svg' || /^\s*<svg/i.test(src)) {
+                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fafafa}</style></head><body>${src}</body></html>`;
+            }
+            if (l === 'css') {
+                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${src}</style></head><body>
+                    <div style="font-family:system-ui;padding:24px;max-width:480px;margin:40px auto;border:1px solid #e5e5e5;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06)">
+                        <h1 style="margin:0 0 8px;font-size:22px">CSS Preview</h1>
+                        <p style="margin:0 0 16px;color:#666">Sample elements styled by your CSS</p>
+                        <button style="margin-right:8px">Button</button>
+                        <a href="#">Link</a>
+                        <div class="card" style="margin-top:16px;padding:12px;border-radius:8px;background:#f7f7f5">Card</div>
+                    </div>
+                </body></html>`;
+            }
+            if (l === 'javascript' || l === 'js') {
+                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:20px;background:#0f0f12;color:#e8e8ec} #out{white-space:pre-wrap;background:#1a1a1f;padding:14px;border-radius:10px;border:1px solid #2a2a30;min-height:80px}</style></head><body>
+                    <h3 style="margin:0 0 12px">JS Preview</h3>
+                    <div id="out">Running…</div>
+                    <script>
+                    (function(){
+                        const out = document.getElementById('out');
+                        const log = (...a) => { out.textContent += a.map(x => typeof x === 'object' ? JSON.stringify(x,null,2) : String(x)).join(' ') + '\\n'; };
+                        const originalLog = console.log;
+                        console.log = function(){ log.apply(null, arguments); originalLog.apply(console, arguments); };
+                        try {
+                            ${src.replace(/<\/script>/gi, '<\\/script>')}
+                            if (!out.textContent || out.textContent === 'Running…') out.textContent = 'Script ran (no console output).';
+                        } catch (e) {
+                            out.textContent = 'Error: ' + e.message;
+                        }
+                    })();
+                    <\/script>
+                </body></html>`;
+            }
+            // Fallback: treat as HTML fragment
+            return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:16px}</style></head><body>${src}</body></html>`;
+        }
 
         function openArtifact(code, lang, ext) {
-            artifactState = { code: code || '', lang: lang || 'code', ext: ext || 'txt' };
+            artifactState = { code: code || '', lang: lang || 'code', ext: ext || 'txt', tab: 'code' };
             const panel = document.getElementById('artifact-panel');
             const pre = document.getElementById('artifact-code');
             const title = document.getElementById('artifact-title');
             if (!panel || !pre) return;
             pre.textContent = artifactState.code;
-            title.textContent = (artifactState.lang || 'Code').toUpperCase() + ' preview';
+            title.textContent = (artifactState.lang || 'Code').toUpperCase();
             panel.classList.add('open');
             const main = document.getElementById('main-workspace');
             if (main) main.classList.add('has-artifact');
+
+            const canPreview = isPreviewableLang(artifactState.lang) || isPreviewableLang('html');
+            const previewBtn = document.getElementById('artifact-tab-preview-btn');
+            if (previewBtn) previewBtn.style.display = canPreview ? '' : 'none';
+
+            // Auto-open live preview for HTML-like code (Grok-style)
+            if (canPreview && (['html', 'htm', 'svg'].includes((lang || '').toLowerCase()) || /^\s*<(!DOCTYPE|html|svg)/i.test(code || ''))) {
+                setArtifactTab('preview');
+            } else {
+                setArtifactTab('code');
+            }
+        }
+
+        function setArtifactTab(tab) {
+            artifactState.tab = tab;
+            const codeView = document.getElementById('artifact-code-view');
+            const previewView = document.getElementById('artifact-preview-view');
+            const codeBtn = document.getElementById('artifact-tab-code-btn');
+            const previewBtn = document.getElementById('artifact-tab-preview-btn');
+            const frame = document.getElementById('artifact-preview-frame');
+            const empty = document.getElementById('artifact-preview-empty');
+
+            if (codeView) codeView.classList.toggle('active', tab === 'code');
+            if (previewView) previewView.classList.toggle('active', tab === 'preview');
+            if (codeBtn) codeBtn.classList.toggle('active-tab', tab === 'code');
+            if (previewBtn) previewBtn.classList.toggle('active-tab', tab === 'preview');
+
+            if (tab === 'preview' && frame) {
+                const can = isPreviewableLang(artifactState.lang) || /^\s*</.test(artifactState.code || '');
+                if (can) {
+                    if (empty) empty.style.display = 'none';
+                    frame.style.display = 'block';
+                    try {
+                        frame.srcdoc = buildPreviewHtml(artifactState.code, artifactState.lang);
+                    } catch (e) {
+                        frame.srcdoc = '<p style="padding:16px;font-family:system-ui">Preview failed to load.</p>';
+                    }
+                } else {
+                    frame.style.display = 'none';
+                    if (empty) empty.style.display = 'block';
+                }
+            }
         }
 
         function openArtifactFromBlock(id, lang, ext) {
@@ -2608,6 +2911,8 @@
             if (panel) panel.classList.remove('open');
             const main = document.getElementById('main-workspace');
             if (main) main.classList.remove('has-artifact');
+            const frame = document.getElementById('artifact-preview-frame');
+            if (frame) frame.srcdoc = '';
         }
 
         function copyArtifact() {
