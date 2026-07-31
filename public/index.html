@@ -1236,13 +1236,164 @@
 
         .logo-mark {
             display: inline-block;
-            vertical-align: -6px;
+            vertical-align: middle;
+            flex-shrink: 0;
+            color: #111111;
+        }
+        .logo-mark--sm { width: 28px; height: 28px; }
+        .logo-mark--lg { width: 36px; height: 36px; }
+        .logo-mark--nav { width: 30px; height: 30px; }
+        .logo-mark--chat { width: 18px; height: 18px; color: #ffffff; }
+
+        /* Dark mode */
+        body.theme-dark {
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+        }
+        body.theme-dark .logo-mark { color: #ffffff; }
+        body.theme-dark .logo-mark--chat { color: #ffffff; }
+        body:not(.theme-dark) .logo-mark { color: #111111; }
+        /* Intro is always dark — logo white there */
+        #intro-page-screen .logo-mark { color: #ffffff !important; }
+
+        body.theme-dark #workspace-screen { background-color: #0a0a0a; color: #f0f0f0; }
+        body.theme-dark .sidebar {
+            background-color: #111113;
+            border-right-color: #222;
+        }
+        body.theme-dark .nav-item { color: #aaa; }
+        body.theme-dark .nav-item:hover,
+        body.theme-dark .nav-item.active {
+            background-color: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+        body.theme-dark .sidebar-section-label { color: #666; }
+        body.theme-dark .recent-chat-item { color: #ccc; }
+        body.theme-dark .recent-chat-item:hover,
+        body.theme-dark .recent-chat-item.active-chat {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+        body.theme-dark .recent-empty { color: #555; }
+        body.theme-dark .sidebar-bottom { border-top-color: #222; }
+        body.theme-dark .profile-name { color: #f0f0f0; }
+        body.theme-dark .profile-email { color: #888; }
+        body.theme-dark .profile-block:hover { background: rgba(255,255,255,0.06); }
+        body.theme-dark .main-workspace {
+            background-image: radial-gradient(circle at 50% 30%, rgba(99,102,241,0.08), transparent 60%);
+        }
+        body.theme-dark .badge-tier {
+            background: #1a1a1f;
+            border-color: #333;
+            color: #aaa;
+        }
+        body.theme-dark .btn-upgrade-top {
+            border-color: rgba(255,255,255,0.25);
+            color: #eee;
+        }
+        body.theme-dark .btn-upgrade-top:hover {
+            background: #fff;
+            color: #111;
+        }
+        body.theme-dark .greeting-header-title { color: #f0f0f0; }
+        body.theme-dark .master-prompt-enclosure {
+            background: #161618;
+            border-color: #2a2a2e;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        body.theme-dark .master-prompt-enclosure textarea { color: #f0f0f0; }
+        body.theme-dark .prompt-controls-dock { border-top-color: #2a2a2e; }
+        body.theme-dark .action-icon-node {
+            background: #1e1e22;
+            border-color: #333;
+            color: #aaa;
+        }
+        body.theme-dark .action-icon-node:hover {
+            background: #2a2a30;
+            color: #fff;
+        }
+        body.theme-dark .engine-picker-selector {
+            background: #1e1e22;
+            border-color: #333;
+            color: #aaa;
+        }
+        body.theme-dark .btn-prompt-deliver {
+            background: #2a2a30;
+            color: #666;
+        }
+        body.theme-dark .btn-prompt-deliver.active-ready {
+            background: #4f46e5;
+            color: #fff;
+        }
+        body.theme-dark .console-text-payload { color: #ddd; }
+        body.theme-dark .console-text-payload strong { color: #fff; }
+        body.theme-dark .msg-inline-code {
+            background: #1e1e22;
+            border-color: #333;
+            color: #eee;
+        }
+        body.theme-dark .msg-action-btn {
+            background: #1e1e22;
+            border-color: #333;
+            color: #aaa;
+        }
+        body.theme-dark .msg-action-btn:hover {
+            background: #2a2a30;
+            color: #fff;
+        }
+        body.theme-dark .attach-menu {
+            background: #161618;
+            border-color: #333;
+        }
+        body.theme-dark .attach-menu-item { color: #ddd; }
+        body.theme-dark .attach-menu-item:hover { background: #222; }
+        body.theme-dark .user-avatar-bubble { background: #333; }
+        body.theme-dark .artifact-panel { border-left-color: #222; }
+        body.theme-dark #landing-page-screen { background-color: #0a0a0a; }
+        body.theme-dark .landing-navbar {
+            border-bottom-color: #222;
+        }
+        body.theme-dark .landing-logo { color: #fff; }
+        body.theme-dark .landing-nav-links { color: #aaa; }
+        body.theme-dark .auth-card {
+            background: #161618;
+            border-color: #2a2a2e;
+        }
+        body.theme-dark .auth-tab-btn { color: #888; }
+        body.theme-dark .auth-tab-btn.active {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+        body.theme-dark .input-group input {
+            background: #0f0f12;
+            border-color: #333;
+            color: #f0f0f0;
+        }
+        body.theme-dark .preview-showcase-box {
+            background: #161618;
+            border-color: #2a2a2e;
+        }
+        body.theme-dark .preview-showcase-title { color: #f0f0f0; }
+        body.theme-dark .preview-showcase-logo { color: #fff; }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid rgba(128,128,128,0.35);
+            color: inherit;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
             flex-shrink: 0;
         }
-        .logo-mark--sm { width: 24px; height: 24px; }
-        .logo-mark--lg { width: 28px; height: 28px; vertical-align: -7px; }
-        .logo-mark--nav { width: 26px; height: 26px; vertical-align: 0; }
-        .logo-mark--chat { width: 20px; height: 20px; vertical-align: 0; }
+        .theme-toggle-btn:hover {
+            background: rgba(128,128,128,0.12);
+        }
 
         #chat-container::-webkit-scrollbar { width: 6px; }
         #chat-container::-webkit-scrollbar-thumb {
@@ -1265,46 +1416,24 @@
 </head>
 <body>
 
-    <!-- SCRIBE LOGO — modern indigo pen mark -->
-    <svg width="0" height="0" style="position:absolute;">
-        <defs>
-            <linearGradient id="scribeLogoGrad" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stop-color="#6366f1"/>
-                <stop offset="0.5" stop-color="#4f46e5"/>
-                <stop offset="1" stop-color="#312e81"/>
-            </linearGradient>
-            <linearGradient id="scribeLogoShine" x1="0" y1="0" x2="40" y2="20" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
-                <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-            </linearGradient>
-            <symbol id="scribe-logo-mark" viewBox="0 0 40 40">
-                <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#scribeLogoGrad)"/>
-                <rect x="1" y="1" width="38" height="16" rx="12" fill="url(#scribeLogoShine)"/>
-                <!-- pen nib / scribe stroke -->
-                <path d="M12 28 L18 14 L22 14 L28 28"
-                      fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.5 22 H24.5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-                <circle cx="20" cy="11" r="2" fill="white" fill-opacity="0.95"/>
-            </symbol>
-        </defs>
+    <!-- LOGO: letter S with diagonal slash (bullet-through, like Ø) -->
+    <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
+        <symbol id="scribe-logo-mark" viewBox="0 0 40 40">
+            <text x="20" y="30" text-anchor="middle"
+                  font-family="Georgia, 'Times New Roman', Times, serif"
+                  font-size="34" font-weight="700" fill="currentColor">S</text>
+            <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+        </symbol>
     </svg>
 
     <!-- SCREEN 0: DARK MARKETING INTRO PAGE -->
     <div id="intro-page-screen">
         <header class="intro-navbar">
             <div class="intro-logo">
-                <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="lg1" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                            <stop offset="0" stop-color="#6366f1"/><stop offset="0.5" stop-color="#4f46e5"/><stop offset="1" stop-color="#312e81"/>
-                        </linearGradient>
-                    </defs>
-                    <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#lg1)"/>
-                    <path d="M12 28 L18 14 L22 14 L28 28" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M15.5 22 H24.5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-                    <circle cx="20" cy="11" r="2" fill="white"/>
+                <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-label="Logo">
+                    <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
                 </svg>
-                <span>Scribe AI</span>
             </div>
             <div class="intro-nav-links">
                 <span class="link-btn" onclick="toggleAboutModal()">About</span>
@@ -1312,6 +1441,7 @@
                 <span class="link-btn" onclick="toggleTermsModal()">Terms</span>
                 <span class="link-btn" onclick="toggleContactModal()">Contact</span>
                 <span class="link-btn" onclick="togglePricingModal()">Pricing</span>
+                <button type="button" class="theme-toggle-btn" title="Dark / Light" onclick="toggleTheme()" style="border-color:rgba(255,255,255,0.25);color:#fff;">🌙</button>
                 <button class="btn-try-intro" onclick="goToAuthScreen()">Try Scribe</button>
             </div>
         </header>
@@ -1350,14 +1480,18 @@
 
     <!-- SCREEN 1: LANDING / AUTH PAGE -->
     <div id="landing-page-screen">
-        <div class="corner-rail on-light" onclick="location.reload()" title="Scribe AI">
-            <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
-            <span class="crail-txt">Scribe AI</span>
+        <div class="corner-rail on-light" onclick="location.reload()" title="Home">
+            <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
         </div>
         <header class="landing-navbar">
             <div class="landing-logo">
-                <svg class="logo-mark logo-mark--sm"><use href="#scribe-logo-mark"></use></svg>
-                <span>Scribe AI</span>
+                <svg class="logo-mark logo-mark--sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
             </div>
             <div class="landing-nav-links">
                 <span onclick="toggleAboutModal()">About</span>
@@ -1401,8 +1535,10 @@
             <div class="hero-right">
                 <div class="preview-showcase-box">
                     <div class="preview-showcase-logo">
-                        <svg class="logo-mark logo-mark--lg"><use href="#scribe-logo-mark"></use></svg>
-                        <span>Scribe AI</span>
+                        <svg class="logo-mark logo-mark--lg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
                     </div>
                     <h2 class="preview-showcase-title" id="preview-showcase-title-text"></h2>
                 </div>
@@ -1415,19 +1551,11 @@
         <div style="display: flex; width: 100%; height: 100vh;">
             <aside class="sidebar">
                 <div class="sidebar-top">
-                    <div class="nav-logo" title="Scribe AI" onclick="resetDashboardView()">
+                    <div class="nav-logo" title="Home" onclick="resetDashboardView()">
                         <svg class="logo-mark logo-mark--nav" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="lg2" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                                    <stop offset="0" stop-color="#6366f1"/><stop offset="0.5" stop-color="#4f46e5"/><stop offset="1" stop-color="#312e81"/>
-                                </linearGradient>
-                            </defs>
-                            <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#lg2)"/>
-                            <path d="M12 28 L18 14 L22 14 L28 28" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M15.5 22 H24.5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-                            <circle cx="20" cy="11" r="2" fill="white"/>
+                            <text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
                         </svg>
-                        <span class="nav-logo-text">Scribe AI</span>
                     </div>
                     <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
                         <span class="icon">➕</span><span class="label">New Chat</span>
@@ -1455,6 +1583,7 @@
                 <header class="top-subnav">
                     <span class="badge-tier">Free Trial</span>
                     <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
+                    <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Dark / Light mode" onclick="toggleTheme()">🌙</button>
                 </header>
 
                 <div class="workspace-split">
@@ -1765,7 +1894,23 @@
         animateWords(document.getElementById('intro-headline-text'), 'Write faster, | think clearer');
         animateWords(document.getElementById('preview-showcase-title-text'), 'Scribe handles your everyday tasks');
 
+        function applyTheme(isDark) {
+            document.body.classList.toggle('theme-dark', isDark);
+            document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+                btn.textContent = isDark ? '☀️' : '🌙';
+                btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+            });
+            safeStorage.setItem('scribe_theme', isDark ? 'dark' : 'light');
+        }
+
+        function toggleTheme() {
+            applyTheme(!document.body.classList.contains('theme-dark'));
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = safeStorage.getItem('scribe_theme');
+            applyTheme(savedTheme === 'dark');
+
             const savedSession = safeStorage.getItem('user_session');
             if (savedSession) {
                 try {
@@ -1949,7 +2094,8 @@
                 } else {
                     const boxId = 'hist-ai-' + i + '-' + Date.now();
                     chatConsole.insertAdjacentHTML('beforeend',
-                        `<div class="console-stream-row"><div class="console-avatar-bubble"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
+                        `<div class="console-stream-row"><div class="console-avatar-bubble"><svg class="logo-mark logo-mark--chat" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
                 }
             });
             chatConsole.scrollTop = chatConsole.scrollHeight;
@@ -2575,7 +2721,8 @@
 
             const targetId = 'ai-chunk-' + Date.now();
             const avatarId = targetId + '-avatar';
-            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><svg class="logo-mark logo-mark--chat"><use href="#scribe-logo-mark"></use></svg></div><div class="console-text-payload" id="${targetId}">Scribe AI is thinking...</div></div>`;
+            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><svg class="logo-mark logo-mark--chat" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><text x="20" y="30" text-anchor="middle" font-family="Georgia, Times New Roman, Times, serif" font-size="34" font-weight="700" fill="currentColor">S</text>
+                    <line x1="8" y1="32" x2="32" y2="8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div><div class="console-text-payload" id="${targetId}">Thinking...</div></div>`;
             chatConsole.insertAdjacentHTML('beforeend', aiHtml);
             chatConsole.scrollTop = chatConsole.scrollHeight;
 
