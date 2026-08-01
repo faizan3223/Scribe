@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta property="og:title" content="Scribe AI">
+    <meta property="og:description" content="Write faster, think clearer — your AI writing workspace.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230a0a0a' width='32' height='32' rx='8'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='20' font-weight='700' fill='%23fff'%3ES%3C/text%3E%3Cline x1='6' y1='26' x2='26' y2='6' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
     <title>Scribe AI Workspace</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437"
-     crossorigin="anonymous"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -1603,6 +1606,312 @@
             .intro-navbar, .landing-navbar { padding: 0 16px; }
             .intro-nav-links { gap: 12px; font-size: 13px; }
         }
+
+        /* ---- Claude-level polish ---- */
+        .starters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 640px;
+            width: 100%;
+            margin: 0 auto 28px;
+        }
+        .starter-card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 14px;
+            padding: 14px 16px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: #333;
+            line-height: 1.4;
+            transition: border-color .15s, box-shadow .15s, transform .12s;
+            font-family: inherit;
+        }
+        .starter-card:hover {
+            border-color: #c7c7c7;
+            box-shadow: 0 4px 16px rgba(0,0,0,.06);
+            transform: translateY(-1px);
+        }
+        .starter-card .st-icon { margin-right: 6px; }
+        body.theme-dark .starter-card {
+            background: #161618;
+            border-color: #2a2a2e;
+            color: #ddd;
+        }
+        body.theme-dark .starter-card:hover {
+            border-color: #444;
+            box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        }
+        @media (max-width: 600px) {
+            .starters-grid { grid-template-columns: 1fr; }
+        }
+
+        .msg-actions { flex-wrap: wrap; }
+        .skeleton-line {
+            height: 12px;
+            background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+            background-size: 200% 100%;
+            animation: skel 1.2s ease-in-out infinite;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+        body.theme-dark .skeleton-line {
+            background: linear-gradient(90deg, #1e1e22 25%, #2a2a30 50%, #1e1e22 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .btn-stop-gen {
+            display: none;
+            background: #111;
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .btn-stop-gen.visible { display: flex; }
+        body.theme-dark .btn-stop-gen { background: #eee; color: #111; }
+
+        .tone-select {
+            background: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            color: #555;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+            max-width: 120px;
+        }
+        body.theme-dark .tone-select {
+            background: #1e1e22;
+            border-color: #333;
+            color: #aaa;
+        }
+
+        /* Mobile sidebar */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(128,128,128,.35);
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 40;
+        }
+        .sidebar-overlay.open { display: block; }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0; top: 0;
+                height: 100vh;
+                z-index: 50;
+                transform: translateX(-105%);
+                transition: transform .25s ease;
+                box-shadow: 8px 0 32px rgba(0,0,0,.15);
+            }
+            .sidebar.open-mobile { transform: translateX(0); }
+            .mobile-menu-btn { display: flex; }
+            .intro-nav-links .link-btn:nth-child(n+3) { display: none; }
+        }
+
+        /* Projects */
+        .project-item {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #444;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .project-item:hover { background: rgba(0,0,0,.05); color: #111; }
+        .project-item.active-project { background: rgba(79,70,229,.1); color: #4f46e5; font-weight: 600; }
+        body.theme-dark .project-item { color: #ccc; }
+        body.theme-dark .project-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+        body.theme-dark .project-item.active-project { background: rgba(99,102,241,.2); color: #a5b4fc; }
+        .btn-add-project {
+            font-size: 12px;
+            color: #888;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 12px;
+            font-family: inherit;
+        }
+        .btn-add-project:hover { color: #4f46e5; }
+
+        /* Command palette */
+        #cmd-palette-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 12vh;
+        }
+        #cmd-palette-overlay.open { display: flex; }
+        .cmd-palette-box {
+            background: #fff;
+            border-radius: 16px;
+            width: 92%;
+            max-width: 520px;
+            box-shadow: 0 24px 64px rgba(0,0,0,.25);
+            overflow: hidden;
+            border: 1px solid #e5e5e5;
+        }
+        body.theme-dark .cmd-palette-box {
+            background: #161618;
+            border-color: #2a2a2e;
+        }
+        .cmd-palette-box input {
+            width: 100%;
+            padding: 16px 18px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            outline: none;
+            background: transparent;
+            color: inherit;
+            font-family: inherit;
+        }
+        body.theme-dark .cmd-palette-box input { border-bottom-color: #2a2a2e; color: #f0f0f0; }
+        .cmd-list { max-height: 320px; overflow-y: auto; padding: 6px; }
+        .cmd-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+        .cmd-item:hover, .cmd-item.active { background: #f0f0ee; }
+        body.theme-dark .cmd-item { color: #ddd; }
+        body.theme-dark .cmd-item:hover,
+        body.theme-dark .cmd-item.active { background: #222; }
+        .cmd-item .cmd-hint { margin-left: auto; font-size: 11px; color: #999; }
+
+        /* Rewrite floating toolbar */
+        #rewrite-toolbar {
+            display: none;
+            position: fixed;
+            z-index: 150;
+            background: #111;
+            color: #fff;
+            border-radius: 12px;
+            padding: 6px;
+            gap: 4px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.25);
+            align-items: center;
+        }
+        #rewrite-toolbar.visible { display: flex; }
+        #rewrite-toolbar button {
+            background: transparent;
+            border: none;
+            color: #eee;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        #rewrite-toolbar button:hover { background: rgba(255,255,255,.12); }
+
+        /* Custom instructions modal content inputs */
+        .settings-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px 14px;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            background: #16161a;
+            color: #f5f5f5;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .settings-textarea:focus { border-color: #fff; }
+
+        .export-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.1);
+            padding: 6px;
+            z-index: 20;
+            min-width: 160px;
+        }
+        .export-menu.open { display: block; }
+        .export-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            color: #333;
+        }
+        .export-menu button:hover { background: #f0f0ee; }
+        body.theme-dark .export-menu {
+            background: #161618;
+            border-color: #333;
+        }
+        body.theme-dark .export-menu button { color: #ddd; }
+        body.theme-dark .export-menu button:hover { background: #222; }
+
+        .retry-btn {
+            margin-top: 10px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .retry-btn:hover { background: #4338ca; }
+
+        .top-subnav { position: relative; gap: 10px; flex-wrap: wrap; }
+
     </style>
 </head>
 <body>
@@ -1742,9 +2051,20 @@
                     <button type="button" class="nav-item" title="Pricing" onclick="togglePricingModal()">
                         <span class="icon">💳</span><span class="label">Pricing</span>
                     </button>
+                    <button type="button" class="nav-item" title="Custom instructions" onclick="toggleCustomInstructions()">
+                        <span class="icon">⚙️</span><span class="label">Instructions</span>
+                    </button>
+                    <button type="button" class="nav-item" title="Command palette (⌘K)" onclick="openCmdPalette()">
+                        <span class="icon">⌘</span><span class="label">Commands</span>
+                    </button>
                     <input type="text" id="chat-search-input" placeholder="Search chats..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
                 </div>
                 <div class="sidebar-mid">
+                    <div class="sidebar-section-label" style="display:flex;align-items:center;justify-content:space-between;">
+                        <span>Projects</span>
+                        <button type="button" class="btn-add-project" onclick="addProject()" title="New project">+ New</button>
+                    </div>
+                    <div id="projects-list"></div>
                     <div class="sidebar-section-label">Recent chats</div>
                     <div id="recent-chats-list">
                         <div class="recent-empty">No chats yet</div>
@@ -1757,17 +2077,47 @@
 
             <main class="main-workspace" id="main-workspace">
                 <header class="top-subnav">
+                    <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" title="Menu" onclick="toggleMobileSidebar()">☰</button>
                     <span class="badge-tier">Free Trial</span>
                     <span class="incognito-badge" id="incognito-badge">🕶️ Incognito</span>
                     <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
+                    <div style="position:relative;">
+                        <button type="button" class="btn-upgrade-top" onclick="toggleExportMenu(event)" title="Export chat">Export ▾</button>
+                        <div class="export-menu" id="export-menu">
+                            <button type="button" onclick="exportChat('md')">📄 Markdown (.md)</button>
+                            <button type="button" onclick="exportChat('txt')">📝 Plain text</button>
+                            <button type="button" onclick="exportChat('copy')">📋 Copy all</button>
+                        </div>
+                    </div>
                     <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Dark / Light mode" onclick="toggleTheme()">🌙</button>
                 </header>
+                <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
                 <div class="workspace-split">
                     <div class="dashboard-content-stream" id="chat-column">
                         <div id="greeting-banner-hub" class="greeting-header-title">
                             <span class="icon">✨</span>
                             <span id="greeting-txt-hook">What can I help with?</span>
+                        </div>
+                        <div id="starters-wrap" class="starters-grid">
+                            <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Draft a professional email about: ">
+                                <span class="st-icon">✉️</span> Draft a professional email
+                            </button>
+                            <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Explain this concept simply: ">
+                                <span class="st-icon">💡</span> Explain a concept simply
+                            </button>
+                            <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Write clean, commented code for: ">
+                                <span class="st-icon">💻</span> Write code with comments
+                            </button>
+                            <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Summarize the following in bullet points: ">
+                                <span class="st-icon">📋</span> Summarize in bullets
+                            </button>
+                            <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Rewrite this more clearly and professionally: ">
+                                <span class="st-icon">✍️</span> Rewrite more clearly
+                            </button>
+                            <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Urdu mein jawab do: ">
+                                <span class="st-icon">🌐</span> Reply in Urdu
+                            </button>
                         </div>
 
                         <div id="chat-stream-console" class="chat-console-body"></div>
@@ -1784,17 +2134,29 @@
                                             <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
                                             <div class="attach-menu-item" onclick="triggerGenerateImage()">🎨 <span>Generate image</span></div>
                                             <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
+                                            <div class="attach-menu-item" onclick="insertTemplate('email')">✉️ <span>Template: Email</span></div>
+                                            <div class="attach-menu-item" onclick="insertTemplate('blog')">📝 <span>Template: Blog outline</span></div>
+                                            <div class="attach-menu-item" onclick="insertTemplate('cover')">📄 <span>Template: Cover letter</span></div>
                                         </div>
                                     </div>
                                     <input type="file" id="hidden-file-image" accept="image/*" style="display:none;">
                                     <input type="file" id="hidden-file-any" style="display:none;">
-                                    <select class="engine-picker-selector">
-                                        <option>Scribe Ultra (Llama 3.3)</option>
-                                        <option>Analytical Logic Model</option>
+                                    <select class="engine-picker-selector" id="engine-picker">
+                                        <option value="ultra">Scribe Ultra</option>
+                                        <option value="logic">Analytical Logic</option>
+                                    </select>
+                                    <select class="tone-select" id="tone-select" title="Writing tone">
+                                        <option value="default">Tone: Default</option>
+                                        <option value="formal">Formal</option>
+                                        <option value="casual">Casual</option>
+                                        <option value="persuasive">Persuasive</option>
+                                        <option value="simple">Simple</option>
+                                        <option value="urdu">Urdu style</option>
                                     </select>
                                 </div>
                                 <div class="controls-right-group">
                                     <div class="action-icon-node" id="mic-btn" title="Voice input">🎙️</div>
+                                    <button type="button" id="stop-gen-btn" class="btn-stop-gen" title="Stop generating" onclick="stopGenerating()">⏹</button>
                                     <button id="submit-prompt-btn" class="btn-prompt-deliver">➤</button>
                                 </div>
                             </div>
@@ -2343,6 +2705,7 @@
             applyScribeLogos();
             configureGreetingBanner();
             renderRecentChats();
+            renderProjects();
         }
 
         function configureGreetingBanner() {
@@ -2424,6 +2787,8 @@
             currentChatMessages = chat.messages || [];
 
             greetingBanner.style.display = 'none';
+            const sw = document.getElementById('starters-wrap');
+            if (sw) sw.style.display = 'none';
             chatConsole.style.display = 'flex';
             chatConsole.innerHTML = '';
 
@@ -2477,6 +2842,18 @@
                 }
             }
             saveChatHistory(chats);
+            // attach chat to active project
+            if (currentProjectId && currentChatId) {
+                const projects = getProjects();
+                const pi = projects.findIndex(p => p.id === currentProjectId);
+                if (pi >= 0) {
+                    const ids = projects[pi].chatIds || [];
+                    if (!ids.includes(currentChatId)) {
+                        projects[pi].chatIds = [currentChatId].concat(ids).slice(0, 50);
+                        saveProjects(projects);
+                    }
+                }
+            }
             renderRecentChats();
         }
 
@@ -2501,8 +2878,11 @@
             currentChatId = null;
             currentChatMessages = [];
             closeArtifact();
+            const starters = document.getElementById('starters-wrap');
+            if (starters) starters.style.display = 'grid';
             if (!keepIncognitoMsg) configureGreetingBanner();
             renderRecentChats();
+            renderProjects();
         }
 
         // Attach menu
@@ -3023,7 +3403,44 @@
                 return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:20px;background:#0f0f12;color:#e8e8ec} #out{white-space:pre-wrap;background:#1a1a1f;padding:14px;border-radius:10px;border:1px solid #2a2a30;min-height:80px}</style></head><body>
                     <h3 style="margin:0 0 12px">JS Preview</h3>
                     <div id="out">Running…</div>
-                    <script>
+                
+    <!-- CUSTOM INSTRUCTIONS MODAL -->
+    <div id="instructions-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleCustomInstructions()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Custom instructions</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Scribe will follow these in every chat (saved on this device).</p>
+            <div class="contact-form-group">
+                <label>What should Scribe know about you?</label>
+                <textarea class="settings-textarea" id="instr-about" placeholder="e.g. I'm a student in Pakistan, prefer short answers, write code in Python..."></textarea>
+            </div>
+            <div class="contact-form-group">
+                <label>How should Scribe respond?</label>
+                <textarea class="settings-textarea" id="instr-style" placeholder="e.g. Always use bullet points. Be direct. Reply in Urdu when asked..."></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="saveCustomInstructions()">Save instructions</button>
+            <p id="instr-saved-msg" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Saved.</p>
+        </div>
+    </div>
+
+    <!-- COMMAND PALETTE -->
+    <div id="cmd-palette-overlay" onclick="if(event.target===this)closeCmdPalette()">
+        <div class="cmd-palette-box">
+            <input type="text" id="cmd-palette-input" placeholder="Type a command…" autocomplete="off">
+            <div class="cmd-list" id="cmd-list"></div>
+        </div>
+    </div>
+
+    <!-- REWRITE FLOATING TOOLBAR -->
+    <div id="rewrite-toolbar">
+        <button type="button" onclick="rewriteSelection('shorten')">Shorten</button>
+        <button type="button" onclick="rewriteSelection('expand')">Expand</button>
+        <button type="button" onclick="rewriteSelection('formal')">Formal</button>
+        <button type="button" onclick="rewriteSelection('simple')">Simplify</button>
+        <button type="button" onclick="rewriteSelection('urdu')">Urdu</button>
+    </div>
+
+    <script>
                     (function(){
                         const out = document.getElementById('out');
                         const log = (...a) => { out.textContent += a.map(x => typeof x === 'object' ? JSON.stringify(x,null,2) : String(x)).join(' ') + '\\n'; };
@@ -3128,13 +3545,15 @@
             URL.revokeObjectURL(a.href);
         }
 
-        function buildAiMessageHtml(rawText, boxId) {
+        function buildAiMessageHtml(rawText, boxId, userPrompt) {
             const body = formatMessageHtml(rawText);
-            const safeAttr = escapeHtml(rawText).replace(/'/g, '&#39;');
+            const safePrompt = escapeHtml(userPrompt || '').replace(/'/g, '&#39;');
             return `${body}
                 <div class="msg-actions">
                     <button type="button" class="msg-action-btn" onclick="speakText(document.getElementById('${boxId}').dataset.speak || '')">🔊 Suno</button>
-                    <button type="button" class="msg-action-btn" onclick="navigator.clipboard.writeText(document.getElementById('${boxId}').dataset.speak || '')">Copy answer</button>
+                    <button type="button" class="msg-action-btn" onclick="navigator.clipboard.writeText(document.getElementById('${boxId}').dataset.speak || '')">Copy</button>
+                    <button type="button" class="msg-action-btn" onclick="regenerateFromBox('${boxId}')">↻ Regenerate</button>
+                    <button type="button" class="msg-action-btn" onclick="editLastUserPrompt('${safePrompt}')">✏️ Edit</button>
                 </div>`;
         }
 
@@ -3192,77 +3611,153 @@
             document.getElementById('contact-message').value = '';
         }
 
-        async function processPromptSubmission() {
-            const promptPayload = promptInput.value.trim();
-            if (!promptPayload) return;
+        let activeAbort = null;
+        let lastUserPromptForRegen = '';
+        let isGenerating = false;
 
+        function setGeneratingUI(on) {
+            isGenerating = on;
+            const stopBtn = document.getElementById('stop-gen-btn');
+            if (stopBtn) stopBtn.classList.toggle('visible', on);
+            if (submitBtn) submitBtn.style.display = on ? 'none' : '';
+        }
+
+        function stopGenerating() {
+            if (activeAbort) {
+                try { activeAbort.abort(); } catch (e) {}
+                activeAbort = null;
+            }
+            setGeneratingUI(false);
+        }
+
+        function getCustomInstructions() {
+            try {
+                const raw = safeStorage.getItem('scribe_instructions');
+                return raw ? JSON.parse(raw) : { about: '', style: '' };
+            } catch (e) { return { about: '', style: '' }; }
+        }
+
+        function buildSystemContext() {
+            const instr = getCustomInstructions();
+            const tone = (document.getElementById('tone-select') || {}).value || 'default';
+            const parts = [];
+            if (instr.about) parts.push('User context: ' + instr.about);
+            if (instr.style) parts.push('Response style: ' + instr.style);
+            if (tone && tone !== 'default') {
+                const toneMap = {
+                    formal: 'Write in a formal, professional tone.',
+                    casual: 'Write in a casual, friendly tone.',
+                    persuasive: 'Write in a persuasive, compelling tone.',
+                    simple: 'Use simple words and short sentences.',
+                    urdu: 'Prefer Urdu (Roman or Nastaliq) when natural; mix if needed.'
+                };
+                if (toneMap[tone]) parts.push(toneMap[tone]);
+            }
+            return parts.join('\n');
+        }
+
+        function showSkeleton(targetId) {
+            const el = document.getElementById(targetId);
+            if (!el) return;
+            el.innerHTML = '<div class="skeleton-line" style="width:92%"></div><div class="skeleton-line" style="width:78%"></div><div class="skeleton-line" style="width:85%"></div>';
+        }
+
+        function showRetryError(targetId, promptPayload, msg) {
+            const el = document.getElementById(targetId);
+            if (!el) return;
+            el.innerHTML = `<p style="color:#c00;margin:0 0 8px">${escapeHtml(msg || 'Connection lost.')}</p>
+                <button type="button" class="retry-btn" onclick="retryPrompt(${JSON.stringify(promptPayload)})">Retry</button>`;
+        }
+
+        function retryPrompt(text) {
+            promptInput.value = text;
+            processPromptSubmission();
+        }
+
+        async function processPromptSubmission(forcedText, opts) {
+            opts = opts || {};
+            const promptPayload = (typeof forcedText === 'string' ? forcedText : promptInput.value).trim();
+            if (!promptPayload || isGenerating) return;
+
+            lastUserPromptForRegen = promptPayload;
+            const starters = document.getElementById('starters-wrap');
+            if (starters) starters.style.display = 'none';
             greetingBanner.style.display = 'none';
             chatConsole.style.display = 'flex';
 
-            const userInitial = (currentNickname || currentUserEmail || 'U').trim().charAt(0).toUpperCase();
-            let attachmentsHtml = '';
-            if (pendingAttachments.length) {
-                attachmentsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;justify-content:flex-end;">' +
-                    pendingAttachments.map(a => a.isImage && a.url
-                        ? `<img src="${a.url}" style="width:90px;height:90px;border-radius:10px;object-fit:cover;">`
-                        : a.isVideo
-                        ? `<video src="${a.url}" style="width:160px;border-radius:10px;" controls loop data-narrate="${(a.promptText || '').replace(/"/g, '&quot;')}"></video>`
-                        : `<span style="font-size:12px;background:#e5e5e5;padding:4px 8px;border-radius:8px;">📄 ${a.name}</span>`
-                    ).join('') + '</div>';
+            if (!opts.skipUserBubble) {
+                const userInitial = (currentNickname || currentUserEmail || 'U').trim().charAt(0).toUpperCase();
+                let attachmentsHtml = '';
+                if (pendingAttachments.length) {
+                    attachmentsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;justify-content:flex-end;">' +
+                        pendingAttachments.map(a => a.isImage && a.url
+                            ? `<img src="${a.url}" style="width:90px;height:90px;border-radius:10px;object-fit:cover;">`
+                            : a.isVideo
+                            ? `<video src="${a.url}" style="width:160px;border-radius:10px;" controls loop data-narrate="${(a.promptText || '').replace(/"/g, '&quot;')}"></video>`
+                            : `<span style="font-size:12px;background:#e5e5e5;padding:4px 8px;border-radius:8px;">📄 ${escapeHtml(a.name)}</span>`
+                        ).join('') + '</div>';
+                }
+
+                const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${escapeHtml(promptPayload)}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
+                chatConsole.insertAdjacentHTML('beforeend', userHtml);
+                wireVoiceOnPlay(chatConsole);
             }
 
-            const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${promptPayload}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
-            chatConsole.insertAdjacentHTML('beforeend', userHtml);
-            wireVoiceOnPlay(chatConsole);
-
-            promptInput.value = '';
-            submitBtn.classList.remove('active-ready');
-            promptInput.style.height = '50px';
+            if (typeof forcedText !== 'string') {
+                promptInput.value = '';
+                submitBtn.classList.remove('active-ready');
+                promptInput.style.height = '50px';
+            }
             pendingAttachments = [];
             renderAttachmentPreviews();
             chatConsole.scrollTop = chatConsole.scrollHeight;
 
             const targetId = 'ai-chunk-' + Date.now();
             const avatarId = targetId + '-avatar';
-            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scribe" data-scribe-logo></div><div class="console-text-payload" id="${targetId}">Thinking...</div></div>`;
+            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scribe" data-scribe-logo></div><div class="console-text-payload" id="${targetId}"></div></div>`;
             chatConsole.insertAdjacentHTML('beforeend', aiHtml);
+            showSkeleton(targetId);
             chatConsole.scrollTop = chatConsole.scrollHeight;
 
             const targetOutputBox = document.getElementById(targetId);
             const avatarNode = document.getElementById(avatarId);
 
+            activeAbort = new AbortController();
+            setGeneratingUI(true);
+
+            const systemCtx = buildSystemContext();
+            const question = systemCtx ? systemCtx + '\n\nUser: ' + promptPayload : promptPayload;
+
             try {
                 const response = await fetch(`${workerURL}/api/ask-question`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: promptPayload })
+                    body: JSON.stringify({ question, tone: (document.getElementById('tone-select')||{}).value, instructions: getCustomInstructions() }),
+                    signal: activeAbort.signal
                 });
 
-                if (!response.ok) throw new Error("Server rejected request");
+                if (!response.ok) throw new Error('Server rejected request');
 
-                avatarNode.classList.remove('thinking');
+                if (avatarNode) avatarNode.classList.remove('thinking');
                 targetOutputBox.textContent = '';
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let aiResponseText = "";
+                let aiResponseText = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
                     const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split("\n");
-
+                    const lines = chunk.split('\n');
                     for (const line of lines) {
-                        if (line.startsWith("data: ")) {
+                        if (line.startsWith('data: ')) {
                             const dataStr = line.slice(6).trim();
-                            if (dataStr === "[DONE]") continue;
+                            if (dataStr === '[DONE]') continue;
                             try {
                                 const parsed = JSON.parse(dataStr);
                                 if (parsed.text) {
                                     aiResponseText += parsed.text;
-                                    // live stream as plain text; format when complete
                                     targetOutputBox.textContent = aiResponseText;
                                     chatConsole.scrollTop = chatConsole.scrollHeight;
                                 }
@@ -3274,27 +3769,333 @@
                 if (aiResponseText) {
                     window._pendingArtifact = null;
                     targetOutputBox.dataset.speak = aiResponseText;
-                    targetOutputBox.innerHTML = buildAiMessageHtml(aiResponseText, targetId);
+                    targetOutputBox.dataset.userPrompt = promptPayload;
+                    targetOutputBox.innerHTML = buildAiMessageHtml(aiResponseText, targetId, promptPayload);
                     if (window._pendingArtifact && window._pendingArtifact.code) {
-                        openArtifact(
-                            window._pendingArtifact.code,
-                            window._pendingArtifact.lang,
-                            window._pendingArtifact.ext
-                        );
+                        openArtifact(window._pendingArtifact.code, window._pendingArtifact.lang, window._pendingArtifact.ext);
                     }
                     persistCurrentChat(promptPayload, aiResponseText);
+                    // light memory: remember preferred tone if set
+                    try {
+                        const mem = JSON.parse(safeStorage.getItem('scribe_memory') || '{}');
+                        const t = (document.getElementById('tone-select')||{}).value;
+                        if (t && t !== 'default') mem.lastTone = t;
+                        if (currentNickname) mem.nickname = currentNickname;
+                        safeStorage.setItem('scribe_memory', JSON.stringify(mem));
+                    } catch (e) {}
                 } else {
-                    targetOutputBox.textContent = "Error compiling model response.";
-                    persistCurrentChat(promptPayload, "Error compiling model response.");
+                    showRetryError(targetId, promptPayload, 'Empty response from model.');
+                    persistCurrentChat(promptPayload, 'Empty response from model.');
                 }
             } catch (err) {
-                avatarNode.classList.remove('thinking');
-                const errMsg = "Connection lost with background server.";
-                targetOutputBox.textContent = errMsg;
-                persistCurrentChat(promptPayload, errMsg);
+                if (avatarNode) avatarNode.classList.remove('thinking');
+                if (err && err.name === 'AbortError') {
+                    targetOutputBox.innerHTML = (targetOutputBox.textContent || '') + '<p style="color:#888;font-size:13px;margin-top:8px"><em>Stopped.</em></p>';
+                    if (targetOutputBox.textContent) {
+                        const partial = targetOutputBox.dataset.speak || targetOutputBox.textContent;
+                        targetOutputBox.dataset.speak = partial;
+                    }
+                } else {
+                    showRetryError(targetId, promptPayload, 'Connection lost with server. Check network or try again.');
+                    persistCurrentChat(promptPayload, 'Connection lost with background server.');
+                }
+            } finally {
+                setGeneratingUI(false);
+                activeAbort = null;
             }
             chatConsole.scrollTop = chatConsole.scrollHeight;
         }
+
+        function regenerateFromBox(boxId) {
+            const box = document.getElementById(boxId);
+            const prompt = (box && (box.dataset.userPrompt || lastUserPromptForRegen)) || lastUserPromptForRegen;
+            if (!prompt) return;
+            const row = box && box.closest('.console-stream-row');
+            if (row) row.remove();
+            // Re-run without adding another user bubble
+            processPromptSubmission(prompt, { skipUserBubble: true });
+        }
+
+        function editLastUserPrompt(prompt) {
+            promptInput.value = prompt || lastUserPromptForRegen || '';
+            promptInput.focus();
+            promptInput.dispatchEvent(new Event('input'));
+        }
+
+
+        // ---- Starters ----
+        function useStarter(btn) {
+            const p = btn.getAttribute('data-prompt') || '';
+            promptInput.value = p;
+            promptInput.focus();
+            promptInput.dispatchEvent(new Event('input'));
+            // place cursor at end
+            promptInput.selectionStart = promptInput.selectionEnd = promptInput.value.length;
+        }
+
+        function insertTemplate(kind) {
+            const templates = {
+                email: 'Write a professional email.\nTo: \nSubject: \nGoal: \nTone: polite and clear\n\nKey points:\n- ',
+                blog: 'Create a blog outline.\nTitle: \nAudience: \nMain sections:\n1. Introduction\n2. \n3. \n4. Conclusion\n\nInclude SEO-friendly subheadings.',
+                cover: 'Write a cover letter.\nRole: \nCompany: \nMy background: \nWhy I fit: \nTone: confident but humble'
+            };
+            const t = templates[kind];
+            if (!t) return;
+            const menu = document.getElementById('attach-menu');
+            if (menu) menu.classList.remove('open');
+            promptInput.value = t;
+            promptInput.focus();
+            promptInput.dispatchEvent(new Event('input'));
+        }
+
+        // ---- Projects ----
+        let currentProjectId = null;
+
+        function getProjects() {
+            try {
+                return JSON.parse(safeStorage.getItem('scribe_projects') || '[]');
+            } catch (e) { return []; }
+        }
+        function saveProjects(list) {
+            safeStorage.setItem('scribe_projects', JSON.stringify(list.slice(0, 30)));
+        }
+        function renderProjects() {
+            const el = document.getElementById('projects-list');
+            if (!el) return;
+            const projects = getProjects();
+            if (!projects.length) {
+                el.innerHTML = '<div class="recent-empty" style="font-size:12px">No projects yet</div>';
+                return;
+            }
+            el.innerHTML = projects.map(p => `
+                <button type="button" class="project-item ${p.id === currentProjectId ? 'active-project' : ''}"
+                    onclick="selectProject('${p.id}')" title="${escapeHtml(p.name)}">
+                    📁 ${escapeHtml(p.name)}
+                </button>`).join('');
+        }
+        function addProject() {
+            const name = prompt('Project name:');
+            if (!name || !name.trim()) return;
+            const projects = getProjects();
+            const id = 'proj_' + Date.now();
+            projects.unshift({ id, name: name.trim(), chatIds: [] });
+            saveProjects(projects);
+            currentProjectId = id;
+            renderProjects();
+        }
+        function selectProject(id) {
+            currentProjectId = id === currentProjectId ? null : id;
+            renderProjects();
+            // filter chats belonging to project
+            const projects = getProjects();
+            const proj = projects.find(p => p.id === id);
+            if (!proj || currentProjectId === null) {
+                renderRecentChats();
+                return;
+            }
+            const listEl = document.getElementById('recent-chats-list');
+            const chats = getChatHistory().filter(c => (proj.chatIds || []).includes(c.id));
+            if (!chats.length) {
+                listEl.innerHTML = '<div class="recent-empty">No chats in this project</div>';
+                return;
+            }
+            listEl.innerHTML = chats.map(c => `
+                <button type="button" class="recent-chat-item ${c.id === currentChatId ? 'active-chat' : ''}"
+                    onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
+                    ${c.title || 'Untitled chat'}
+                </button>`).join('');
+        }
+
+        // Hook project into persist - wrap after save
+        const _origPersist = typeof persistCurrentChat === 'function' ? persistCurrentChat : null;
+
+        // ---- Custom instructions ----
+        function toggleCustomInstructions() {
+            const card = document.getElementById('instructions-popup-card');
+            if (!card) return;
+            const open = card.style.display === 'flex';
+            card.style.display = open ? 'none' : 'flex';
+            if (!open) {
+                const instr = getCustomInstructions();
+                const a = document.getElementById('instr-about');
+                const s = document.getElementById('instr-style');
+                if (a) a.value = instr.about || '';
+                if (s) s.value = instr.style || '';
+                const msg = document.getElementById('instr-saved-msg');
+                if (msg) msg.style.display = 'none';
+            }
+        }
+        function saveCustomInstructions() {
+            const about = (document.getElementById('instr-about') || {}).value || '';
+            const style = (document.getElementById('instr-style') || {}).value || '';
+            safeStorage.setItem('scribe_instructions', JSON.stringify({ about: about.trim(), style: style.trim() }));
+            const msg = document.getElementById('instr-saved-msg');
+            if (msg) { msg.style.display = 'block'; setTimeout(() => msg.style.display = 'none', 2000); }
+        }
+
+        // ---- Mobile sidebar ----
+        function toggleMobileSidebar() {
+            const sb = document.querySelector('.sidebar');
+            const ov = document.getElementById('sidebar-overlay');
+            if (!sb) return;
+            const open = sb.classList.toggle('open-mobile');
+            if (ov) ov.classList.toggle('open', open);
+        }
+        function closeMobileSidebar() {
+            const sb = document.querySelector('.sidebar');
+            const ov = document.getElementById('sidebar-overlay');
+            if (sb) sb.classList.remove('open-mobile');
+            if (ov) ov.classList.remove('open');
+        }
+
+        // ---- Export ----
+        function toggleExportMenu(e) {
+            if (e) e.stopPropagation();
+            const m = document.getElementById('export-menu');
+            if (m) m.classList.toggle('open');
+        }
+        document.addEventListener('click', () => {
+            const m = document.getElementById('export-menu');
+            if (m) m.classList.remove('open');
+        });
+        function exportChat(kind) {
+            const m = document.getElementById('export-menu');
+            if (m) m.classList.remove('open');
+            const msgs = currentChatMessages || [];
+            if (!msgs.length) { alert('No messages to export yet.'); return; }
+            let text = '# Scribe AI Chat\n\n';
+            msgs.forEach(msg => {
+                const role = msg.role === 'user' ? '**You**' : '**Scribe**';
+                text += role + '\n\n' + (msg.text || '') + '\n\n---\n\n';
+            });
+            if (kind === 'copy') {
+                navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard')).catch(() => {});
+                return;
+            }
+            const ext = kind === 'md' ? 'md' : 'txt';
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'scribe-chat.' + ext;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // ---- Command palette ----
+        const CMD_ITEMS = [
+            { id: 'new', label: 'New chat', hint: 'N', run: () => { startNewChat(); closeCmdPalette(); } },
+            { id: 'incognito', label: 'Toggle Incognito', hint: 'I', run: () => { toggleIncognito(); closeCmdPalette(); } },
+            { id: 'theme', label: 'Toggle dark / light', hint: 'T', run: () => { toggleTheme(); closeCmdPalette(); } },
+            { id: 'instr', label: 'Custom instructions', hint: '', run: () => { closeCmdPalette(); toggleCustomInstructions(); } },
+            { id: 'pricing', label: 'Pricing', hint: '', run: () => { closeCmdPalette(); togglePricingModal(); } },
+            { id: 'search', label: 'Search chats', hint: '/', run: () => { closeCmdPalette(); toggleChatSearch(); } },
+            { id: 'export', label: 'Export as Markdown', hint: '', run: () => { closeCmdPalette(); exportChat('md'); } },
+            { id: 'project', label: 'New project', hint: '', run: () => { closeCmdPalette(); addProject(); } },
+        ];
+        let cmdActiveIdx = 0;
+
+        function openCmdPalette() {
+            const ov = document.getElementById('cmd-palette-overlay');
+            if (!ov) return;
+            ov.classList.add('open');
+            const input = document.getElementById('cmd-palette-input');
+            if (input) { input.value = ''; input.focus(); }
+            renderCmdList('');
+        }
+        function closeCmdPalette() {
+            const ov = document.getElementById('cmd-palette-overlay');
+            if (ov) ov.classList.remove('open');
+        }
+        function renderCmdList(q) {
+            const list = document.getElementById('cmd-list');
+            if (!list) return;
+            const qq = (q || '').toLowerCase();
+            const items = CMD_ITEMS.filter(c => !qq || c.label.toLowerCase().includes(qq));
+            cmdActiveIdx = 0;
+            list.innerHTML = items.map((c, i) => `
+                <div class="cmd-item ${i===0?'active':''}" data-idx="${i}" onclick="CMD_ITEMS.find(x=>x.id==='${c.id}').run()">
+                    <span>${c.label}</span>
+                    <span class="cmd-hint">${c.hint || ''}</span>
+                </div>`).join('') || '<div class="cmd-item">No commands</div>';
+            list._filtered = items;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('cmd-palette-input');
+            if (input) {
+                input.addEventListener('input', () => renderCmdList(input.value));
+                input.addEventListener('keydown', (e) => {
+                    const list = document.getElementById('cmd-list');
+                    const items = (list && list._filtered) || CMD_ITEMS;
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        cmdActiveIdx = Math.min(cmdActiveIdx + 1, items.length - 1);
+                        [...list.querySelectorAll('.cmd-item')].forEach((el, i) => el.classList.toggle('active', i === cmdActiveIdx));
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        cmdActiveIdx = Math.max(cmdActiveIdx - 1, 0);
+                        [...list.querySelectorAll('.cmd-item')].forEach((el, i) => el.classList.toggle('active', i === cmdActiveIdx));
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (items[cmdActiveIdx]) items[cmdActiveIdx].run();
+                    } else if (e.key === 'Escape') {
+                        closeCmdPalette();
+                    }
+                });
+            }
+            renderProjects();
+            // restore memory tone
+            try {
+                const mem = JSON.parse(safeStorage.getItem('scribe_memory') || '{}');
+                const tone = document.getElementById('tone-select');
+                if (tone && mem.lastTone) tone.value = mem.lastTone;
+            } catch (e) {}
+        });
+
+        // ---- Rewrite selection toolbar ----
+        let rewriteRange = null;
+        document.addEventListener('mouseup', () => {
+            const sel = window.getSelection();
+            const tb = document.getElementById('rewrite-toolbar');
+            if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+                if (tb) tb.classList.remove('visible');
+                return;
+            }
+            // only inside chat console
+            const node = sel.anchorNode && sel.anchorNode.parentElement;
+            if (!node || !node.closest('#chat-stream-console')) {
+                if (tb) tb.classList.remove('visible');
+                return;
+            }
+            rewriteRange = sel.getRangeAt(0).cloneRange();
+            const rect = sel.getRangeAt(0).getBoundingClientRect();
+            if (tb) {
+                tb.classList.add('visible');
+                tb.style.left = Math.min(window.innerWidth - 320, Math.max(8, rect.left + rect.width / 2 - 140)) + 'px';
+                tb.style.top = Math.max(8, rect.top - 48) + 'px';
+            }
+        });
+        document.addEventListener('mousedown', (e) => {
+            const tb = document.getElementById('rewrite-toolbar');
+            if (tb && !tb.contains(e.target)) tb.classList.remove('visible');
+        });
+
+        function rewriteSelection(mode) {
+            const tb = document.getElementById('rewrite-toolbar');
+            if (tb) tb.classList.remove('visible');
+            const text = rewriteRange ? rewriteRange.toString() : '';
+            if (!text.trim()) return;
+            const prompts = {
+                shorten: 'Shorten this text while keeping the meaning:\n\n',
+                expand: 'Expand this text with a bit more detail, keep the same tone:\n\n',
+                formal: 'Rewrite this in a formal professional tone:\n\n',
+                simple: 'Rewrite this in simpler words:\n\n',
+                urdu: 'Is text ko clear Urdu mein likho:\n\n'
+            };
+            promptInput.value = (prompts[mode] || '') + text;
+            promptInput.dispatchEvent(new Event('input'));
+            processPromptSubmission();
+        }
+
 
         submitBtn.addEventListener('click', processPromptSubmission);
         promptInput.addEventListener('keydown', (e) => {
@@ -3325,9 +4126,19 @@
 
         // Close modals on Escape
         document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl+K command palette
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                openCmdPalette();
+                return;
+            }
             if (e.key === 'Escape') {
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card']
+                closeCmdPalette();
+                closeMobileSidebar();
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card']
                     .forEach(id => closeModal(id));
+                const tb = document.getElementById('rewrite-toolbar');
+                if (tb) tb.classList.remove('visible');
             }
         });
     </script>
