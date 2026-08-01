@@ -828,16 +828,25 @@
             flex-wrap: wrap;
             margin-bottom: 10px;
         }
+
         .attachment-chip {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: #f0f0ee;
             border: 1px solid #e5e5e5;
-            border-radius: 10px;
-            padding: 5px 10px;
+            border-radius: 14px;
+            padding: 8px 10px;
             font-size: 12px;
             color: #444;
+            max-width: 100%;
+        }
+        .attachment-chip.is-image-chip {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 8px;
+            min-width: 140px;
+            max-width: 200px;
         }
         .attachment-chip img {
             width: 22px;
@@ -845,12 +854,114 @@
             border-radius: 6px;
             object-fit: cover;
         }
+        .attachment-chip.is-image-chip img.attach-thumb {
+            width: 100%;
+            height: 120px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: zoom-in;
+            display: block;
+        }
+        .attachment-chip .chip-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .attachment-chip .chip-bar span.name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 120px;
+            color: #555;
+            font-weight: 500;
+        }
         .attachment-chip .remove-chip {
             cursor: pointer;
             color: #999;
             font-weight: bold;
-            padding-left: 2px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1;
         }
+        .attachment-chip .remove-chip:hover {
+            background: #e5e5e5;
+            color: #111;
+        }
+        body.theme-dark .attachment-chip {
+            background: #1e1e22;
+            border-color: #333;
+            color: #ddd;
+        }
+        body.theme-dark .attachment-chip .remove-chip:hover {
+            background: #333;
+            color: #fff;
+        }
+        body.theme-dark .attachment-chip .chip-bar span.name { color: #bbb; }
+
+        /* Fullscreen image lightbox */
+        #img-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0,0,0,0.92);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 24px;
+        }
+        #img-lightbox.open { display: flex; }
+        #img-lightbox img {
+            max-width: min(92vw, 960px);
+            max-height: 78vh;
+            border-radius: 12px;
+            object-fit: contain;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        #img-lightbox .lb-top {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+        #img-lightbox .lb-btn {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        #img-lightbox .lb-btn:hover { background: rgba(255,255,255,0.22); }
+        #img-lightbox .lb-caption {
+            margin-top: 14px;
+            color: #ccc;
+            font-size: 13px;
+            text-align: center;
+            max-width: 80vw;
+        }
+        .chat-img-thumb {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            object-fit: cover;
+            cursor: zoom-in;
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: transform .15s;
+        }
+        .chat-img-thumb:hover { transform: scale(1.03); }
+
 
         #mic-btn.listening {
             background-color: #111111;
@@ -3305,31 +3416,107 @@
 
         function renderAttachmentPreviews() {
             const row = document.getElementById('attachment-preview-row');
+            if (!row) return;
             if (pendingAttachments.length === 0) {
                 row.style.display = 'none';
                 row.innerHTML = '';
                 return;
             }
             row.style.display = 'flex';
-            row.innerHTML = pendingAttachments.map((a, i) => `
-                <div class="attachment-chip">
-                    ${a.loading
-                        ? `<span class="img-gen-loading"><span class="img-gen-spinner"></span></span>`
-                        : a.isImage && a.url
-                        ? `<img src="${a.url}" alt="">`
-                        : a.isVideo
-                        ? `<video src="${a.url}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;" muted></video>`
-                        : '📄'}
-                    <span>${a.name}</span>
+            row.innerHTML = pendingAttachments.map((a, i) => {
+                if (a.loading) {
+                    return `<div class="attachment-chip is-image-chip">
+                        <div style="height:120px;display:flex;align-items:center;justify-content:center;background:#ececec;border-radius:10px;">
+                            <span class="img-gen-loading"><span class="img-gen-spinner"></span> Generating…</span>
+                        </div>
+                        <div class="chip-bar"><span class="name">${escapeHtml(a.name || 'Image')}</span>
+                        <span class="remove-chip" onclick="removeAttachment(${i})" title="Remove">×</span></div>
+                    </div>`;
+                }
+                if (a.isImage && a.url) {
+                    const safeName = escapeHtml(a.name || 'Generated image');
+                    return `<div class="attachment-chip is-image-chip">
+                        <img class="attach-thumb" src="${a.url.replace(/"/g, '&quot;')}" alt="${safeName}"
+                            data-att-idx="${i}" onclick="openAttachmentLightbox(${i})">
+                        <div class="chip-bar">
+                            <span class="name">${safeName}</span>
+                            <span>
+                                <span class="remove-chip" title="Download" onclick="downloadAttachment(${i})">⬇</span>
+                                <span class="remove-chip" title="Remove" onclick="removeAttachment(${i})">×</span>
+                            </span>
+                        </div>
+                    </div>`;
+                }
+                if (a.isVideo && a.url) {
+                    return `<div class="attachment-chip is-image-chip">
+                        <video src="${a.url}" style="width:100%;height:120px;border-radius:10px;object-fit:cover;" muted controls></video>
+                        <div class="chip-bar"><span class="name">${escapeHtml(a.name || 'Video')}</span>
+                        <span class="remove-chip" onclick="removeAttachment(${i})">×</span></div>
+                    </div>`;
+                }
+                return `<div class="attachment-chip">
+                    📄 <span>${escapeHtml(a.name || 'File')}</span>
                     <span class="remove-chip" onclick="removeAttachment(${i})">×</span>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function removeAttachment(i) {
             pendingAttachments.splice(i, 1);
             renderAttachmentPreviews();
         }
+
+        let lightboxSrc = '';
+        window._chatImageStore = window._chatImageStore || {};
+        function openStoredChatImage(id) {
+            const item = window._chatImageStore && window._chatImageStore[id];
+            if (!item) return;
+            openImageLightbox(item.url, item.name);
+        }
+        function openAttachmentLightbox(i) {
+            const a = pendingAttachments[i];
+            if (!a || !a.url) return;
+            openImageLightbox(a.url, a.name || 'Generated image');
+        }
+        function downloadAttachment(i) {
+            const a = pendingAttachments[i];
+            if (!a || !a.url) return;
+            downloadDataUrl(a.url, 'scribe-image.png');
+        }
+        function openImageLightbox(src, caption) {
+            lightboxSrc = src || '';
+            const box = document.getElementById('img-lightbox');
+            const img = document.getElementById('img-lightbox-img');
+            const cap = document.getElementById('img-lightbox-caption');
+            if (!box || !img) return;
+            img.src = lightboxSrc;
+            if (cap) cap.textContent = caption || '';
+            box.classList.add('open');
+        }
+        function closeImageLightbox() {
+            const box = document.getElementById('img-lightbox');
+            if (box) box.classList.remove('open');
+            const img = document.getElementById('img-lightbox-img');
+            if (img) img.src = '';
+            lightboxSrc = '';
+        }
+        function downloadLightboxImage() {
+            if (!lightboxSrc) return;
+            downloadDataUrl(lightboxSrc, 'scribe-image.png');
+        }
+        function downloadDataUrl(url, filename) {
+            try {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename || 'scribe-image.png';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (e) {
+                window.open(url, '_blank');
+            }
+        }
+
 
         function makeLocalPreviewImage(promptText) {
             // Client-side artistic preview when backend is offline (so Generate always returns an image)
@@ -3807,6 +3994,16 @@
             <div id="plib-list" style="margin-top:18px;"></div>
         </div>
     </div>
+
+    <!-- IMAGE LIGHTBOX -->
+    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
+        <div class="lb-top">
+            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
+            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
+        </div>
+        <img id="img-lightbox-img" src="" alt="Preview">
+        <div class="lb-caption" id="img-lightbox-caption"></div>
+    </div>
 </body></html>`;
             }
             if (l === 'css') {
@@ -3836,6 +4033,16 @@
             <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
             <div id="plib-list" style="margin-top:18px;"></div>
         </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX -->
+    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
+        <div class="lb-top">
+            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
+            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
+        </div>
+        <img id="img-lightbox-img" src="" alt="Preview">
+        <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
 </body></html>`;
             }
@@ -3876,6 +4083,16 @@
             <div id="plib-list" style="margin-top:18px;"></div>
         </div>
     </div>
+
+    <!-- IMAGE LIGHTBOX -->
+    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
+        <div class="lb-top">
+            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
+            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
+        </div>
+        <img id="img-lightbox-img" src="" alt="Preview">
+        <div class="lb-caption" id="img-lightbox-caption"></div>
+    </div>
 </body></html>`;
             }
             // Fallback: treat as HTML fragment
@@ -3898,6 +4115,16 @@
             <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
             <div id="plib-list" style="margin-top:18px;"></div>
         </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX -->
+    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
+        <div class="lb-top">
+            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
+            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
+        </div>
+        <img id="img-lightbox-img" src="" alt="Preview">
+        <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
 </body></html>`;
         }
@@ -4166,12 +4393,17 @@
                 let attachmentsHtml = '';
                 if (pendingAttachments.length) {
                     attachmentsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;justify-content:flex-end;">' +
-                        pendingAttachments.map(a => a.isImage && a.url
-                            ? `<img src="${a.url}" style="width:90px;height:90px;border-radius:10px;object-fit:cover;">`
-                            : a.isVideo
-                            ? `<video src="${a.url}" style="width:160px;border-radius:10px;" controls loop data-narrate="${(a.promptText || '').replace(/"/g, '&quot;')}"></video>`
-                            : `<span style="font-size:12px;background:#e5e5e5;padding:4px 8px;border-radius:8px;">📄 ${escapeHtml(a.name)}</span>`
-                        ).join('') + '</div>';
+                        pendingAttachments.map(a => {
+                            if (a.isImage && a.url) {
+                                const id = 'cimg_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+                                window._chatImageStore[id] = { url: a.url, name: a.name || 'Image' };
+                                return `<img class="chat-img-thumb" src="${a.url.replace(/"/g, '&quot;')}" alt="Image" data-cimg="${id}" onclick="openStoredChatImage('${id}')">`;
+                            }
+                            if (a.isVideo && a.url) {
+                                return `<video src="${a.url}" style="width:160px;border-radius:10px;" controls loop data-narrate="${(a.promptText || '').replace(/"/g, '&quot;')}"></video>`;
+                            }
+                            return `<span style="font-size:12px;background:#e5e5e5;padding:4px 8px;border-radius:8px;">📄 ${escapeHtml(a.name)}</span>`;
+                        }).join('') + '</div>';
                 }
 
                 const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${escapeHtml(promptPayload)}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
@@ -4770,6 +5002,7 @@
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
+                closeImageLightbox();
             }
         });
     </script>
@@ -4828,6 +5061,16 @@
             <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
             <div id="plib-list" style="margin-top:18px;"></div>
         </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX -->
+    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
+        <div class="lb-top">
+            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
+            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
+        </div>
+        <img id="img-lightbox-img" src="" alt="Preview">
+        <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
 </body>
 </html>
