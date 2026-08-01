@@ -1951,6 +1951,90 @@
         body.theme-dark .profile-dropdown button:hover { background: #222; }
         body.theme-dark .profile-dropdown button.danger { color: #f87171; }
 
+
+        .artifact-editor {
+            width: 100%;
+            height: 100%;
+            min-height: 360px;
+            margin: 0;
+            padding: 16px;
+            border: none;
+            outline: none;
+            resize: none;
+            background: #0f0f12;
+            color: #e8e8ec;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.55;
+            white-space: pre;
+            tab-size: 2;
+        }
+        .msg-highlight {
+            background: linear-gradient(120deg, rgba(250, 204, 21, 0.35), rgba(250, 204, 21, 0.15));
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: inherit;
+        }
+        body.theme-dark .msg-highlight {
+            background: linear-gradient(120deg, rgba(250, 204, 21, 0.28), rgba(250, 204, 21, 0.12));
+            color: #fef08a;
+        }
+        .msg-key-callout {
+            border-left: 3px solid #4f46e5;
+            background: rgba(79, 70, 229, 0.08);
+            padding: 10px 14px;
+            border-radius: 0 10px 10px 0;
+            margin: 12px 0;
+            font-size: 14.5px;
+        }
+        body.theme-dark .msg-key-callout {
+            background: rgba(99, 102, 241, 0.15);
+            border-left-color: #818cf8;
+        }
+        .console-text-payload blockquote {
+            border-left: 3px solid #d4d4d4;
+            margin: 10px 0;
+            padding: 6px 14px;
+            color: #555;
+        }
+        body.theme-dark .console-text-payload blockquote {
+            border-left-color: #444;
+            color: #bbb;
+        }
+        .usage-chip {
+            font-size: 11px;
+            color: #666;
+            background: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        body.theme-dark .usage-chip {
+            background: #1a1a1f;
+            border-color: #333;
+            color: #aaa;
+        }
+        .prompt-lib-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+        .prompt-lib-item:hover { background: #f0f0ee; }
+        body.theme-dark .prompt-lib-item { color: #ddd; }
+        body.theme-dark .prompt-lib-item:hover { background: #222; }
+
     </style>
 </head>
 <body>
@@ -2093,6 +2177,9 @@
                     <button type="button" class="nav-item" title="Custom instructions" onclick="toggleCustomInstructions()">
                         <span class="icon">⚙️</span><span class="label">Instructions</span>
                     </button>
+                    <button type="button" class="nav-item" title="Prompt library" onclick="togglePromptLibrary()">
+                        <span class="icon">📚</span><span class="label">Prompts</span>
+                    </button>
                     <button type="button" class="nav-item" title="Command palette (⌘K)" onclick="openCmdPalette()">
                         <span class="icon">⌘</span><span class="label">Commands</span>
                     </button>
@@ -2117,7 +2204,8 @@
             <main class="main-workspace" id="main-workspace">
                 <header class="top-subnav">
                     <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" title="Menu" onclick="toggleMobileSidebar()">☰</button>
-                    <span class="badge-tier">Free Trial</span>
+                    <span class="badge-tier" id="badge-tier">Free · 15 chats</span>
+                    <span class="usage-chip" id="usage-chip">Chats 0/15 · Img 0/1</span>
                     <span class="incognito-badge" id="incognito-badge">🕶️ Incognito</span>
                     <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
                     <div style="position:relative;">
@@ -2209,6 +2297,7 @@
                             <div class="artifact-header-actions">
                                 <button type="button" class="artifact-btn" id="artifact-tab-code-btn" onclick="setArtifactTab('code')">Code</button>
                                 <button type="button" class="artifact-btn" id="artifact-tab-preview-btn" onclick="setArtifactTab('preview')">Preview</button>
+                                <button type="button" class="artifact-btn" onclick="applyArtifactEdit()" title="Apply edits">Apply</button>
                                 <button type="button" class="artifact-btn" onclick="copyArtifact()">Copy</button>
                                 <button type="button" class="artifact-btn" onclick="downloadArtifact()">⬇ Download</button>
                                 <button type="button" class="artifact-btn" onclick="closeArtifact()">✕</button>
@@ -2216,7 +2305,7 @@
                         </div>
                         <div class="artifact-body">
                             <div class="artifact-code-view active" id="artifact-code-view">
-                                <pre id="artifact-code"></pre>
+                                <textarea id="artifact-code" class="artifact-editor" spellcheck="false"></textarea>
                             </div>
                             <div class="artifact-preview-view" id="artifact-preview-view">
                                 <iframe id="artifact-preview-frame" class="artifact-preview-frame" sandbox="allow-scripts allow-same-origin" title="Live preview"></iframe>
@@ -2237,39 +2326,42 @@
             <button class="popup-close-trigger" onclick="togglePricingModal()">×</button>
             <h2 style="text-align: center; color: white; margin-bottom: 30px;">Scribe AI <span style="color: #fff;">Pricing Tiers</span></h2>
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div class="price-tier-card">
+                <div class="price-tier-card" id="tier-card-free">
                     <h3>Free</h3>
                     <div class="price-tier-amount">$0</div>
                     <ul class="price-feature-list">
-                        <li>Unlimited text chat</li>
-                        <li>Voice input &amp; voice replies</li>
-                        <li>File upload</li>
-                        <li>Standard response speed</li>
+                        <li>15 chats total</li>
+                        <li>1 AI image / day</li>
+                        <li>Voice input &amp; replies</li>
+                        <li>File upload (text / PDF)</li>
+                        <li>Standard speed</li>
                     </ul>
-                    <button class="price-tier-btn" style="background-color:#2a2a30; color:#999; cursor:default;" disabled>Current Plan</button>
+                    <button class="price-tier-btn" id="btn-plan-free" style="background-color:#2a2a30; color:#999; cursor:default;" disabled>Current Plan</button>
                 </div>
-                <div class="price-tier-card featured">
+                <div class="price-tier-card featured" id="tier-card-pro">
                     <div class="price-tier-badge">Most Popular</div>
                     <h3>Pro Build</h3>
                     <div class="price-tier-amount">$20<span>/mo</span></div>
                     <ul class="price-feature-list">
-                        <li>Everything in Free</li>
-                        <li>AI image generation</li>
-                        <li>AI video generation — up to 50 videos/mo</li>
+                        <li>Unlimited chats</li>
+                        <li>AI image generation (100/mo)</li>
                         <li>Priority response speed</li>
+                        <li>Prompt library &amp; projects</li>
+                        <li>Editable artifacts</li>
                     </ul>
-                    <button class="price-tier-btn" id="stripe-checkout-node" onclick="handleUpgradeClick(this, 'pro')">Upgrade</button>
+                    <button class="price-tier-btn" id="stripe-checkout-node" onclick="handleUpgradeClick(this, 'pro')">Upgrade — $20</button>
                 </div>
-                <div class="price-tier-card">
+                <div class="price-tier-card" id="tier-card-ultra">
                     <h3>Ultra</h3>
                     <div class="price-tier-amount">$100<span>/mo</span></div>
                     <ul class="price-feature-list">
-                        <li>Everything in Pro Build</li>
-                        <li>Unlimited AI image generation</li>
-                        <li>Unlimited AI video generation</li>
+                        <li>Everything in Pro</li>
+                        <li>Unlimited AI images</li>
                         <li>Fastest response speed</li>
+                        <li>Priority support</li>
+                        <li>Advanced writing tools</li>
                     </ul>
-                    <button class="price-tier-btn" onclick="handleUpgradeClick(this, 'ultra')">Upgrade</button>
+                    <button class="price-tier-btn" onclick="handleUpgradeClick(this, 'ultra')">Upgrade — $100</button>
                 </div>
             </div>
         </div>
@@ -2287,7 +2379,7 @@
                     <li>Fast, clear AI chat for writing and research</li>
                     <li>Voice input and spoken replies</li>
                     <li>Image and file attachments</li>
-                    <li>Optional AI image &amp; video generation (Pro / Ultra)</li>
+                    <li>Optional AI image generation (Pro / Ultra)</li>
                 </ul>
                 <h3>Our mission</h3>
                 <p>We help people write faster and think clearer — without unnecessary complexity. Scribe is built for students, creators, teams, and anyone who works with words every day.</p>
@@ -2515,6 +2607,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             applyScribeLogos();
             watchChatLogos();
+            if (typeof updatePlanUI === 'function') updatePlanUI();
             const savedTheme = safeStorage.getItem('scribe_theme');
             applyTheme(savedTheme === 'dark');
 
@@ -2802,6 +2895,112 @@
             btn.innerText = landingAuthMode === 'login' ? 'Continue with Email' : 'Register Free Account';
         }
 
+
+        // ---- Plans & usage limits ----
+        // free: 15 chats total, 1 image/day | pro: unlimited chats, 100 img/mo | ultra: unlimited
+        const PLAN_LIMITS = {
+            free:  { chats: 15,  imagesPerDay: 1,   imagesPerMonth: 1 },
+            pro:   { chats: Infinity, imagesPerDay: Infinity, imagesPerMonth: 100 },
+            ultra: { chats: Infinity, imagesPerDay: Infinity, imagesPerMonth: Infinity }
+        };
+        const PLAN_PRICES = { pro: 20, ultra: 100 };
+
+        function getUserPlan() {
+            try {
+                const p = safeStorage.getItem('scribe_plan');
+                if (p === 'pro' || p === 'ultra') return p;
+            } catch (e) {}
+            return 'free';
+        }
+        function setUserPlan(plan) {
+            safeStorage.setItem('scribe_plan', plan);
+            updatePlanUI();
+        }
+        function getUsage() {
+            try {
+                return JSON.parse(safeStorage.getItem('scribe_usage') || '{}');
+            } catch (e) { return {}; }
+        }
+        function saveUsage(u) {
+            safeStorage.setItem('scribe_usage', JSON.stringify(u));
+        }
+        function todayKey() {
+            const d = new Date();
+            return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+        }
+        function getChatCount() {
+            const u = getUsage();
+            return u.chatCount || 0;
+        }
+        function getImagesToday() {
+            const u = getUsage();
+            if (u.imageDay !== todayKey()) return 0;
+            return u.imagesToday || 0;
+        }
+        function incChatCount() {
+            const u = getUsage();
+            u.chatCount = (u.chatCount || 0) + 1;
+            saveUsage(u);
+            updatePlanUI();
+        }
+        function incImageCount() {
+            const u = getUsage();
+            const t = todayKey();
+            if (u.imageDay !== t) { u.imageDay = t; u.imagesToday = 0; }
+            u.imagesToday = (u.imagesToday || 0) + 1;
+            saveUsage(u);
+            updatePlanUI();
+        }
+        function canStartChat() {
+            const plan = getUserPlan();
+            const lim = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+            if (getChatCount() >= lim.chats) {
+                alert('Free plan limit: 15 chats. Upgrade to Pro ($20) or Ultra ($100) for unlimited chats.');
+                togglePricingModal();
+                return false;
+            }
+            return true;
+        }
+        function canGenerateImage() {
+            const plan = getUserPlan();
+            const lim = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+            if (plan === 'free') {
+                if (getImagesToday() >= lim.imagesPerDay) {
+                    alert('Free plan: 1 image per day. Upgrade for more images.');
+                    togglePricingModal();
+                    return false;
+                }
+            }
+            return true;
+        }
+        function updatePlanUI() {
+            const plan = getUserPlan();
+            const badge = document.getElementById('badge-tier');
+            const chip = document.getElementById('usage-chip');
+            const chats = getChatCount();
+            const imgs = getImagesToday();
+            if (badge) {
+                if (plan === 'pro') badge.textContent = 'Pro';
+                else if (plan === 'ultra') badge.textContent = 'Ultra';
+                else badge.textContent = 'Free · 15 chats';
+            }
+            if (chip) {
+                if (plan === 'free') chip.textContent = 'Chats ' + chats + '/15 · Img ' + imgs + '/1';
+                else if (plan === 'pro') chip.textContent = 'Pro · Images ' + imgs + ' today';
+                else chip.textContent = 'Ultra · Unlimited';
+            }
+            // pricing buttons state
+            const bf = document.getElementById('btn-plan-free');
+            const bp = document.getElementById('stripe-checkout-node');
+            const cards = { free: 'tier-card-free', pro: 'tier-card-pro', ultra: 'tier-card-ultra' };
+            // mark current
+            if (bf) {
+                if (plan === 'free') { bf.disabled = true; bf.textContent = 'Current Plan'; bf.style.cursor = 'default'; }
+                else { bf.disabled = false; bf.textContent = 'Free'; bf.onclick = () => {}; bf.style.opacity = '0.5'; }
+            }
+        }
+
+
         let currentUserEmail = '';
         let currentChatId = null;
         let currentChatMessages = [];
@@ -2868,6 +3067,7 @@
             configureGreetingBanner();
             renderRecentChats();
             renderProjects();
+            updatePlanUI();
         }
 
         function configureGreetingBanner() {
@@ -3078,13 +3278,28 @@
             e.target.value = '';
         });
 
-        function handleFileChosen(file, isImage) {
+        async function handleFileChosen(file, isImage) {
             if (!file) return;
-            pendingAttachments.push({
-                name: file.name,
-                isImage,
-                url: isImage ? URL.createObjectURL(file) : null
-            });
+            if (isImage) {
+                pendingAttachments.push({
+                    name: file.name,
+                    isImage: true,
+                    url: URL.createObjectURL(file)
+                });
+                renderAttachmentPreviews();
+                return;
+            }
+            const extracted = await extractTextFromFile(file);
+            if (extracted) {
+                const clip = extracted.length > 12000 ? extracted.slice(0, 12000) + "\n...[truncated]" : extracted;
+                const prefix = promptInput.value.trim();
+                promptInput.value = (prefix ? prefix + "\n\n" : "") + 'Here is the file "' + file.name + '" content:\n\n' + clip + "\n\nQuestion: ";
+                promptInput.dispatchEvent(new Event('input'));
+                promptInput.focus();
+                pendingAttachments.push({ name: file.name + ' (text extracted)', isImage: false, url: null });
+            } else {
+                pendingAttachments.push({ name: file.name, isImage: false, url: null });
+            }
             renderAttachmentPreviews();
         }
 
@@ -3159,6 +3374,7 @@
 
         async function triggerGenerateImage() {
             attachMenu.classList.remove('open');
+            if (!canGenerateImage()) return;
             const prompt = promptInput.value.trim();
             if (!prompt) {
                 alert("Pehle image ke liye prompt likho (jaise: a cat on the moon)");
@@ -3217,11 +3433,18 @@
                     promptText: prompt
                 });
             }
+            incImageCount();
             renderAttachmentPreviews();
         }
 
         function triggerGenerateVideo() {
             attachMenu.classList.remove('open');
+            const plan = getUserPlan();
+            if (plan === 'free') {
+                alert('Video generation is a Pro/Ultra feature. Please upgrade.');
+                togglePricingModal();
+                return;
+            }
             if (!('MediaRecorder' in window) || !HTMLCanvasElement.prototype.captureStream) {
                 alert("Video generation isn't supported in this browser. Please try Chrome.");
                 return;
@@ -3413,11 +3636,13 @@
 
         function formatInline(text) {
             let s = escapeHtml(text);
+            // ==highlight== important lines (Claude-style key emphasis)
+            s = s.replace(/==([^=]+)==/g, '<mark class="msg-highlight">$1</mark>');
             // inline code `code`
             s = s.replace(/`([^`]+)`/g, '<code class="msg-inline-code">$1</code>');
-            // **bold**
+            // **bold** — also lightly emphasize
             s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-            // *italic* (simple)
+            // *italic*
             s = s.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>');
             return s;
         }
@@ -3490,6 +3715,8 @@
                 const ul = trimmed.match(/^[-*•]\s+(.+)/);
                 const ol = trimmed.match(/^\d+[.)]\s+(.+)/);
                 const heading = trimmed.match(/^#{1,3}\s+(.+)/);
+                const quote = trimmed.match(/^>\s+(.+)/);
+                const callout = trimmed.match(/^\[!\s*(IMPORTANT|KEY|NOTE|TIP)\]\s*(.*)/i);
 
                 if (ul) {
                     flushPara();
@@ -3505,6 +3732,14 @@
                     flushPara();
                     closeLists();
                     html += `<h3>${formatInline(heading[1])}</h3>`;
+                } else if (callout) {
+                    flushPara();
+                    closeLists();
+                    html += `<div class="msg-key-callout"><strong>${callout[1].toUpperCase()}:</strong> ${formatInline(callout[2] || '')}</div>`;
+                } else if (quote) {
+                    flushPara();
+                    closeLists();
+                    html += `<blockquote>${formatInline(quote[1])}</blockquote>`;
                 } else if (trimmed === '') {
                     flushPara();
                     closeLists();
@@ -3553,6 +3788,25 @@
             }
             if (l === 'svg' || /^\s*<svg/i.test(src)) {
                 return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fafafa}</style></head><body>${src}
+
+    <!-- PROMPT LIBRARY -->
+    <div id="prompt-lib-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
+            <div class="contact-form-group">
+                <label>New prompt title</label>
+                <input type="text" id="plib-title" placeholder="e.g. Client email">
+            </div>
+            <div class="contact-form-group">
+                <label>Prompt text</label>
+                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
+            <div id="plib-list" style="margin-top:18px;"></div>
+        </div>
+    </div>
 </body></html>`;
             }
             if (l === 'css') {
@@ -3564,6 +3818,25 @@
                         <a href="#">Link</a>
                         <div class="card" style="margin-top:16px;padding:12px;border-radius:8px;background:#f7f7f5">Card</div>
                     </div>
+
+    <!-- PROMPT LIBRARY -->
+    <div id="prompt-lib-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
+            <div class="contact-form-group">
+                <label>New prompt title</label>
+                <input type="text" id="plib-title" placeholder="e.g. Client email">
+            </div>
+            <div class="contact-form-group">
+                <label>Prompt text</label>
+                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
+            <div id="plib-list" style="margin-top:18px;"></div>
+        </div>
+    </div>
 </body></html>`;
             }
             if (l === 'javascript' || l === 'js') {
@@ -3584,21 +3857,59 @@
                         }
                     })();
                     <\/script>
+
+    <!-- PROMPT LIBRARY -->
+    <div id="prompt-lib-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
+            <div class="contact-form-group">
+                <label>New prompt title</label>
+                <input type="text" id="plib-title" placeholder="e.g. Client email">
+            </div>
+            <div class="contact-form-group">
+                <label>Prompt text</label>
+                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
+            <div id="plib-list" style="margin-top:18px;"></div>
+        </div>
+    </div>
 </body></html>`;
             }
             // Fallback: treat as HTML fragment
             return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:16px}</style></head><body>${src}
+
+    <!-- PROMPT LIBRARY -->
+    <div id="prompt-lib-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
+            <div class="contact-form-group">
+                <label>New prompt title</label>
+                <input type="text" id="plib-title" placeholder="e.g. Client email">
+            </div>
+            <div class="contact-form-group">
+                <label>Prompt text</label>
+                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
+            <div id="plib-list" style="margin-top:18px;"></div>
+        </div>
+    </div>
 </body></html>`;
         }
 
         function openArtifact(code, lang, ext) {
             artifactState = { code: code || '', lang: lang || 'code', ext: ext || 'txt', tab: 'code' };
             const panel = document.getElementById('artifact-panel');
-            const pre = document.getElementById('artifact-code');
+            const editor = document.getElementById('artifact-code');
             const title = document.getElementById('artifact-title');
-            if (!panel || !pre) return;
-            pre.textContent = artifactState.code;
-            title.textContent = (artifactState.lang || 'Code').toUpperCase();
+            if (!panel || !editor) return;
+            editor.value = artifactState.code;
+            title.textContent = (artifactState.lang || 'Code').toUpperCase() + ' (editable)';
             panel.classList.add('open');
             const main = document.getElementById('main-workspace');
             if (main) main.classList.add('has-artifact');
@@ -3607,11 +3918,27 @@
             const previewBtn = document.getElementById('artifact-tab-preview-btn');
             if (previewBtn) previewBtn.style.display = canPreview ? '' : 'none';
 
-            // Auto-open live preview for HTML-like code (Grok-style)
             if (canPreview && (['html', 'htm', 'svg'].includes((lang || '').toLowerCase()) || /^\s*<(!DOCTYPE|html|svg)/i.test(code || ''))) {
                 setArtifactTab('preview');
             } else {
                 setArtifactTab('code');
+            }
+        }
+
+        function applyArtifactEdit() {
+            const editor = document.getElementById('artifact-code');
+            if (!editor) return;
+            artifactState.code = editor.value;
+            // refresh preview if open
+            if (artifactState.tab === 'preview') setArtifactTab('preview');
+            else {
+                // brief feedback on title
+                const title = document.getElementById('artifact-title');
+                if (title) {
+                    const t = title.textContent;
+                    title.textContent = 'Saved ✓';
+                    setTimeout(() => { title.textContent = t; }, 900);
+                }
             }
         }
 
@@ -3629,7 +3956,13 @@
             if (codeBtn) codeBtn.classList.toggle('active-tab', tab === 'code');
             if (previewBtn) previewBtn.classList.toggle('active-tab', tab === 'preview');
 
+            if (tab === 'code') {
+                const editor = document.getElementById('artifact-code');
+                if (editor && artifactState.code !== undefined) editor.value = artifactState.code;
+            }
             if (tab === 'preview' && frame) {
+                const editor = document.getElementById('artifact-code');
+                if (editor) artifactState.code = editor.value;
                 const can = isPreviewableLang(artifactState.lang) || /^\s*</.test(artifactState.code || '');
                 if (can) {
                     if (empty) empty.style.display = 'none';
@@ -3662,13 +3995,19 @@
         }
 
         function copyArtifact() {
-            if (!artifactState.code) return;
-            navigator.clipboard.writeText(artifactState.code).catch(() => {});
+            const editor = document.getElementById('artifact-code');
+            const code = editor ? editor.value : artifactState.code;
+            if (!code) return;
+            artifactState.code = code;
+            navigator.clipboard.writeText(code).catch(() => {});
         }
 
         function downloadArtifact() {
-            if (!artifactState.code) return;
-            const blob = new Blob([artifactState.code], { type: 'text/plain' });
+            const editor = document.getElementById('artifact-code');
+            const code = editor ? editor.value : artifactState.code;
+            if (!code) return;
+            artifactState.code = code;
+            const blob = new Blob([code], { type: 'text/plain' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'code.' + (artifactState.ext || 'txt');
@@ -3772,6 +4111,7 @@
             const instr = getCustomInstructions();
             const tone = (document.getElementById('tone-select') || {}).value || 'default';
             const parts = [];
+            parts.push('Format answers clearly like Claude: short paragraphs, bullet lists when helpful, ## headings for sections. Put the most important phrases between ==double equals== so they highlight. Use **bold** for key terms. For critical warnings use a line starting with [! IMPORTANT].');
             if (instr.about) parts.push('User context: ' + instr.about);
             if (instr.style) parts.push('Response style: ' + instr.style);
             if (tone && tone !== 'default') {
@@ -3809,6 +4149,11 @@
             opts = opts || {};
             const promptPayload = (typeof forcedText === 'string' ? forcedText : promptInput.value).trim();
             if (!promptPayload || isGenerating) return;
+
+            // Free plan: 15 chats (count each new user question, not regenerate)
+            if (!opts.skipUserBubble && !opts.skipLimit) {
+                if (!canStartChat()) return;
+            }
 
             lastUserPromptForRegen = promptPayload;
             const starters = document.getElementById('starters-wrap');
@@ -3906,6 +4251,7 @@
                         openArtifact(window._pendingArtifact.code, window._pendingArtifact.lang, window._pendingArtifact.ext);
                     }
                     persistCurrentChat(promptPayload, aiResponseText);
+                    if (!opts.skipUserBubble) incChatCount();
                     // light memory: remember preferred tone if set
                     try {
                         const mem = JSON.parse(safeStorage.getItem('scribe_memory') || '{}');
@@ -4061,6 +4407,98 @@
             }
         }
 
+
+        function getPromptLibrary() {
+            try { return JSON.parse(safeStorage.getItem('scribe_prompts') || '[]'); }
+            catch (e) { return []; }
+        }
+        function savePromptLibrary(list) {
+            safeStorage.setItem('scribe_prompts', JSON.stringify(list.slice(0, 40)));
+        }
+        function togglePromptLibrary() {
+            const card = document.getElementById('prompt-lib-popup');
+            if (!card) return;
+            const open = card.style.display === 'flex';
+            card.style.display = open ? 'none' : 'flex';
+            if (!open) renderPromptLibrary();
+        }
+        function renderPromptLibrary() {
+            const list = document.getElementById('plib-list');
+            if (!list) return;
+            const items = getPromptLibrary();
+            if (!items.length) {
+                list.innerHTML = '<p style="color:#888;font-size:13px;text-align:center;">No saved prompts yet.</p>';
+                return;
+            }
+            list.innerHTML = items.map((p, i) => `
+                <div style="display:flex;gap:6px;margin-bottom:6px;align-items:stretch;">
+                    <button type="button" class="prompt-lib-item" style="flex:1;" onclick="useLibraryPrompt(${i})">📌 ${escapeHtml(p.title)}</button>
+                    <button type="button" class="msg-action-btn" onclick="deleteLibraryPrompt(${i})">✕</button>
+                </div>`).join('');
+        }
+        function savePromptToLibrary() {
+            const title = (document.getElementById('plib-title') || {}).value || '';
+            const body = (document.getElementById('plib-body') || {}).value || '';
+            if (!title.trim() || !body.trim()) { alert('Title and prompt required'); return; }
+            const items = getPromptLibrary();
+            items.unshift({ title: title.trim(), body: body.trim(), at: Date.now() });
+            savePromptLibrary(items);
+            document.getElementById('plib-title').value = '';
+            document.getElementById('plib-body').value = '';
+            renderPromptLibrary();
+        }
+        function useLibraryPrompt(i) {
+            const items = getPromptLibrary();
+            if (!items[i]) return;
+            promptInput.value = items[i].body;
+            promptInput.dispatchEvent(new Event('input'));
+            togglePromptLibrary();
+            promptInput.focus();
+        }
+        function deleteLibraryPrompt(i) {
+            const items = getPromptLibrary();
+            items.splice(i, 1);
+            savePromptLibrary(items);
+            renderPromptLibrary();
+        }
+
+        // ---- PDF / text file extract ----
+        async function extractTextFromFile(file) {
+            const name = (file.name || '').toLowerCase();
+            if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.csv') || name.endsWith('.json') || name.endsWith('.html')) {
+                return await file.text();
+            }
+            if (name.endsWith('.pdf')) {
+                // Try pdf.js from CDN
+                try {
+                    if (!window.pdfjsLib) {
+                        await new Promise((resolve, reject) => {
+                            const s = document.createElement('script');
+                            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                            s.onload = resolve;
+                            s.onerror = reject;
+                            document.head.appendChild(s);
+                        });
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    }
+                    const buf = await file.arrayBuffer();
+                    const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+                    let text = '';
+                    const maxPages = Math.min(pdf.numPages, 20);
+                    for (let i = 1; i <= maxPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map(it => it.str).join(' ') + '\n\n';
+                    }
+                    return text.trim() || '[PDF had no extractable text]';
+                } catch (e) {
+                    return '[Could not read PDF text. Try a .txt file or check network for PDF engine.]';
+                }
+            }
+            return null;
+        }
+
+
         function toggleCustomInstructions() {
             const card = document.getElementById('instructions-popup-card');
             if (!card) return;
@@ -4142,6 +4580,8 @@
             { id: 'search', label: 'Search chats', hint: '/', run: () => { closeCmdPalette(); toggleChatSearch(); } },
             { id: 'export', label: 'Export as Markdown', hint: '', run: () => { closeCmdPalette(); exportChat('md'); } },
             { id: 'project', label: 'New project', hint: '', run: () => { closeCmdPalette(); addProject(); } },
+            { id: 'prompts', label: 'Prompt library', hint: '', run: () => { closeCmdPalette(); togglePromptLibrary(); } },
+            { id: 'upgrade', label: 'Upgrade plan', hint: '', run: () => { closeCmdPalette(); togglePricingModal(); } },
         ];
         let cmdActiveIdx = 0;
 
@@ -4258,22 +4698,62 @@
 
         async function handleUpgradeClick(btn, tier) {
             const original = btn.innerText;
+            const amount = PLAN_PRICES[tier] || (tier === 'ultra' ? 100 : 20);
             btn.innerText = "Connecting...";
             try {
                 const r = await fetch(`${workerURL}/api/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tier })
+                    body: JSON.stringify({
+                        tier,
+                        amount,
+                        price: amount,
+                        currency: 'usd',
+                        productName: tier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build'
+                    })
                 });
                 const d = await r.json();
-                if (d.success && d.url) window.location.href = d.url;
-                else alert("Stripe Failed");
+                if (d.success && d.url) {
+                    // remember intended plan for return URL handling
+                    safeStorage.setItem('scribe_pending_plan', tier);
+                    window.location.href = d.url;
+                    return;
+                }
+                // Demo / offline: activate plan locally so correct tier works in UI
+                if (confirm('Payment server unavailable. Activate ' + tier.toUpperCase() + ' ($' + amount + '/mo) on this device for testing?')) {
+                    setUserPlan(tier);
+                    safeStorage.removeItem('scribe_pending_plan');
+                    alert(tier.toUpperCase() + ' plan activated ($' + amount + '/mo).');
+                    togglePricingModal();
+                }
             } catch {
-                alert("Error triggers.");
+                if (confirm('Could not reach Stripe. Activate ' + tier.toUpperCase() + ' ($' + amount + '/mo) locally for testing?')) {
+                    setUserPlan(tier);
+                    alert(tier.toUpperCase() + ' plan activated.');
+                    togglePricingModal();
+                }
             } finally {
                 btn.innerText = original;
             }
         }
+
+        // After Stripe return ?plan=pro or pending plan
+        (function applyPendingPlan() {
+            try {
+                const params = new URLSearchParams(location.search);
+                const q = params.get('plan') || params.get('tier');
+                if (q === 'pro' || q === 'ultra') {
+                    setUserPlan(q);
+                    safeStorage.removeItem('scribe_pending_plan');
+                } else {
+                    const pending = safeStorage.getItem('scribe_pending_plan');
+                    if (pending && (params.get('success') === '1' || params.get('checkout') === 'success')) {
+                        setUserPlan(pending);
+                        safeStorage.removeItem('scribe_pending_plan');
+                    }
+                }
+            } catch (e) {}
+        })();
 
         // Close modals on Escape
         document.addEventListener('keydown', (e) => {
@@ -4286,7 +4766,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
@@ -4330,5 +4810,24 @@
         <button type="button" onclick="rewriteSelection('urdu')">Urdu</button>
     </div>
 
+
+    <!-- PROMPT LIBRARY -->
+    <div id="prompt-lib-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
+            <div class="contact-form-group">
+                <label>New prompt title</label>
+                <input type="text" id="plib-title" placeholder="e.g. Client email">
+            </div>
+            <div class="contact-form-group">
+                <label>Prompt text</label>
+                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
+            <div id="plib-list" style="margin-top:18px;"></div>
+        </div>
+    </div>
 </body>
 </html>
