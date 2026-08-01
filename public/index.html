@@ -1175,7 +1175,7 @@
             backdrop-filter: blur(8px);
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 200;
         }
         .popup-window-box {
             background-color: #111113;
@@ -1912,6 +1912,45 @@
 
         .top-subnav { position: relative; gap: 10px; flex-wrap: wrap; }
 
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 52px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.12);
+            padding: 6px;
+            z-index: 30;
+        }
+        .profile-dropdown.open { display: block; }
+        .profile-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            color: #333;
+        }
+        .profile-dropdown button:hover { background: #f0f0ee; }
+        .profile-dropdown button.danger { color: #dc2626; }
+        .profile-dropdown button.danger:hover { background: #fef2f2; }
+        body.theme-dark .profile-dropdown {
+            background: #161618;
+            border-color: #333;
+        }
+        body.theme-dark .profile-dropdown button { color: #ddd; }
+        body.theme-dark .profile-dropdown button:hover { background: #222; }
+        body.theme-dark .profile-dropdown button.danger { color: #f87171; }
+
     </style>
 </head>
 <body>
@@ -2597,6 +2636,7 @@
             const tabSignup = document.getElementById('landing-tab-signup');
             const nameGroup = document.getElementById('landing-name-group');
             const btn = document.getElementById('landing-submit-btn');
+            if (typeof showAuthError === 'function') showAuthError('');
 
             if (type === 'login') {
                 tabLogin.classList.add('active');
@@ -2611,39 +2651,155 @@
             }
         }
 
+        function getLocalAccounts() {
+            try { return JSON.parse(safeStorage.getItem('scribe_accounts') || '{}'); }
+            catch (e) { return {}; }
+        }
+        function saveLocalAccounts(map) {
+            safeStorage.setItem('scribe_accounts', JSON.stringify(map));
+        }
+        // Simple non-crypto hash for client-side password check (demo; real apps need server)
+        function hashPass(pw) {
+            let h = 5381;
+            const s = String(pw || '');
+            for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+            return 'h' + (h >>> 0).toString(16);
+        }
+        function showAuthError(msg) {
+            let el = document.getElementById('landing-auth-error');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'landing-auth-error';
+                el.style.cssText = 'color:#dc2626;font-size:13px;margin:8px 0 0;text-align:center;';
+                const form = document.getElementById('landing-auth-form');
+                if (form) form.insertBefore(el, form.querySelector('button[type=submit]'));
+            }
+            el.textContent = msg || '';
+            el.style.display = msg ? 'block' : 'none';
+        }
+
         async function handleLandingAuth(event) {
             event.preventDefault();
             const btn = document.getElementById('landing-submit-btn');
             const nameVal = document.getElementById('landing-name').value.trim();
             const nicknameVal = document.getElementById('landing-nickname').value.trim();
-            const emailVal = document.getElementById('landing-email').value.trim();
-            const passwordVal = document.getElementById('landing-password').value.trim();
+            const emailVal = document.getElementById('landing-email').value.trim().toLowerCase();
+            const passwordVal = document.getElementById('landing-password').value;
 
-            const endpoint = landingAuthMode === 'login'
-              ? `${workerURL}/api/signin`
-              : `${workerURL}/api/signup`;
+            showAuthError('');
+            if (!emailVal || !emailVal.includes('@')) {
+                showAuthError('Valid email required.');
+                return;
+            }
+            if (!passwordVal || passwordVal.length < 4) {
+                showAuthError('Password must be at least 4 characters.');
+                return;
+            }
+            if (landingAuthMode === 'signup' && !nicknameVal) {
+                showAuthError('Nickname is required.');
+                return;
+            }
 
-            btn.innerText = "Connecting...";
+            btn.innerText = 'Connecting...';
+            btn.disabled = true;
 
+            const accounts = getLocalAccounts();
+            const passHash = hashPass(passwordVal);
+
+            // Try backend first
+            let serverOk = false;
             try {
+                const endpoint = landingAuthMode === 'login'
+                  ? `${workerURL}/api/signin`
+                  : `${workerURL}/api/signup`;
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: nameVal, nickname: nicknameVal, email: emailVal, password: passwordVal })
                 });
-                const data = await res.json();
-
-                if (data.success) {
-                    safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal }));
-                    switchToWorkspaceUI(emailVal, nicknameVal);
-                } else {
-                    alert("Auth Error: " + (data.error || "Unknown error"));
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        // If we already have this account locally, password MUST match
+                        if (landingAuthMode === 'login' && accounts[emailVal] && accounts[emailVal].passHash !== passHash) {
+                            showAuthError('Incorrect password. Please try again.');
+                            btn.innerText = 'Continue with Email';
+                            btn.disabled = false;
+                            return;
+                        }
+                        serverOk = true;
+                        const nick = nicknameVal || (data.nickname || (accounts[emailVal] && accounts[emailVal].nickname) || emailVal.split('@')[0]);
+                        accounts[emailVal] = {
+                            email: emailVal,
+                            nickname: nick,
+                            name: nameVal || (accounts[emailVal] && accounts[emailVal].name) || '',
+                            passHash: accounts[emailVal] ? accounts[emailVal].passHash : passHash
+                        };
+                        // On signup / first login via server, store the password hash we just used
+                        if (!accounts[emailVal].passHash || landingAuthMode === 'signup') {
+                            accounts[emailVal].passHash = passHash;
+                        }
+                        saveLocalAccounts(accounts);
+                        safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nick }));
+                        switchToWorkspaceUI(emailVal, nick);
+                    } else if (landingAuthMode === 'login') {
+                        // Server rejected — still enforce local check if account exists
+                        showAuthError(data.error || 'Invalid email or password.');
+                        btn.innerText = 'Continue with Email';
+                        btn.disabled = false;
+                        return;
+                    } else {
+                        showAuthError(data.error || 'Could not create account.');
+                        btn.innerText = 'Register Free Account';
+                        btn.disabled = false;
+                        return;
+                    }
                 }
             } catch (err) {
-                alert("Server Offline.");
-            } finally {
-                btn.innerText = landingAuthMode === 'login' ? "Continue with Email" : "Register Free Account";
+                // offline — fall through to local auth
             }
+
+            if (serverOk) {
+                btn.disabled = false;
+                return;
+            }
+
+            // Local auth (when server offline or unavailable)
+            if (landingAuthMode === 'signup') {
+                if (accounts[emailVal]) {
+                    showAuthError('Account already exists. Please Sign In.');
+                    btn.innerText = 'Register Free Account';
+                    btn.disabled = false;
+                    return;
+                }
+                accounts[emailVal] = {
+                    email: emailVal,
+                    nickname: nicknameVal,
+                    name: nameVal || nicknameVal,
+                    passHash
+                };
+                saveLocalAccounts(accounts);
+                safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal }));
+                switchToWorkspaceUI(emailVal, nicknameVal);
+            } else {
+                const acc = accounts[emailVal];
+                if (!acc) {
+                    showAuthError('No account found for this email. Create an account first.');
+                    btn.innerText = 'Continue with Email';
+                    btn.disabled = false;
+                    return;
+                }
+                if (acc.passHash !== passHash) {
+                    showAuthError('Incorrect password. Please try again.');
+                    btn.innerText = 'Continue with Email';
+                    btn.disabled = false;
+                    return;
+                }
+                safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: acc.nickname || nicknameVal }));
+                switchToWorkspaceUI(emailVal, acc.nickname || nicknameVal);
+            }
+            btn.disabled = false;
+            btn.innerText = landingAuthMode === 'login' ? 'Continue with Email' : 'Register Free Account';
         }
 
         let currentUserEmail = '';
@@ -2686,20 +2842,26 @@
             const displayName = nickname || email.split('@')[0] || 'User';
 
             targetNode.innerHTML = `
-                <div class="profile-block" id="logout-trigger" title="Click to logout">
-                    <div class="profile-avatar">${initialLetter}</div>
-                    <div class="profile-info">
-                        <div class="profile-name">${displayName}</div>
-                        <div class="profile-email">${email || ''}</div>
+                <div class="profile-menu-wrap" style="position:relative;width:100%;">
+                    <div class="profile-block" id="profile-trigger" title="Account menu">
+                        <div class="profile-avatar">${initialLetter}</div>
+                        <div class="profile-info">
+                            <div class="profile-name">${displayName}</div>
+                            <div class="profile-email">${email || ''}</div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <button type="button" onclick="openProfileInstructions()">⚙️ Instructions</button>
+                        <button type="button" onclick="openProfileSettings()">👤 Account info</button>
+                        <button type="button" class="danger" onclick="confirmLogout()">🚪 Logout</button>
                     </div>
                 </div>
             `;
 
-            document.getElementById('logout-trigger').addEventListener('click', () => {
-                if (confirm("Confirm Logout Session?")) {
-                    safeStorage.removeItem('user_session');
-                    window.location.reload();
-                }
+            document.getElementById('profile-trigger').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dd = document.getElementById('profile-dropdown');
+                if (dd) dd.classList.toggle('open');
             });
 
             applyScribeLogos();
@@ -2894,7 +3056,11 @@
             e.stopPropagation();
             attachMenu.classList.toggle('open');
         });
-        document.addEventListener('click', () => attachMenu.classList.remove('open'));
+        document.addEventListener('click', () => {
+            if (attachMenu) attachMenu.classList.remove('open');
+            const pdd = document.getElementById('profile-dropdown');
+            if (pdd) pdd.classList.remove('open');
+        });
         attachMenu.addEventListener('click', (e) => e.stopPropagation());
 
         function triggerFileSelect(kind) {
@@ -3386,7 +3552,8 @@
                 return src;
             }
             if (l === 'svg' || /^\s*<svg/i.test(src)) {
-                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fafafa}</style></head><body>${src}</body></html>`;
+                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fafafa}</style></head><body>${src}
+</body></html>`;
             }
             if (l === 'css') {
                 return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${src}</style></head><body>
@@ -3397,50 +3564,13 @@
                         <a href="#">Link</a>
                         <div class="card" style="margin-top:16px;padding:12px;border-radius:8px;background:#f7f7f5">Card</div>
                     </div>
-                </body></html>`;
+</body></html>`;
             }
             if (l === 'javascript' || l === 'js') {
                 return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:20px;background:#0f0f12;color:#e8e8ec} #out{white-space:pre-wrap;background:#1a1a1f;padding:14px;border-radius:10px;border:1px solid #2a2a30;min-height:80px}</style></head><body>
                     <h3 style="margin:0 0 12px">JS Preview</h3>
                     <div id="out">Running…</div>
-                
-    <!-- CUSTOM INSTRUCTIONS MODAL -->
-    <div id="instructions-popup-card" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="toggleCustomInstructions()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Custom instructions</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Scribe will follow these in every chat (saved on this device).</p>
-            <div class="contact-form-group">
-                <label>What should Scribe know about you?</label>
-                <textarea class="settings-textarea" id="instr-about" placeholder="e.g. I'm a student in Pakistan, prefer short answers, write code in Python..."></textarea>
-            </div>
-            <div class="contact-form-group">
-                <label>How should Scribe respond?</label>
-                <textarea class="settings-textarea" id="instr-style" placeholder="e.g. Always use bullet points. Be direct. Reply in Urdu when asked..."></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="saveCustomInstructions()">Save instructions</button>
-            <p id="instr-saved-msg" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Saved.</p>
-        </div>
-    </div>
-
-    <!-- COMMAND PALETTE -->
-    <div id="cmd-palette-overlay" onclick="if(event.target===this)closeCmdPalette()">
-        <div class="cmd-palette-box">
-            <input type="text" id="cmd-palette-input" placeholder="Type a command…" autocomplete="off">
-            <div class="cmd-list" id="cmd-list"></div>
-        </div>
-    </div>
-
-    <!-- REWRITE FLOATING TOOLBAR -->
-    <div id="rewrite-toolbar">
-        <button type="button" onclick="rewriteSelection('shorten')">Shorten</button>
-        <button type="button" onclick="rewriteSelection('expand')">Expand</button>
-        <button type="button" onclick="rewriteSelection('formal')">Formal</button>
-        <button type="button" onclick="rewriteSelection('simple')">Simplify</button>
-        <button type="button" onclick="rewriteSelection('urdu')">Urdu</button>
-    </div>
-
-    <script>
+                    <script>
                     (function(){
                         const out = document.getElementById('out');
                         const log = (...a) => { out.textContent += a.map(x => typeof x === 'object' ? JSON.stringify(x,null,2) : String(x)).join(' ') + '\\n'; };
@@ -3454,10 +3584,11 @@
                         }
                     })();
                     <\/script>
-                </body></html>`;
+</body></html>`;
             }
             // Fallback: treat as HTML fragment
-            return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:16px}</style></head><body>${src}</body></html>`;
+            return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:16px}</style></head><body>${src}
+</body></html>`;
         }
 
         function openArtifact(code, lang, ext) {
@@ -3910,6 +4041,26 @@
         const _origPersist = typeof persistCurrentChat === 'function' ? persistCurrentChat : null;
 
         // ---- Custom instructions ----
+
+        function openProfileInstructions() {
+            const dd = document.getElementById('profile-dropdown');
+            if (dd) dd.classList.remove('open');
+            toggleCustomInstructions();
+        }
+        function openProfileSettings() {
+            const dd = document.getElementById('profile-dropdown');
+            if (dd) dd.classList.remove('open');
+            alert('Signed in as: ' + (currentUserEmail || 'unknown') + '\nNickname: ' + (currentNickname || '-'));
+        }
+        function confirmLogout() {
+            const dd = document.getElementById('profile-dropdown');
+            if (dd) dd.classList.remove('open');
+            if (confirm('Log out of Scribe?')) {
+                safeStorage.removeItem('user_session');
+                window.location.reload();
+            }
+        }
+
         function toggleCustomInstructions() {
             const card = document.getElementById('instructions-popup-card');
             if (!card) return;
@@ -4142,5 +4293,42 @@
             }
         });
     </script>
+
+    <!-- CUSTOM INSTRUCTIONS MODAL -->
+    <div id="instructions-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleCustomInstructions()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Custom instructions</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Scribe will follow these in every chat (saved on this device).</p>
+            <div class="contact-form-group">
+                <label>What should Scribe know about you?</label>
+                <textarea class="settings-textarea" id="instr-about" placeholder="e.g. I'm a student in Pakistan, prefer short answers, write code in Python..."></textarea>
+            </div>
+            <div class="contact-form-group">
+                <label>How should Scribe respond?</label>
+                <textarea class="settings-textarea" id="instr-style" placeholder="e.g. Always use bullet points. Be direct. Reply in Urdu when asked..."></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="saveCustomInstructions()">Save instructions</button>
+            <p id="instr-saved-msg" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Saved.</p>
+        </div>
+    </div>
+
+    <!-- COMMAND PALETTE -->
+    <div id="cmd-palette-overlay" onclick="if(event.target===this)closeCmdPalette()">
+        <div class="cmd-palette-box">
+            <input type="text" id="cmd-palette-input" placeholder="Type a command…" autocomplete="off">
+            <div class="cmd-list" id="cmd-list"></div>
+        </div>
+    </div>
+
+    <!-- REWRITE FLOATING TOOLBAR -->
+    <div id="rewrite-toolbar">
+        <button type="button" onclick="rewriteSelection('shorten')">Shorten</button>
+        <button type="button" onclick="rewriteSelection('expand')">Expand</button>
+        <button type="button" onclick="rewriteSelection('formal')">Formal</button>
+        <button type="button" onclick="rewriteSelection('simple')">Simplify</button>
+        <button type="button" onclick="rewriteSelection('urdu')">Urdu</button>
+    </div>
+
 </body>
 </html>
