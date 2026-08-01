@@ -2146,6 +2146,148 @@
         body.theme-dark .prompt-lib-item { color: #ddd; }
         body.theme-dark .prompt-lib-item:hover { background: #222; }
 
+
+        .recent-chat-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            width: 100%;
+            border-radius: 10px;
+            position: relative;
+        }
+        .recent-chat-row:hover { background: rgba(0,0,0,0.04); }
+        body.theme-dark .recent-chat-row:hover { background: rgba(255,255,255,0.06); }
+        .recent-chat-item {
+            flex: 1;
+            min-width: 0;
+            padding: 9px 8px 9px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #444;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-family: inherit;
+            display: block;
+            transition: background 0.15s;
+        }
+        .recent-chat-item:hover { color: #111; }
+        .recent-chat-item.active-chat {
+            background: rgba(0,0,0,0.07);
+            color: #111;
+            font-weight: 500;
+        }
+        .chat-item-actions {
+            display: none;
+            flex-shrink: 0;
+            gap: 2px;
+            padding-right: 4px;
+        }
+        .recent-chat-row:hover .chat-item-actions,
+        .recent-chat-row.active-row .chat-item-actions { display: flex; }
+        .chat-item-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 5px;
+            border-radius: 6px;
+            color: #888;
+            line-height: 1;
+        }
+        .chat-item-btn:hover { background: rgba(0,0,0,0.08); color: #111; }
+        .chat-item-btn.danger:hover { background: #fef2f2; color: #dc2626; }
+        body.theme-dark .chat-item-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        body.theme-dark .chat-item-btn.danger:hover { background: rgba(220,38,38,0.2); color: #f87171; }
+
+        .onboard-banner {
+            display: none;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+            border: 1px solid #c7d2fe;
+            border-radius: 16px;
+            padding: 16px 18px;
+            position: relative;
+            text-align: left;
+        }
+        .onboard-banner.visible { display: block; }
+        body.theme-dark .onboard-banner {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border-color: #4338ca;
+        }
+        .onboard-banner h4 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            color: #312e81;
+        }
+        body.theme-dark .onboard-banner h4 { color: #e0e7ff; }
+        .onboard-banner p {
+            margin: 0;
+            font-size: 13px;
+            color: #4338ca;
+            line-height: 1.5;
+        }
+        body.theme-dark .onboard-banner p { color: #c7d2fe; }
+        .onboard-banner .ob-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #6366f1;
+            line-height: 1;
+        }
+        .onboard-banner .ob-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .onboard-banner .ob-actions button {
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .onboard-banner .ob-actions button.secondary {
+            background: transparent;
+            color: #4f46e5;
+            border: 1px solid #a5b4fc;
+        }
+        body.theme-dark .onboard-banner .ob-actions button.secondary {
+            color: #c7d2fe;
+            border-color: #6366f1;
+        }
+        .search-hit-snippet {
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 400;
+        }
+        mark.search-hl {
+            background: #fef08a;
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
     </style>
 </head>
 <body>
@@ -2294,7 +2436,7 @@
                     <button type="button" class="nav-item" title="Command palette (⌘K)" onclick="openCmdPalette()">
                         <span class="icon">⌘</span><span class="label">Commands</span>
                     </button>
-                    <input type="text" id="chat-search-input" placeholder="Search chats..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
+                    <input type="text" id="chat-search-input" placeholder="Search titles & messages..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
                 </div>
                 <div class="sidebar-mid">
                     <div class="sidebar-section-label" style="display:flex;align-items:center;justify-content:space-between;">
@@ -2336,6 +2478,15 @@
                         <div id="greeting-banner-hub" class="greeting-header-title">
                             <span class="icon">✨</span>
                             <span id="greeting-txt-hook">What can I help with?</span>
+                        </div>
+                        <div id="onboard-banner" class="onboard-banner">
+                            <button type="button" class="ob-close" onclick="dismissOnboarding()" title="Dismiss">×</button>
+                            <h4>Welcome to Scribe AI</h4>
+                            <p>Free plan: <strong>15 chats</strong> total and <strong>1 AI image per day</strong>. Use starters below, or press <strong>Ctrl/Cmd+K</strong> for commands. Upgrade anytime for unlimited chats &amp; more images.</p>
+                            <div class="ob-actions">
+                                <button type="button" onclick="togglePricingModal()">See plans</button>
+                                <button type="button" class="secondary" onclick="dismissOnboarding()">Got it</button>
+                            </div>
                         </div>
                         <div id="starters-wrap" class="starters-grid">
                             <button type="button" class="starter-card" onclick="useStarter(this)" data-prompt="Draft a professional email about: ">
@@ -3179,6 +3330,23 @@
             renderRecentChats();
             renderProjects();
             updatePlanUI();
+            maybeShowOnboarding();
+        }
+
+
+        function dismissOnboarding() {
+            safeStorage.setItem('scribe_onboard_done', '1');
+            const b = document.getElementById('onboard-banner');
+            if (b) b.classList.remove('visible');
+        }
+        function maybeShowOnboarding() {
+            const b = document.getElementById('onboard-banner');
+            if (!b) return;
+            if (safeStorage.getItem('scribe_onboard_done') === '1') {
+                b.classList.remove('visible');
+                return;
+            }
+            b.classList.add('visible');
         }
 
         function configureGreetingBanner() {
@@ -3208,25 +3376,106 @@
             return t.length > 42 ? t.slice(0, 42) + '…' : t;
         }
 
+        function chatMatchesQuery(chat, q) {
+            if (!q) return { match: true, snippet: '' };
+            const ql = q.toLowerCase();
+            if ((chat.title || '').toLowerCase().includes(ql)) {
+                return { match: true, snippet: '' };
+            }
+            const msgs = chat.messages || [];
+            for (const m of msgs) {
+                const t = (m.text || '');
+                const idx = t.toLowerCase().indexOf(ql);
+                if (idx >= 0) {
+                    const start = Math.max(0, idx - 24);
+                    const end = Math.min(t.length, idx + q.length + 36);
+                    let snip = (start > 0 ? '…' : '') + t.slice(start, end).replace(/\s+/g, ' ') + (end < t.length ? '…' : '');
+                    // highlight query in snippet (escaped later)
+                    return { match: true, snippet: snip, query: q };
+                }
+            }
+            return { match: false, snippet: '' };
+        }
+
         function renderRecentChats(filterText) {
             const listEl = document.getElementById('recent-chats-list');
             if (!listEl) return;
             let chats = getChatHistory();
-            if (filterText) {
-                const q = filterText.toLowerCase();
-                chats = chats.filter(c => (c.title || '').toLowerCase().includes(q));
+            const q = (filterText || '').trim();
+            const rows = [];
+            for (const c of chats) {
+                const hit = chatMatchesQuery(c, q);
+                if (!hit.match) continue;
+                rows.push({ chat: c, snippet: hit.snippet, query: hit.query || q });
             }
-            if (!chats.length) {
-                listEl.innerHTML = '<div class="recent-empty">No chats yet</div>';
+            if (!rows.length) {
+                listEl.innerHTML = q
+                    ? '<div class="recent-empty">No chats match "' + escapeHtml(q) + '"</div>'
+                    : '<div class="recent-empty">No chats yet</div>';
                 return;
             }
-            listEl.innerHTML = chats.map(c => `
-                <button type="button" class="recent-chat-item ${c.id === currentChatId ? 'active-chat' : ''}"
-                    onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
-                    ${c.title || 'Untitled chat'}
-                </button>
-            `).join('');
+            listEl.innerHTML = rows.map(({ chat: c, snippet, query }) => {
+                const title = escapeHtml(c.title || 'Untitled chat');
+                let snipHtml = '';
+                if (snippet && query) {
+                    const safe = escapeHtml(snippet);
+                    const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+                    snipHtml = '<span class="search-hit-snippet">' + safe.replace(re, '<mark class="search-hl">$1</mark>') + '</span>';
+                }
+                const active = c.id === currentChatId ? 'active-chat' : '';
+                const activeRow = c.id === currentChatId ? 'active-row' : '';
+                return `<div class="recent-chat-row ${activeRow}">
+                    <button type="button" class="recent-chat-item ${active}"
+                        onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
+                        ${title}${snipHtml}
+                    </button>
+                    <div class="chat-item-actions">
+                        <button type="button" class="chat-item-btn" title="Rename" onclick="event.stopPropagation();renameChat('${c.id}')">✏️</button>
+                        <button type="button" class="chat-item-btn danger" title="Delete" onclick="event.stopPropagation();deleteChat('${c.id}')">🗑</button>
+                    </div>
+                </div>`;
+            }).join('');
         }
+
+        function renameChat(id) {
+            const chats = getChatHistory();
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return;
+            const next = prompt('Rename chat:', chat.title || '');
+            if (next === null) return;
+            const t = next.trim();
+            if (!t) return;
+            chat.title = t.slice(0, 80);
+            chat.updatedAt = Date.now();
+            saveChatHistory(chats);
+            const input = document.getElementById('chat-search-input');
+            renderRecentChats(input && input.style.display !== 'none' ? input.value.trim() : '');
+        }
+
+        function deleteChat(id) {
+            if (!confirm('Delete this chat? This cannot be undone.')) return;
+            let chats = getChatHistory().filter(c => c.id !== id);
+            saveChatHistory(chats);
+            // remove from projects
+            try {
+                const projects = getProjects();
+                let changed = false;
+                projects.forEach(p => {
+                    if (p.chatIds && p.chatIds.includes(id)) {
+                        p.chatIds = p.chatIds.filter(x => x !== id);
+                        changed = true;
+                    }
+                });
+                if (changed) saveProjects(projects);
+            } catch (e) {}
+            if (currentChatId === id) {
+                startNewChat();
+            } else {
+                const input = document.getElementById('chat-search-input');
+                renderRecentChats(input && input.style.display !== 'none' ? input.value.trim() : '');
+            }
+        }
+
 
         function startNewChat() {
             currentChatId = null;
@@ -3356,6 +3605,7 @@
             if (!keepIncognitoMsg) configureGreetingBanner();
             renderRecentChats();
             renderProjects();
+            maybeShowOnboarding();
         }
 
         // Attach menu
@@ -4385,6 +4635,8 @@
             lastUserPromptForRegen = promptPayload;
             const starters = document.getElementById('starters-wrap');
             if (starters) starters.style.display = 'none';
+            const ob = document.getElementById('onboard-banner');
+            if (ob) ob.classList.remove('visible');
             greetingBanner.style.display = 'none';
             chatConsole.style.display = 'flex';
 
@@ -4466,7 +4718,12 @@
                                 const parsed = JSON.parse(dataStr);
                                 if (parsed.text) {
                                     aiResponseText += parsed.text;
-                                    targetOutputBox.textContent = aiResponseText;
+                                    // Live markdown-ish formatting while streaming
+                                    try {
+                                        targetOutputBox.innerHTML = formatMessageHtml(aiResponseText);
+                                    } catch (e) {
+                                        targetOutputBox.textContent = aiResponseText;
+                                    }
                                     chatConsole.scrollTop = chatConsole.scrollHeight;
                                 }
                             } catch (e) {}
@@ -4608,11 +4865,23 @@
                 listEl.innerHTML = '<div class="recent-empty">No chats in this project</div>';
                 return;
             }
-            listEl.innerHTML = chats.map(c => `
-                <button type="button" class="recent-chat-item ${c.id === currentChatId ? 'active-chat' : ''}"
-                    onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
-                    ${c.title || 'Untitled chat'}
-                </button>`).join('');
+            // Temporarily filter via renderRecentChats by monkey-patching getChatHistory is heavy;
+            // render with actions inline
+            listEl.innerHTML = chats.map(c => {
+                const title = escapeHtml(c.title || 'Untitled chat');
+                const active = c.id === currentChatId ? 'active-chat' : '';
+                const activeRow = c.id === currentChatId ? 'active-row' : '';
+                return `<div class="recent-chat-row ${activeRow}">
+                    <button type="button" class="recent-chat-item ${active}"
+                        onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
+                        ${title}
+                    </button>
+                    <div class="chat-item-actions">
+                        <button type="button" class="chat-item-btn" title="Rename" onclick="event.stopPropagation();renameChat('${c.id}')">✏️</button>
+                        <button type="button" class="chat-item-btn danger" title="Delete" onclick="event.stopPropagation();deleteChat('${c.id}')">🗑</button>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         // Hook project into persist - wrap after save
