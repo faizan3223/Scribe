@@ -2288,6 +2288,126 @@
             border-radius: 2px;
         }
 
+
+        /* ---- Final polish pack ---- */
+        .toast-stack {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: min(360px, 92vw);
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            background: #111;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
+            animation: toastIn .25s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast.success { background: #166534; }
+        .toast.error { background: #991b1b; }
+        .toast.info { background: #1e3a8a; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        body.theme-dark .toast { box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+
+        .scroll-bottom-btn {
+            display: none;
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 12;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 4px 16px rgba(0,0,0,.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+        }
+        .scroll-bottom-btn.visible { display: flex; }
+        body.theme-dark .scroll-bottom-btn {
+            background: #1a1a1f;
+            border-color: #333;
+            color: #eee;
+        }
+
+        .prompt-meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            padding: 0 4px;
+            font-size: 11px;
+            color: #999;
+        }
+        .master-prompt-enclosure.drag-over {
+            outline: 2px dashed #4f46e5;
+            outline-offset: 2px;
+            background: rgba(79,70,229,.04);
+        }
+
+        .sidebar.collapsed {
+            width: 72px;
+            min-width: 72px;
+        }
+        .sidebar.collapsed .label,
+        .sidebar.collapsed .sidebar-section-label,
+        .sidebar.collapsed .profile-info,
+        .sidebar.collapsed .btn-add-project,
+        .sidebar.collapsed .recent-chat-item,
+        .sidebar.collapsed .search-hit-snippet,
+        .sidebar.collapsed .chat-item-actions,
+        .sidebar.collapsed #chat-search-input,
+        .sidebar.collapsed .project-item span:not(.icon),
+        .sidebar.collapsed .nav-logo-text {
+            display: none !important;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 0;
+        }
+        .sidebar.collapsed .nav-item .icon { margin: 0; }
+        .sidebar.collapsed .profile-block { justify-content: center; }
+        .sidebar.collapsed .recent-chat-row { display: none; }
+        .sidebar.collapsed #projects-list { display: none; }
+
+        .msg-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 6px;
+        }
+        .pin-badge {
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .chat-preview-line {
+            display: block;
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 400;
+        }
+
     </style>
 </head>
 <body>
@@ -2457,11 +2577,13 @@
             <main class="main-workspace" id="main-workspace">
                 <header class="top-subnav">
                     <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" title="Menu" onclick="toggleMobileSidebar()">☰</button>
+                    <button type="button" class="theme-toggle-btn" id="sidebar-collapse-btn" title="Collapse sidebar" onclick="toggleSidebarCollapse()">«</button>
                     <span class="badge-tier" id="badge-tier">Free · 15 chats</span>
                     <span class="usage-chip" id="usage-chip">Chats 0/15 · Img 0/1</span>
                     <span class="incognito-badge" id="incognito-badge">🕶️ Incognito</span>
                     <button class="btn-upgrade-top" onclick="togglePricingModal()">Upgrade</button>
                     <div style="position:relative;">
+                        <button type="button" class="btn-upgrade-top" onclick="clearCurrentChat()" title="Clear this chat">Clear</button>
                         <button type="button" class="btn-upgrade-top" onclick="toggleExportMenu(event)" title="Export chat">Export ▾</button>
                         <div class="export-menu" id="export-menu">
                             <button type="button" onclick="exportChat('md')">📄 Markdown (.md)</button>
@@ -2510,8 +2632,9 @@
                         </div>
 
                         <div id="chat-stream-console" class="chat-console-body"></div>
+                        <button type="button" class="scroll-bottom-btn" id="scroll-bottom-btn" title="Scroll to bottom" onclick="scrollChatToBottom()">↓</button>
 
-                        <div class="master-prompt-enclosure">
+                        <div class="master-prompt-enclosure" id="master-prompt-enclosure">
                             <div id="attachment-preview-row" class="attachment-preview-row"></div>
                             <textarea id="prompt-input" placeholder="Ask Scribe" rows="1"></textarea>
                             <div class="prompt-controls-dock">
@@ -2548,6 +2671,10 @@
                                     <button type="button" id="stop-gen-btn" class="btn-stop-gen" title="Stop generating" onclick="stopGenerating()">⏹</button>
                                     <button id="submit-prompt-btn" class="btn-prompt-deliver">➤</button>
                                 </div>
+                            </div>
+                            <div class="prompt-meta-bar">
+                                <span id="prompt-hint">Enter to send · Shift+Enter new line · Drop image here</span>
+                                <span id="prompt-char-count">0</span>
                             </div>
                         </div>
                     </div>
@@ -2794,6 +2921,88 @@
 
         // Backend (Cloudflare Worker) — same as your original
         const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
+
+
+        // ---- Toast ----
+        function showToast(msg, type) {
+            const stack = document.getElementById('toast-stack');
+            if (!stack) { try { console.log(msg); } catch(e) {} return; }
+            const el = document.createElement('div');
+            el.className = 'toast ' + (type || 'info');
+            el.textContent = msg;
+            stack.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity .3s';
+                setTimeout(() => el.remove(), 300);
+            }, 3200);
+        }
+
+        // ---- Sidebar collapse ----
+        function toggleSidebarCollapse() {
+            const sb = document.querySelector('.sidebar');
+            if (!sb) return;
+            sb.classList.toggle('collapsed');
+            const btn = document.getElementById('sidebar-collapse-btn');
+            if (btn) btn.textContent = sb.classList.contains('collapsed') ? '»' : '«';
+            safeStorage.setItem('scribe_sidebar_collapsed', sb.classList.contains('collapsed') ? '1' : '0');
+        }
+        function restoreSidebarCollapse() {
+            if (safeStorage.getItem('scribe_sidebar_collapsed') === '1') {
+                const sb = document.querySelector('.sidebar');
+                if (sb) sb.classList.add('collapsed');
+                const btn = document.getElementById('sidebar-collapse-btn');
+                if (btn) btn.textContent = '»';
+            }
+        }
+
+        // ---- Scroll to bottom ----
+        function scrollChatToBottom() {
+            if (chatConsole) chatConsole.scrollTop = chatConsole.scrollHeight;
+        }
+        function updateScrollBottomBtn() {
+            const btn = document.getElementById('scroll-bottom-btn');
+            if (!btn || !chatConsole) return;
+            const nearBottom = chatConsole.scrollHeight - chatConsole.scrollTop - chatConsole.clientHeight < 80;
+            btn.classList.toggle('visible', chatConsole.style.display === 'flex' && !nearBottom && chatConsole.scrollHeight > chatConsole.clientHeight + 40);
+        }
+
+        // ---- Clear chat ----
+        function clearCurrentChat() {
+            if (!currentChatMessages.length && (!chatConsole || !chatConsole.innerHTML)) {
+                showToast('Nothing to clear', 'info');
+                return;
+            }
+            if (!confirm('Clear this conversation from the screen? (Saved history stays unless you delete the chat)')) return;
+            chatConsole.innerHTML = '';
+            currentChatMessages = [];
+            // keep currentChatId so next message continues thread, or null for fresh
+            currentChatId = null;
+            currentChatMessages = [];
+            closeArtifact();
+            resetDashboardView(isIncognito);
+            showToast('Chat cleared', 'success');
+        }
+
+        // ---- Pin chat ----
+        function togglePinChat(id) {
+            const chats = getChatHistory();
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return;
+            chat.pinned = !chat.pinned;
+            chat.updatedAt = Date.now();
+            saveChatHistory(chats);
+            const input = document.getElementById('chat-search-input');
+            renderRecentChats(input && input.style.display !== 'none' ? input.value.trim() : '');
+            showToast(chat.pinned ? 'Chat pinned' : 'Chat unpinned', 'success');
+        }
+
+        function formatMsgTime(ts) {
+            if (!ts) ts = Date.now();
+            const d = new Date(ts);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
 
         let landingAuthMode = 'login';
         let currentNickname = '';
@@ -3331,6 +3540,7 @@
             renderProjects();
             updatePlanUI();
             maybeShowOnboarding();
+            restoreSidebarCollapse();
         }
 
 
@@ -3414,6 +3624,13 @@
                     : '<div class="recent-empty">No chats yet</div>';
                 return;
             }
+            // Pinned first
+            rows.sort((a, b) => {
+                const ap = a.chat.pinned ? 1 : 0;
+                const bp = b.chat.pinned ? 1 : 0;
+                if (ap !== bp) return bp - ap;
+                return (b.chat.updatedAt || 0) - (a.chat.updatedAt || 0);
+            });
             listEl.innerHTML = rows.map(({ chat: c, snippet, query }) => {
                 const title = escapeHtml(c.title || 'Untitled chat');
                 let snipHtml = '';
@@ -3421,15 +3638,25 @@
                     const safe = escapeHtml(snippet);
                     const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
                     snipHtml = '<span class="search-hit-snippet">' + safe.replace(re, '<mark class="search-hl">$1</mark>') + '</span>';
+                } else {
+                    // last message preview
+                    const msgs = c.messages || [];
+                    if (msgs.length) {
+                        const last = msgs[msgs.length - 1];
+                        const prev = (last.text || '').replace(/\s+/g, ' ').slice(0, 60);
+                        if (prev) snipHtml = '<span class="chat-preview-line">' + escapeHtml(prev) + (last.text && last.text.length > 60 ? '…' : '') + '</span>';
+                    }
                 }
                 const active = c.id === currentChatId ? 'active-chat' : '';
                 const activeRow = c.id === currentChatId ? 'active-row' : '';
+                const pinIcon = c.pinned ? '<span class="pin-badge">📌</span>' : '';
                 return `<div class="recent-chat-row ${activeRow}">
                     <button type="button" class="recent-chat-item ${active}"
                         onclick="loadChat('${c.id}')" title="${(c.title || '').replace(/"/g, '&quot;')}">
-                        ${title}${snipHtml}
+                        ${pinIcon}${title}${snipHtml}
                     </button>
                     <div class="chat-item-actions">
+                        <button type="button" class="chat-item-btn" title="${c.pinned ? 'Unpin' : 'Pin'}" onclick="event.stopPropagation();togglePinChat('${c.id}')">${c.pinned ? '📌' : '📍'}</button>
                         <button type="button" class="chat-item-btn" title="Rename" onclick="event.stopPropagation();renameChat('${c.id}')">✏️</button>
                         <button type="button" class="chat-item-btn danger" title="Delete" onclick="event.stopPropagation();deleteChat('${c.id}')">🗑</button>
                     </div>
@@ -3814,7 +4041,7 @@
             if (!canGenerateImage()) return;
             const prompt = promptInput.value.trim();
             if (!prompt) {
-                alert("Pehle image ke liye prompt likho (jaise: a cat on the moon)");
+                showToast("Pehle image ke liye prompt likho", "error");
                 promptInput.focus();
                 return;
             }
@@ -3872,13 +4099,14 @@
             }
             incImageCount();
             renderAttachmentPreviews();
+            showToast("Image ready in prompt area", "success");
         }
 
         function triggerGenerateVideo() {
             attachMenu.classList.remove('open');
             const plan = getUserPlan();
             if (plan === 'free') {
-                alert('Video generation is a Pro/Ultra feature. Please upgrade.');
+                showToast('Video is Pro/Ultra only — upgrade', 'info');
                 togglePricingModal();
                 return;
             }
@@ -4254,6 +4482,8 @@
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
             if (l === 'css') {
@@ -4294,6 +4524,8 @@
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
             if (l === 'javascript' || l === 'js') {
@@ -4343,6 +4575,8 @@
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
             // Fallback: treat as HTML fragment
@@ -4376,6 +4610,8 @@
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
         }
 
@@ -4498,17 +4734,74 @@
             return `${body}
                 <div class="msg-actions">
                     <button type="button" class="msg-action-btn" onclick="speakText(document.getElementById('${boxId}').dataset.speak || '')">🔊 Suno</button>
-                    <button type="button" class="msg-action-btn" onclick="navigator.clipboard.writeText(document.getElementById('${boxId}').dataset.speak || '')">Copy</button>
+                    <button type="button" class="msg-action-btn" onclick="navigator.clipboard.writeText(document.getElementById('${boxId}').dataset.speak || '').then(()=>showToast('Copied','success')).catch(()=>{})">Copy</button>
                     <button type="button" class="msg-action-btn" onclick="regenerateFromBox('${boxId}')">↻ Regenerate</button>
                     <button type="button" class="msg-action-btn" onclick="editLastUserPrompt('${safePrompt}')">✏️ Edit</button>
-                </div>`;
+                </div>
+                <div class="msg-time">${formatMsgTime()}</div>`;
         }
 
         promptInput.addEventListener('input', () => {
             submitBtn.classList.toggle('active-ready', promptInput.value.trim() !== '');
             promptInput.style.height = 'auto';
             promptInput.style.height = promptInput.scrollHeight + 'px';
+            const cc = document.getElementById('prompt-char-count');
+            if (cc) cc.textContent = promptInput.value.length ? (promptInput.value.length + ' chars') : '0';
         });
+
+        // Drag & drop images onto prompt
+        (function setupPromptDrop() {
+            const box = document.getElementById('master-prompt-enclosure') || promptInput;
+            if (!box) return;
+            ['dragenter','dragover'].forEach(ev => box.addEventListener(ev, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                box.classList.add('drag-over');
+            }));
+            ['dragleave','drop'].forEach(ev => box.addEventListener(ev, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (ev === 'dragleave') box.classList.remove('drag-over');
+            }));
+            box.addEventListener('drop', (e) => {
+                box.classList.remove('drag-over');
+                const files = e.dataTransfer && e.dataTransfer.files;
+                if (!files || !files.length) return;
+                Array.from(files).forEach(f => {
+                    if (f.type.startsWith('image/')) handleFileChosen(f, true);
+                    else handleFileChosen(f, false);
+                });
+                showToast('File added', 'success');
+            });
+        })();
+
+        // Paste image from clipboard
+        promptInput.addEventListener('paste', (e) => {
+            const items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (const it of items) {
+                if (it.type && it.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const file = it.getAsFile();
+                    if (file) {
+                        handleFileChosen(file, true);
+                        showToast('Image pasted', 'success');
+                    }
+                    break;
+                }
+            }
+        });
+
+        if (chatConsole) {
+            chatConsole.addEventListener('scroll', updateScrollBottomBtn);
+        }
+        window.addEventListener('beforeunload', (e) => {
+            if (typeof isGenerating !== 'undefined' && isGenerating) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
 
         function openModal(id) {
             const el = document.getElementById(id);
@@ -4658,7 +4951,7 @@
                         }).join('') + '</div>';
                 }
 
-                const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${escapeHtml(promptPayload)}${attachmentsHtml}</div><div class="user-avatar-bubble">${userInitial}</div></div>`;
+                const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${escapeHtml(promptPayload)}${attachmentsHtml}<div class="msg-time">${formatMsgTime()}</div></div><div class="user-avatar-bubble">${userInitial}</div></div>`;
                 chatConsole.insertAdjacentHTML('beforeend', userHtml);
                 wireVoiceOnPlay(chatConsole);
             }
@@ -4725,6 +5018,7 @@
                                         targetOutputBox.textContent = aiResponseText;
                                     }
                                     chatConsole.scrollTop = chatConsole.scrollHeight;
+                                    updateScrollBottomBtn();
                                 }
                             } catch (e) {}
                         }
@@ -5083,6 +5377,8 @@
             { id: 'project', label: 'New project', hint: '', run: () => { closeCmdPalette(); addProject(); } },
             { id: 'prompts', label: 'Prompt library', hint: '', run: () => { closeCmdPalette(); togglePromptLibrary(); } },
             { id: 'upgrade', label: 'Upgrade plan', hint: '', run: () => { closeCmdPalette(); togglePricingModal(); } },
+            { id: 'clear', label: 'Clear current chat', hint: '', run: () => { closeCmdPalette(); clearCurrentChat(); } },
+            { id: 'sidebar', label: 'Toggle sidebar width', hint: '', run: () => { closeCmdPalette(); toggleSidebarCollapse(); } },
         ];
         let cmdActiveIdx = 0;
 
@@ -5341,5 +5637,7 @@
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
 </body>
 </html>
