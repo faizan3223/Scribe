@@ -10,7 +10,8 @@
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230a0a0a' width='32' height='32' rx='8'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='20' font-weight='700' fill='%23fff'%3ES%3C/text%3E%3Cline x1='6' y1='26' x2='26' y2='6' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
     <title>Scribe AI Workspace</title>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437"
+     crossorigin="anonymous"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -3955,15 +3956,60 @@
             e.target.value = '';
         });
 
+        function compressImageDataUrl(dataUrl, maxEdge, quality) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.width, h = img.height;
+                    const scale = Math.min(1, maxEdge / Math.max(w, h));
+                    w = Math.round(w * scale);
+                    h = Math.round(h * scale);
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    const ctx = c.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(c.toDataURL('image/jpeg', quality || 0.85));
+                };
+                img.onerror = () => resolve(dataUrl);
+                img.src = dataUrl;
+            });
+        }
+
+        function fileToDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const r = new FileReader();
+                r.onload = () => resolve(r.result);
+                r.onerror = reject;
+                r.readAsDataURL(file);
+            });
+        }
+
         async function handleFileChosen(file, isImage) {
             if (!file) return;
             if (isImage) {
+                let dataUrl = '';
+                try {
+                    dataUrl = await fileToDataURL(file);
+                } catch (e) {
+                    dataUrl = URL.createObjectURL(file);
+                }
+                // compress large images for API (max edge ~1280)
+                try {
+                    dataUrl = await compressImageDataUrl(dataUrl, 1280, 0.82);
+                } catch (e) {}
                 pendingAttachments.push({
-                    name: file.name,
+                    name: file.name || 'image.png',
                     isImage: true,
-                    url: URL.createObjectURL(file)
+                    url: dataUrl,
+                    dataUrl: dataUrl,
+                    mime: file.type || 'image/jpeg'
                 });
                 renderAttachmentPreviews();
+                if (!promptInput.value.trim()) {
+                    promptInput.value = 'Describe this image in detail and answer questions about what you see.';
+                    promptInput.dispatchEvent(new Event('input'));
+                }
+                try { showToast('Image attached — AI will see it', 'success'); } catch (e) {}
                 return;
             }
             const extracted = await extractTextFromFile(file);
@@ -5006,8 +5052,18 @@
 
         async function processPromptSubmission(forcedText, opts) {
             opts = opts || {};
-            const promptPayload = (typeof forcedText === 'string' ? forcedText : promptInput.value).trim();
-            if (!promptPayload || isGenerating) return;
+            let promptPayload = (typeof forcedText === 'string' ? forcedText : promptInput.value).trim();
+            const imagesForApi = (pendingAttachments || [])
+                .filter(a => a.isImage && (a.dataUrl || a.url))
+                .map(a => ({
+                    name: a.name || 'image',
+                    mime: a.mime || 'image/jpeg',
+                    data: a.dataUrl || a.url
+                }));
+            if (!promptPayload && imagesForApi.length) {
+                promptPayload = 'Describe this image in detail. What do you see? Answer clearly.';
+            }
+            if ((!promptPayload && !imagesForApi.length) || isGenerating) return;
 
             // Free plan: 15 chats (count each new user question, not regenerate)
             if (!opts.skipUserBubble && !opts.skipLimit) {
@@ -5050,6 +5106,7 @@
                 submitBtn.classList.remove('active-ready');
                 promptInput.style.height = '50px';
             }
+            // keep imagesForApi already captured above; clear UI attachments
             pendingAttachments = [];
             renderAttachmentPreviews();
             chatConsole.scrollTop = chatConsole.scrollHeight;
@@ -5068,13 +5125,23 @@
             setGeneratingUI(true);
 
             const systemCtx = buildSystemContext();
-            const question = systemCtx ? systemCtx + '\n\nUser: ' + promptPayload : promptPayload;
+            let question = systemCtx ? systemCtx + '\n\nUser: ' + promptPayload : promptPayload;
+            if (imagesForApi.length) {
+                question += '\n\n[User attached ' + imagesForApi.length + ' image(s). Analyze the image content and answer based on what you see. Image data is included in the request.]';
+            }
 
             try {
                 const response = await fetch(`${workerURL}/api/ask-question`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, tone: (document.getElementById('tone-select')||{}).value, instructions: getCustomInstructions() }),
+                    body: JSON.stringify({
+                        question,
+                        tone: (document.getElementById('tone-select')||{}).value,
+                        instructions: getCustomInstructions(),
+                        images: imagesForApi,
+                        hasImage: imagesForApi.length > 0,
+                        image: imagesForApi[0] ? imagesForApi[0].data : null
+                    }),
                     signal: activeAbort.signal
                 });
 
