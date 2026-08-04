@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AIclaude ai alternative, free sites like claude ai, best ai chatbot alternative, claude 3.5 sonnet alternative free, websites like claude ai, advanced ai chatbot online, free ai coding assistant, best ai for long text analysis, smart ai assistant free, next gen ai chatbot, ai text writer free no login, scribe ai text generator, ai essay writer and researcher, professional ai copywriting tool, ai humanlike text writer, how to analyze large pdf with ai free, best free ai for writing code, free ai chatbot with long context window, ai that writes like a human freeclaude code free online, agentic ai tool free, free ai bypass jailbreak, uncensored ai chatbot no sign up, ai agent chatbot free, best ai for coding python free, humanlike ai content generator, free deepseek alternative, model context protocol client free, ai text humanizer without login,AI.">
+    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
     <meta name="theme-color" content="#0a0a0a">
     <meta property="og:title" content="Scribe AI">
     <meta property="og:description" content="Write faster, think clearer — your AI writing workspace.">
     <meta property="og:type" content="website">
-    <meta name="monetag" content="da6ab99e749e02fd6e66ac78124f9cc3">
-
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230a0a0a' width='32' height='32' rx='8'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='20' font-weight='700' fill='%23fff'%3ES%3C/text%3E%3Cline x1='6' y1='26' x2='26' y2='6' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
     <title>Scribe AI Workspace</title>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437" crossorigin="anonymous"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -2413,6 +2409,90 @@
             font-weight: 400;
         }
 
+
+        /* Realistic interactive buttons */
+        .btn-try-intro,
+        .btn-email-intro,
+        .btn-try-scribe,
+        .landing-submit-btn,
+        .btn-google,
+        .price-tier-btn,
+        .btn-upgrade-top,
+        .contact-submit-btn,
+        .auth-tab-btn {
+            transition: background-color .15s ease, transform .12s ease, box-shadow .15s ease, border-color .15s ease, opacity .15s ease;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .btn-try-intro:active,
+        .btn-email-intro:active,
+        .btn-try-scribe:active,
+        .landing-submit-btn:active,
+        .btn-google:active,
+        .price-tier-btn:active:not(:disabled),
+        .btn-upgrade-top:active,
+        .contact-submit-btn:active {
+            transform: scale(0.97);
+        }
+        .btn-try-intro:hover,
+        .btn-try-scribe:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 4px 14px rgba(0,0,0,.18);
+        }
+        .btn-email-intro:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+        .landing-submit-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+        }
+        .landing-submit-btn:disabled,
+        .price-tier-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-google {
+            box-shadow: 0 1px 2px rgba(0,0,0,.06);
+        }
+        .btn-google:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+            background: #fafafa;
+        }
+        .intro-nav-links .link-btn,
+        .landing-nav-links span {
+            transition: color .15s ease, opacity .15s ease;
+            cursor: pointer;
+            padding: 4px 2px;
+        }
+        .intro-nav-links .link-btn:hover {
+            opacity: 0.85;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .landing-nav-links span:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .price-tier-btn:not(:disabled) {
+            cursor: pointer;
+        }
+        .price-tier-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+        }
+        .auth-tab-btn {
+            cursor: pointer;
+        }
+        .auth-tab-btn.active {
+            font-weight: 600;
+        }
+        button:focus-visible,
+        .link-btn:focus-visible {
+            outline: 2px solid #4f46e5;
+            outline-offset: 2px;
+        }
+
     </style>
 </head>
 <body>
@@ -2758,6 +2838,10 @@
                     <button class="price-tier-btn" onclick="handleUpgradeClick(this, 'ultra')">Upgrade — $100</button>
                 </div>
             </div>
+            <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:18px;line-height:1.5;">
+                Pro = <strong style="color:#e5e5e5;">$20/mo</strong> · Ultra = <strong style="color:#e5e5e5;">$100/mo</strong>.<br>
+                Checkout sends the exact amount to Stripe. If Ultra still shows $20, update your Worker price IDs.
+            </p>
         </div>
     </div>
 
@@ -5196,15 +5280,15 @@
         function openProfileSettings() {
             const dd = document.getElementById('profile-dropdown');
             if (dd) dd.classList.remove('open');
-            alert('Signed in as: ' + (currentUserEmail || 'unknown') + '\nNickname: ' + (currentNickname || '-'));
+            const msg = 'Signed in as ' + (currentUserEmail || 'unknown') + (currentNickname ? ' · ' + currentNickname : '');
+            try { showToast(msg, 'info'); } catch (e) { alert(msg); }
         }
         function confirmLogout() {
             const dd = document.getElementById('profile-dropdown');
             if (dd) dd.classList.remove('open');
-            if (confirm('Log out of Scribe?')) {
-                safeStorage.removeItem('user_session');
-                window.location.reload();
-            }
+            safeStorage.removeItem('user_session');
+            try { showToast('Signed out', 'info'); } catch (e) {}
+            window.location.reload();
         }
 
 
@@ -5500,42 +5584,58 @@
 
         async function handleUpgradeClick(btn, tier) {
             const original = btn.innerText;
-            const amount = PLAN_PRICES[tier] || (tier === 'ultra' ? 100 : 20);
-            btn.innerText = "Connecting...";
+            // Always map tier → dollars → cents for Stripe
+            const amountDollars = (tier === 'ultra') ? 100 : (tier === 'pro' ? 20 : (PLAN_PRICES[tier] || 20));
+            const unitAmountCents = amountDollars * 100; // Stripe uses cents: 2000 or 10000
+            btn.innerText = "Connecting to Stripe…";
+            btn.disabled = true;
+            safeStorage.setItem('scribe_pending_plan', tier);
+            safeStorage.setItem('scribe_pending_amount', String(amountDollars));
             try {
+                const payload = {
+                    tier: tier,
+                    plan: tier,
+                    amount: amountDollars,
+                    price: amountDollars,
+                    unit_amount: unitAmountCents,
+                    unitAmount: unitAmountCents,
+                    currency: 'usd',
+                    mode: 'subscription',
+                    productName: tier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build',
+                    product_name: tier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build',
+                    success_url: location.origin + location.pathname + '?checkout=success&plan=' + encodeURIComponent(tier) + '&amount=' + amountDollars,
+                    cancel_url: location.origin + location.pathname + '?checkout=cancel'
+                };
                 const r = await fetch(`${workerURL}/api/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tier,
-                        amount,
-                        price: amount,
-                        currency: 'usd',
-                        productName: tier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build'
-                    })
+                    body: JSON.stringify(payload)
                 });
-                const d = await r.json();
+                const d = await r.json().catch(() => ({}));
                 if (d.success && d.url) {
-                    // remember intended plan for return URL handling
-                    safeStorage.setItem('scribe_pending_plan', tier);
+                    // Verify server echoed correct amount if it returns one
+                    if (d.amount && Number(d.amount) !== amountDollars && Number(d.unit_amount) !== unitAmountCents) {
+                        console.warn('Stripe session amount mismatch', d);
+                    }
                     window.location.href = d.url;
                     return;
                 }
-                // Demo / offline: activate plan locally so correct tier works in UI
-                if (confirm('Payment server unavailable. Activate ' + tier.toUpperCase() + ' ($' + amount + '/mo) on this device for testing?')) {
+                // Fallback local unlock for demo when Worker has no separate Ultra price
+                if (confirm('Payment server unavailable or misconfigured.\n\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) on this device for testing?')) {
                     setUserPlan(tier);
                     safeStorage.removeItem('scribe_pending_plan');
-                    alert(tier.toUpperCase() + ' plan activated ($' + amount + '/mo).');
+                    try { showToast(tier.toUpperCase() + ' activated — $' + amountDollars + '/mo', 'success'); } catch (e) {}
                     togglePricingModal();
                 }
-            } catch {
-                if (confirm('Could not reach Stripe. Activate ' + tier.toUpperCase() + ' ($' + amount + '/mo) locally for testing?')) {
+            } catch (err) {
+                if (confirm('Could not reach Stripe.\n\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) locally for testing?')) {
                     setUserPlan(tier);
-                    alert(tier.toUpperCase() + ' plan activated.');
+                    try { showToast(tier.toUpperCase() + ' activated — $' + amountDollars + '/mo', 'success'); } catch (e) {}
                     togglePricingModal();
                 }
             } finally {
                 btn.innerText = original;
+                btn.disabled = false;
             }
         }
 
