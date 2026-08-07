@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI,BISE FSD ,claude ,chatgpt,grok,gemini,youtube,gmail,amazon,wordle,AI Mode conversation: google top searchgoogle top searchQuick results from the web:Google TrendsExplore search interest of terms and topics by time, location and popularity on Google Trends. ... Welcome to our data visualization project: where the Trends Data Team works with the best designers around the world to tell stories with data — and make the results open source. arrow_forwardVisit · Trending Now where you are. See what's spiking in Google Trends where you live. arrow_forwardVisit · The Shape of Dreams. A visual exploration of Google searches for the interpretation of dreams. arrow_forwardVisit · What are we searching for? A visual essay of what we're searching for throughout the day, night, and in between. arrow_forwardVisit · OECD Weekly Tracker of Economic Activity.Google Trends·https://trends.google.comGoogle TrendsExplore search interest of terms and topics by time, location and popularity on Google Trends.Google.com.hk·https://trends.google.com.pkAs of mid-2026, chatgpt is the most searched term globally on Google, followed closely by major digital platforms like youtube, amazon, and gmail.Top Global Google SearchesAccording to data compiled by Ahrefs for recent search volumes, the highest-ranking search terms are primarily utility-based and navigational landmarks:RankSearch KeywordEstimated Monthly Volume1chatgpt94,610,0002youtube86,140,0003amazon85,770,0004gmail58,010,0005wordle45,910,000How to Find What is Currently TrendingIf you are tracking shifting daily interests or regional data, you can use Google's official native tools:Google Trends: Displays real-time and daily search trends across different countries. You can filter by categories (such as entertainment, sports, or tech) to see what is spiking at any given moment.Google Keyword Planner: A free tool meant for advertisers that allows you to discover new keyword ideas and see precise historical monthly search volumes for specific terms.Are you looking for the top searches in a specific country, or are you trying to find trending topics for a particular niche like tech, gaming, or news?10 sitesGoogle TrendsGoogle Trends is a data visualization project that works with designers to tell stories with data. The Trends Data Team curates co...Google TrendsTrending Now: Stay on Top of Google Search Trends11-Sept-2024 — team in this video we'll talk about ways for you to stay on top of what's happening in Google search we'll take a different approa...4:32YouTube·Google Search CentralResearch Keywords for Campaigns with Keyword PlannerGoogle Keyword Planner is a free keyword search tool to help advertisers build keyword lists for search campaigns. It also include...Google Business ProfileShow allin europe country trend search in 20 search in commabbc news, weather, bbc sport, chatgpt, amazon, pornhub, google, amazon uk, wordle, gmail, rightmove, bbc football, premier league, translate, argos, sky news, google translate, sainsbury's, ebay, google maps.">
+    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
     <meta name="theme-color" content="#0a0a0a">
     <meta property="og:title" content="Scribe AI">
     <meta property="og:description" content="Write faster, think clearer — your AI writing workspace.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230a0a0a' width='32' height='32' rx='8'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='20' font-weight='700' fill='%23fff'%3ES%3C/text%3E%3Cline x1='6' y1='26' x2='26' y2='6' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
-    <meta name="clckd" content="f5118132480d3cace29e3ad52505437c" />
     <title>Scribe AI Workspace</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437"
      crossorigin="anonymous"></script>
@@ -2495,6 +2494,58 @@
             outline-offset: 2px;
         }
 
+
+        /* Grok-like simple sidebar icons */
+        .nav-item .icon {
+            font-size: 15px;
+            width: 22px;
+            text-align: center;
+            opacity: 0.85;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-item .icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .nav-item .dot-live {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3b82f6;
+            margin-left: 6px;
+            display: inline-block;
+        }
+        .sidebar-section-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #888;
+            text-transform: none;
+            letter-spacing: 0;
+            padding: 14px 12px 6px;
+        }
+        .recent-chat-item {
+            font-size: 13.5px;
+            color: #555;
+            padding: 8px 12px;
+        }
+        .chat-preview-line,
+        .search-hit-snippet {
+            display: none !important; /* clean history — titles only */
+        }
+        .nav-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 10px;
+        }
+        body.theme-dark .nav-divider { background: #2a2a2a; }
+
     </style>
 </head>
 <body>
@@ -2622,17 +2673,27 @@
                     <div class="nav-logo" title="Home" onclick="resetDashboardView()">
                         <img class="logo-img logo-img--nav" src="" alt="Scribe" data-scribe-logo>
                     </div>
+                    <button type="button" class="nav-item" id="nav-search" title="Search" onclick="toggleChatSearch()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><span class="label">Search</span>
+                    </button>
                     <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
-                        <span class="icon">➕</span><span class="label">New Chat</span>
+                        <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="label">New Chat</span>
                     </button>
-                    <button type="button" class="nav-item" id="nav-incognito" title="Incognito chat (not saved)" onclick="toggleIncognito()">
-                        <span class="icon">🕶️</span><span class="label">Incognito</span>
+                    <button type="button" class="nav-item" id="nav-imagine" title="Imagine — generate images" onclick="openImagineMode()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="label">Imagine</span><span class="dot-live" title="Live"></span>
                     </button>
-                    <button type="button" class="nav-item" id="nav-search" title="Search chats" onclick="toggleChatSearch()">
-                        <span class="icon">🔍</span><span class="label">Search chats</span>
+                    <button type="button" class="nav-item" id="nav-automations" title="Automations" onclick="openAutomations()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg></span><span class="label">Automations</span>
+                    </button>
+                    <button type="button" class="nav-item" id="nav-skills" title="Skills" onclick="openSkills()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="label">Skills</span>
+                    </button>
+                    <div class="nav-divider"></div>
+                    <button type="button" class="nav-item" id="nav-incognito" title="Incognito (not saved)" onclick="toggleIncognito()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M9 9c.5 1.5 1.5 2.5 3 2.5S14.5 10.5 15 9"/></svg></span><span class="label">Incognito</span>
                     </button>
                     <button type="button" class="nav-item" title="Pricing" onclick="togglePricingModal()">
-                        <span class="icon">💳</span><span class="label">Pricing</span>
+                        <span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="label">Pricing</span>
                     </button>
                     <button type="button" class="nav-item" title="Custom instructions" onclick="toggleCustomInstructions()">
                         <span class="icon">⚙️</span><span class="label">Instructions</span>
@@ -2640,18 +2701,18 @@
                     <button type="button" class="nav-item" title="Prompt library" onclick="togglePromptLibrary()">
                         <span class="icon">📚</span><span class="label">Prompts</span>
                     </button>
-                    <button type="button" class="nav-item" title="Command palette (⌘K)" onclick="openCmdPalette()">
+                    <button type="button" class="nav-item" title="Commands (⌘K)" onclick="openCmdPalette()">
                         <span class="icon">⌘</span><span class="label">Commands</span>
                     </button>
-                    <input type="text" id="chat-search-input" placeholder="Search titles & messages..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
+                    <input type="text" id="chat-search-input" placeholder="Search..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
                 </div>
                 <div class="sidebar-mid">
                     <div class="sidebar-section-label" style="display:flex;align-items:center;justify-content:space-between;">
                         <span>Projects</span>
-                        <button type="button" class="btn-add-project" onclick="addProject()" title="New project">+ New</button>
+                        <button type="button" class="btn-add-project" onclick="addProject()" title="New project">+ Add project</button>
                     </div>
                     <div id="projects-list"></div>
-                    <div class="sidebar-section-label">Recent chats</div>
+                    <div class="sidebar-section-label">History</div>
                     <div id="recent-chats-list">
                         <div class="recent-empty">No chats yet</div>
                     </div>
@@ -4619,6 +4680,42 @@
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
 
+
+    <!-- AUTOMATIONS -->
+    <div id="automations-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
+                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
+                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
+                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
+                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
+                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
+                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
@@ -4659,6 +4756,42 @@
         </div>
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
+    </div>
+
+
+    <!-- AUTOMATIONS -->
+    <div id="automations-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
+                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
+                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
+                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
+                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
+                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
+                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
+            </div>
+        </div>
     </div>
 
     <div class="toast-stack" id="toast-stack"></div>
@@ -4712,6 +4845,42 @@
         <div class="lb-caption" id="img-lightbox-caption"></div>
     </div>
 
+
+    <!-- AUTOMATIONS -->
+    <div id="automations-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
+                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
+                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
+                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
+                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
+                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
+                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
@@ -4745,6 +4914,42 @@
         </div>
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
+    </div>
+
+
+    <!-- AUTOMATIONS -->
+    <div id="automations-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
+                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
+                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
+                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
+                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
+                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
+                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
+            </div>
+        </div>
     </div>
 
     <div class="toast-stack" id="toast-stack"></div>
@@ -5016,8 +5221,30 @@
         function buildSystemContext() {
             const instr = getCustomInstructions();
             const tone = (document.getElementById('tone-select') || {}).value || 'default';
+            const skill = safeStorage.getItem('scribe_active_skill') || '';
             const parts = [];
-            parts.push('Format answers clearly like Claude: short paragraphs, bullet lists when helpful, ## headings for sections. Put the most important phrases between ==double equals== so they highlight. Use **bold** for key terms. For critical warnings use a line starting with [! IMPORTANT].');
+            parts.push(
+                'You are Scribe AI — an elite coding and writing partner. For programming: ' +
+                '(1) Prefer complete, runnable solutions over sketches. ' +
+                '(2) Put all code in fenced markdown blocks with the language tag. ' +
+                '(3) Explain briefly before code, then code, then short notes if needed. ' +
+                '(4) Call out edge cases, complexity, and security when relevant. ' +
+                '(5) Never invent APIs — if unsure, say so. ' +
+                'Format: short paragraphs, ## headings, bullets; mark critical phrases with ==highlight==; use **bold** for key terms.'
+            );
+            if (skill === 'debug') {
+                parts.push('Active skill: DEBUGGER. Find root cause, minimal fix, and a test case. Show before/after if useful.');
+            } else if (skill === 'architect') {
+                parts.push('Active skill: ARCHITECT. Propose clean structure, files, interfaces, and tradeoffs before code.');
+            } else if (skill === 'review') {
+                parts.push('Active skill: CODE REVIEW. Rate severity, list issues (bugs/security/style), then suggested patches.');
+            } else if (skill === 'leetcode') {
+                parts.push('Active skill: ALGORITHMS. State approach, complexity O(...), then optimal code with comments on tricky lines.');
+            } else if (skill === 'frontend') {
+                parts.push('Active skill: FRONTEND. Prefer accessible, responsive HTML/CSS/JS; include full single-file demos when useful.');
+            } else if (skill === 'backend') {
+                parts.push('Active skill: BACKEND. Cover validation, errors, auth, and data models; production-minded.');
+            }
             if (instr.about) parts.push('User context: ' + instr.about);
             if (instr.style) parts.push('Response style: ' + instr.style);
             if (tone && tone !== 'default') {
@@ -5539,6 +5766,73 @@
         ];
         let cmdActiveIdx = 0;
 
+
+        function openImagineMode() {
+            startNewChat();
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const btn = document.getElementById('nav-imagine');
+            if (btn) btn.classList.add('active');
+            promptInput.value = '';
+            promptInput.placeholder = 'Describe an image to create… (then click + → Generate image, or type and use Imagine)';
+            promptInput.dispatchEvent(new Event('input'));
+            promptInput.focus();
+            // open attach menu path: direct generate after text
+            try { showToast('Imagine mode — describe your image, then Generate image', 'info'); } catch (e) {}
+            // If user already has text, offer generate
+            setTimeout(() => {
+                if (promptInput.value.trim()) triggerGenerateImage();
+            }, 100);
+        }
+
+        function openAutomations() {
+            const card = document.getElementById('automations-popup');
+            if (card) card.style.display = 'flex';
+        }
+        function closeAutomations() {
+            const card = document.getElementById('automations-popup');
+            if (card) card.style.display = 'none';
+        }
+        function runAutomation(id) {
+            closeAutomations();
+            const map = {
+                daily: 'Write a clear daily standup update in 5 bullets: yesterday, today, blockers. Tone: professional and short.',
+                email: 'Turn the following rough notes into a polished professional email. Keep it under 150 words. Notes:\n\n',
+                summary: 'Summarize the following text in 5 bullets + 1-line takeaway:\n\n',
+                refactor: 'Refactor the following code for clarity and performance. Keep behavior the same. Explain changes briefly, then show full code.\n\n',
+                tests: 'Write thorough unit tests for the following code. Use clear test names. Show complete test file.\n\n',
+                docs: 'Write concise developer documentation (overview, API, example usage) for:\n\n'
+            };
+            promptInput.value = map[id] || '';
+            promptInput.dispatchEvent(new Event('input'));
+            promptInput.focus();
+            try { showToast('Automation loaded — edit and send', 'success'); } catch (e) {}
+        }
+
+        function openSkills() {
+            const card = document.getElementById('skills-popup');
+            if (card) card.style.display = 'flex';
+            highlightActiveSkill();
+        }
+        function closeSkills() {
+            const card = document.getElementById('skills-popup');
+            if (card) card.style.display = 'none';
+        }
+        function setSkill(id) {
+            if (id === 'off') safeStorage.removeItem('scribe_active_skill');
+            else safeStorage.setItem('scribe_active_skill', id);
+            highlightActiveSkill();
+            closeSkills();
+            const labels = { debug: 'Debugger', architect: 'Architect', review: 'Code Review', leetcode: 'Algorithms', frontend: 'Frontend', backend: 'Backend', off: 'Default' };
+            try { showToast('Skill: ' + (labels[id] || id), 'success'); } catch (e) {}
+        }
+        function highlightActiveSkill() {
+            const cur = safeStorage.getItem('scribe_active_skill') || 'off';
+            document.querySelectorAll('[data-skill]').forEach(el => {
+                el.style.outline = el.getAttribute('data-skill') === cur ? '2px solid #4f46e5' : 'none';
+            });
+        }
+
+
         function openCmdPalette() {
             const ov = document.getElementById('cmd-palette-overlay');
             if (!ov) return;
@@ -5736,7 +6030,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
@@ -5809,6 +6103,42 @@
         </div>
         <img id="img-lightbox-img" src="" alt="Preview">
         <div class="lb-caption" id="img-lightbox-caption"></div>
+    </div>
+
+
+    <!-- AUTOMATIONS -->
+    <div id="automations-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
+            <div style="display:grid;gap:8px;">
+                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
+                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
+                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
+                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
+                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
+                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
+                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
+            </div>
+        </div>
     </div>
 
     <div class="toast-stack" id="toast-stack"></div>
