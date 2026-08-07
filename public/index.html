@@ -2546,6 +2546,71 @@
         }
         body.theme-dark .nav-divider { background: #2a2a2a; }
 
+
+        /* Long-code card (Grok-style compact preview) */
+        .code-card {
+            margin: 12px 0;
+            border: 1px solid #e5e5e5;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #0f0f12;
+            cursor: pointer;
+            max-width: 320px;
+            transition: transform .15s, box-shadow .15s;
+            box-shadow: 0 4px 16px rgba(0,0,0,.08);
+        }
+        .code-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+        }
+        .code-card-preview {
+            height: 140px;
+            overflow: hidden;
+            padding: 12px 14px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 10px;
+            line-height: 1.45;
+            color: #a3e635;
+            white-space: pre;
+            position: relative;
+            background: linear-gradient(180deg, #0f0f12 0%, #0f0f12 70%, #1a1a1f 100%);
+        }
+        .code-card-preview::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 48px;
+            background: linear-gradient(transparent, #0f0f12);
+            pointer-events: none;
+        }
+        .code-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #1a1a1f;
+            border-top: 1px solid #2a2a30;
+            gap: 8px;
+        }
+        .code-card-meta .cc-lang {
+            font-size: 11px;
+            font-weight: 700;
+            color: #e5e5e5;
+            text-transform: uppercase;
+        }
+        .code-card-meta .cc-lines {
+            font-size: 11px;
+            color: #888;
+        }
+        .code-card-meta .cc-open {
+            font-size: 11px;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+        body.theme-dark .code-card {
+            border-color: #333;
+        }
+
     </style>
 </head>
 <body>
@@ -3733,6 +3798,18 @@
             } catch (e) {}
         }
 
+        function setDocumentTitle(name) {
+            const base = 'Scribe AI';
+            const n = (name || '').trim();
+            if (!n || n === 'New chat' || n === 'Scribe AI Workspace') {
+                document.title = base + ' Workspace';
+            } else {
+                // Grok-style: chat name in tab
+                const short = n.length > 48 ? n.slice(0, 48) + '…' : n;
+                document.title = short + ' · ' + base;
+            }
+        }
+
         function makeChatTitle(text) {
             const t = (text || 'New chat').trim().replace(/\s+/g, ' ');
             return t.length > 42 ? t.slice(0, 42) + '…' : t;
@@ -3865,9 +3942,11 @@
             if (isIncognito) {
                 const inc = document.getElementById('nav-incognito');
                 if (inc) inc.classList.add('active', 'incognito-active');
+                setDocumentTitle('Incognito');
             } else {
                 const nc = document.getElementById('nav-new-chat');
                 if (nc) nc.classList.add('active');
+                setDocumentTitle('New chat');
             }
             renderRecentChats();
         }
@@ -3886,6 +3965,7 @@
             }
             currentChatId = chat.id;
             currentChatMessages = chat.messages || [];
+            setDocumentTitle(chat.title || 'Chat');
 
             greetingBanner.style.display = 'none';
             const sw = document.getElementById('starters-wrap');
@@ -3943,6 +4023,10 @@
                 }
             }
             saveChatHistory(chats);
+            try {
+                const t = (getChatHistory().find(c => c.id === currentChatId) || {}).title;
+                if (t) setDocumentTitle(t);
+            } catch (e) {}
             // attach chat to active project
             if (currentProjectId && currentChatId) {
                 const projects = getProjects();
@@ -3978,6 +4062,7 @@
             chatConsole.innerHTML = '';
             currentChatId = null;
             currentChatMessages = [];
+            setDocumentTitle(isIncognito ? 'Incognito' : 'New chat');
             closeArtifact();
             const starters = document.getElementById('starters-wrap');
             if (starters) starters.style.display = 'grid';
@@ -4537,17 +4622,39 @@
                     if (!window._pendingArtifact || part.value.length > (window._pendingArtifact.code || '').length) {
                         window._pendingArtifact = { lang, code: part.value, ext, id };
                     }
-                    html += `<div class="msg-code-block">
-                        <div class="msg-code-header">
-                            <span class="msg-code-lang">${escapeHtml(lang)}</span>
-                            <div class="msg-code-actions">
-                                <button type="button" class="msg-code-btn" onclick="openArtifactFromBlock('${id}', '${escapeHtml(lang)}', '${ext}')">▣ Open panel</button>
-                                <button type="button" class="msg-code-btn" onclick="copyCodeBlock('${id}')">Copy</button>
-                                <button type="button" class="msg-code-btn" onclick="downloadCodeBlock('${id}', '${ext}')">⬇ Download</button>
+                    window._codeStore = window._codeStore || {};
+                    window._codeStore[id] = { code: part.value, lang, ext };
+
+                    const lineCount = part.value.split('\n').length;
+                    // Grok-style: long code → compact card (click opens full panel)
+                    const LONG = lineCount >= 80 || part.value.length >= 4000;
+                    if (LONG) {
+                        const previewLines = part.value.split('\n').slice(0, 18).join('\n');
+                        html += `<div class="code-card" role="button" tabindex="0"
+                            onclick="openStoredCode('${id}')"
+                            onkeydown="if(event.key==='Enter')openStoredCode('${id}')"
+                            title="Open full code">
+                            <div class="code-card-preview">${escapeHtml(previewLines)}</div>
+                            <div class="code-card-meta">
+                                <span class="cc-lang">${escapeHtml(lang)}</span>
+                                <span class="cc-lines">${lineCount} lines</span>
+                                <span class="cc-open">Open full →</span>
                             </div>
-                        </div>
-                        <pre><code id="${id}">${escapeHtml(part.value)}</code></pre>
-                    </div>`;
+                            <pre style="display:none"><code id="${id}">${escapeHtml(part.value)}</code></pre>
+                        </div>`;
+                    } else {
+                        html += `<div class="msg-code-block">
+                            <div class="msg-code-header">
+                                <span class="msg-code-lang">${escapeHtml(lang)}</span>
+                                <div class="msg-code-actions">
+                                    <button type="button" class="msg-code-btn" onclick="openArtifactFromBlock('${id}', '${escapeHtml(lang)}', '${ext}')">▣ Open panel</button>
+                                    <button type="button" class="msg-code-btn" onclick="copyCodeBlock('${id}')">Copy</button>
+                                    <button type="button" class="msg-code-btn" onclick="downloadCodeBlock('${id}', '${ext}')">⬇ Download</button>
+                                </div>
+                            </div>
+                            <pre><code id="${id}">${escapeHtml(part.value)}</code></pre>
+                        </div>`;
+                    }
                 } else {
                     html += formatTextBlocks(part.value);
                 }
@@ -5031,6 +5138,16 @@
                     if (empty) empty.style.display = 'block';
                 }
             }
+        }
+
+        function openStoredCode(id) {
+            const store = (window._codeStore && window._codeStore[id]) || null;
+            if (store) {
+                openArtifact(store.code, store.lang, store.ext);
+                return;
+            }
+            const el = document.getElementById(id);
+            if (el) openArtifact(el.textContent || '', 'code', 'txt');
         }
 
         function openArtifactFromBlock(id, lang, ext) {
