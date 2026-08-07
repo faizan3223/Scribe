@@ -2611,6 +2611,144 @@
             border-color: #333;
         }
 
+
+        .more-menu-wrap { position: relative; margin-left: 4px; }
+        .btn-more-dots {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        .btn-more-dots:hover { background: #f0f0ee; }
+        body.theme-dark .btn-more-dots {
+            background: #1a1a1f;
+            border-color: #333;
+            color: #ddd;
+        }
+        .more-dropdown {
+            display: none;
+            position: absolute;
+            top: 42px;
+            right: 0;
+            min-width: 200px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.12);
+            padding: 6px;
+            z-index: 80;
+        }
+        .more-dropdown.open { display: block; }
+        body.theme-dark .more-dropdown {
+            background: #1a1a1f;
+            border-color: #333;
+        }
+        .more-dropdown button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .more-dropdown button:hover { background: #f0f0ee; }
+        body.theme-dark .more-dropdown button { color: #ddd; }
+        body.theme-dark .more-dropdown button:hover { background: #2a2a30; }
+        .history-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            color: #888;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+        .history-toggle-btn:hover { background: rgba(0,0,0,.05); color: #333; }
+        body.theme-dark .history-toggle-btn:hover { background: rgba(255,255,255,.08); color: #eee; }
+        #recent-chats-list.collapsed { display: none; }
+        .nav-item .code-brackets {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+
+        #recent-chats-list.history-collapsed {
+            display: none !important;
+        }
+        .history-toggle-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+        .imagine-style-bar {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto 14px;
+            padding: 0 4px;
+        }
+        .imagine-style-bar.visible { display: flex; }
+        .imagine-style-chip {
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #444;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .15s;
+        }
+        .imagine-style-chip:hover { border-color: #111; color: #111; }
+        .imagine-style-chip.active {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+        body.theme-dark .imagine-style-chip {
+            background: #1a1a1f;
+            border-color: #333;
+            color: #ccc;
+        }
+        body.theme-dark .imagine-style-chip.active {
+            background: #f5f5f5;
+            color: #111;
+        }
+        .img-prompt-caption {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+            max-width: 280px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        body.theme-dark .img-prompt-caption { color: #aaa; }
+        #img-lightbox-caption {
+            max-width: min(90vw, 640px);
+            white-space: pre-wrap;
+        }
+
     </style>
 </head>
 <body>
@@ -2741,8 +2879,11 @@
                     <button type="button" class="nav-item" id="nav-search" title="Search" onclick="toggleChatSearch()">
                         <span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><span class="label">Search</span>
                     </button>
-                    <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="startNewChat()">
+                    <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="scribeWorkspaceMode='chat';startNewChat()">
                         <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="label">New Chat</span>
+                    </button>
+                    <button type="button" class="nav-item" id="nav-code" title="Code — coding workspace" onclick="openCodeMode()">
+                        <span class="icon code-brackets">&lt;/&gt;</span><span class="label">Code</span>
                     </button>
                     <button type="button" class="nav-item" id="nav-imagine" title="Imagine — generate images" onclick="openImagineMode()">
                         <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="label">Imagine</span><span class="dot-live" title="Live"></span>
@@ -2753,22 +2894,6 @@
                     <button type="button" class="nav-item" id="nav-skills" title="Skills" onclick="openSkills()">
                         <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="label">Skills</span>
                     </button>
-                    <div class="nav-divider"></div>
-                    <button type="button" class="nav-item" id="nav-incognito" title="Incognito (not saved)" onclick="toggleIncognito()">
-                        <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M9 9c.5 1.5 1.5 2.5 3 2.5S14.5 10.5 15 9"/></svg></span><span class="label">Incognito</span>
-                    </button>
-                    <button type="button" class="nav-item" title="Pricing" onclick="togglePricingModal()">
-                        <span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="label">Pricing</span>
-                    </button>
-                    <button type="button" class="nav-item" title="Custom instructions" onclick="toggleCustomInstructions()">
-                        <span class="icon">⚙️</span><span class="label">Instructions</span>
-                    </button>
-                    <button type="button" class="nav-item" title="Prompt library" onclick="togglePromptLibrary()">
-                        <span class="icon">📚</span><span class="label">Prompts</span>
-                    </button>
-                    <button type="button" class="nav-item" title="Commands (⌘K)" onclick="openCmdPalette()">
-                        <span class="icon">⌘</span><span class="label">Commands</span>
-                    </button>
                     <input type="text" id="chat-search-input" placeholder="Search..." style="display:none; width:100%; margin-top:6px; padding:8px 12px; border:1px solid #e5e5e5; border-radius:10px; font-size:13px; outline:none; background:#f7f7f5;">
                 </div>
                 <div class="sidebar-mid">
@@ -2777,7 +2902,10 @@
                         <button type="button" class="btn-add-project" onclick="addProject()" title="New project">+ Add project</button>
                     </div>
                     <div id="projects-list"></div>
-                    <div class="sidebar-section-label">History</div>
+                    <div class="sidebar-section-label" style="display:flex;align-items:center;justify-content:space-between;">
+                        <span>History</span>
+                        <button type="button" class="history-toggle-btn" id="history-toggle-btn" onclick="toggleHistoryExpand()" title="Expand / collapse">▾</button>
+                    </div>
                     <div id="recent-chats-list">
                         <div class="recent-empty">No chats yet</div>
                     </div>
@@ -2805,6 +2933,16 @@
                         </div>
                     </div>
                     <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Dark / Light mode" onclick="toggleTheme()">🌙</button>
+                    <div class="more-menu-wrap">
+                        <button type="button" class="btn-more-dots" id="more-menu-btn" title="More" onclick="toggleMoreMenu(event)">⋯</button>
+                        <div class="more-dropdown" id="more-dropdown">
+                            <button type="button" onclick="closeMoreMenu(); toggleIncognito();">🕶️ Incognito</button>
+                            <button type="button" onclick="closeMoreMenu(); togglePricingModal();">💳 Pricing</button>
+                            <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();">⚙️ Instructions</button>
+                            <button type="button" onclick="closeMoreMenu(); togglePromptLibrary();">📚 Prompts</button>
+                            <button type="button" onclick="closeMoreMenu(); openCmdPalette();">⌘ Commands</button>
+                        </div>
+                    </div>
                 </header>
                 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
@@ -3936,6 +4074,13 @@
         function startNewChat() {
             currentChatId = null;
             currentChatMessages = [];
+            if (scribeWorkspaceMode === 'imagine') {
+                /* keep imagine if launched from Imagine */
+            } else if (scribeWorkspaceMode !== 'code') {
+                scribeWorkspaceMode = 'chat';
+            }
+            const ib = document.getElementById('imagine-style-bar');
+            if (ib && scribeWorkspaceMode !== 'imagine') ib.classList.remove('visible');
             // Leaving new chat does not force exit from incognito; user can toggle off
             resetDashboardView(isIncognito);
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -4194,6 +4339,9 @@
                 }
                 if (a.isImage && a.url) {
                     const safeName = escapeHtml(a.name || 'Generated image');
+                    const promptLine = a.promptText
+                        ? `<div class="img-prompt-caption">${escapeHtml(a.promptText)}</div>`
+                        : '';
                     return `<div class="attachment-chip is-image-chip">
                         <img class="attach-thumb" src="${a.url.replace(/"/g, '&quot;')}" alt="${safeName}"
                             data-att-idx="${i}" onclick="openAttachmentLightbox(${i})">
@@ -4204,6 +4352,7 @@
                                 <span class="remove-chip" title="Remove" onclick="removeAttachment(${i})">×</span>
                             </span>
                         </div>
+                        ${promptLine}
                     </div>`;
                 }
                 if (a.isVideo && a.url) {
@@ -4230,12 +4379,18 @@
         function openStoredChatImage(id) {
             const item = window._chatImageStore && window._chatImageStore[id];
             if (!item) return;
-            openImageLightbox(item.url, item.name);
+            const cap = item.prompt
+                ? (item.name || 'Image') + '\n\nPrompt: ' + item.prompt
+                : (item.name || 'Image');
+            openImageLightbox(item.url, cap);
         }
         function openAttachmentLightbox(i) {
             const a = pendingAttachments[i];
             if (!a || !a.url) return;
-            openImageLightbox(a.url, a.name || 'Generated image');
+            const cap = a.promptText
+                ? (a.name || 'Image') + '\n\nPrompt: ' + a.promptText
+                : (a.name || 'Generated image');
+            openImageLightbox(a.url, cap);
         }
         function downloadAttachment(i) {
             const a = pendingAttachments[i];
@@ -4321,11 +4476,15 @@
         async function triggerGenerateImage() {
             attachMenu.classList.remove('open');
             if (!canGenerateImage()) return;
-            const prompt = promptInput.value.trim();
+            let prompt = promptInput.value.trim();
             if (!prompt) {
                 showToast("Pehle image ke liye prompt likho", "error");
                 promptInput.focus();
                 return;
+            }
+            // Apply Imagine style suffix when in imagine mode
+            if (scribeWorkspaceMode === 'imagine' || document.getElementById('nav-imagine')?.classList.contains('active')) {
+                prompt = applyImagineStyleToPrompt(prompt);
             }
 
             const placeholderId = 'imgplaceholder-' + Date.now();
@@ -5431,7 +5590,7 @@
                         pendingAttachments.map(a => {
                             if (a.isImage && a.url) {
                                 const id = 'cimg_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-                                window._chatImageStore[id] = { url: a.url, name: a.name || 'Image' };
+                                window._chatImageStore[id] = { url: a.url, name: a.name || 'Image', prompt: a.promptText || '' };
                                 return `<img class="chat-img-thumb" src="${a.url.replace(/"/g, '&quot;')}" alt="Image" data-cimg="${id}" onclick="openStoredChatImage('${id}')">`;
                             }
                             if (a.isVideo && a.url) {
@@ -5884,21 +6043,120 @@
         let cmdActiveIdx = 0;
 
 
+
+        let scribeWorkspaceMode = 'chat'; // chat | code | imagine
+        let activeImagineStyle = 'cinematic';
+
+        const IMAGINE_STYLES = [
+            { id: 'cinematic', label: 'Cinematic', suffix: ', cinematic lighting, highly detailed, 8k' },
+            { id: 'romantic', label: 'Romantic', suffix: ', romantic atmosphere, soft warm light, dreamy, elegant' },
+            { id: 'cartoon', label: 'Cartoon', suffix: ', cartoon style, vibrant colors, clean lines, animated look' },
+            { id: 'anime', label: 'Anime', suffix: ', anime style, expressive eyes, Studio Ghibli inspired' },
+            { id: 'oil', label: 'Oil paint', suffix: ', oil painting, rich brush strokes, classical art' },
+            { id: 'photo', label: 'Photo', suffix: ', photorealistic, natural light, sharp focus, DSLR' },
+            { id: '3d', label: '3D render', suffix: ', 3D render, octane, soft lighting, product shot' },
+            { id: 'watercolor', label: 'Watercolor', suffix: ', watercolor painting, soft washes, artistic paper texture' },
+            { id: 'cyber', label: 'Cyberpunk', suffix: ', cyberpunk, neon lights, futuristic city, night' },
+            { id: 'fantasy', label: 'Fantasy', suffix: ', epic fantasy, magical, dramatic sky, detailed' }
+        ];
+
+        function toggleMoreMenu(e) {
+            if (e) e.stopPropagation();
+            const dd = document.getElementById('more-dropdown');
+            if (!dd) return;
+            dd.classList.toggle('open');
+        }
+        function closeMoreMenu() {
+            const dd = document.getElementById('more-dropdown');
+            if (dd) dd.classList.remove('open');
+        }
+        document.addEventListener('click', (e) => {
+            const wrap = document.querySelector('.more-menu-wrap');
+            if (wrap && !wrap.contains(e.target)) closeMoreMenu();
+        });
+
+        function toggleHistoryExpand() {
+            const list = document.getElementById('recent-chats-list');
+            const btn = document.getElementById('history-toggle-btn');
+            if (!list) return;
+            const collapsed = list.classList.toggle('history-collapsed');
+            if (btn) {
+                btn.classList.toggle('collapsed', collapsed);
+                btn.textContent = collapsed ? '▸' : '▾';
+                btn.title = collapsed ? 'Expand history' : 'Collapse history';
+            }
+            safeStorage.setItem('scribe_history_collapsed', collapsed ? '1' : '0');
+        }
+        function restoreHistoryExpand() {
+            if (safeStorage.getItem('scribe_history_collapsed') === '1') {
+                const list = document.getElementById('recent-chats-list');
+                const btn = document.getElementById('history-toggle-btn');
+                if (list) list.classList.add('history-collapsed');
+                if (btn) { btn.classList.add('collapsed'); btn.textContent = '▸'; }
+            }
+        }
+
+        function openCodeMode() {
+            scribeWorkspaceMode = 'code';
+            startNewChat();
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const btn = document.getElementById('nav-code');
+            if (btn) btn.classList.add('active');
+            // auto coding skill
+            safeStorage.setItem('scribe_active_skill', 'frontend');
+            setDocumentTitle('Code');
+            const bar = document.getElementById('imagine-style-bar');
+            if (bar) bar.classList.remove('visible');
+            if (promptInput) {
+                promptInput.placeholder = 'Ask anything about code — bugs, architecture, full apps…';
+                promptInput.focus();
+            }
+            // swap starters for coding if present
+            try { showToast('Code mode — optimized for programming', 'success'); } catch (e) {}
+        }
+
+        function renderImagineStyles() {
+            const bar = document.getElementById('imagine-style-bar');
+            if (!bar) return;
+            bar.innerHTML = IMAGINE_STYLES.map(s =>
+                `<button type="button" class="imagine-style-chip ${s.id === activeImagineStyle ? 'active' : ''}"
+                    onclick="selectImagineStyle('${s.id}')">${s.label}</button>`
+            ).join('');
+        }
+        function selectImagineStyle(id) {
+            activeImagineStyle = id;
+            renderImagineStyles();
+            const s = IMAGINE_STYLES.find(x => x.id === id);
+            try { showToast('Style: ' + (s ? s.label : id), 'info'); } catch (e) {}
+        }
+        function applyImagineStyleToPrompt(prompt) {
+            const s = IMAGINE_STYLES.find(x => x.id === activeImagineStyle);
+            if (!s) return prompt;
+            // avoid double-append
+            if (prompt.toLowerCase().includes(s.label.toLowerCase()) || prompt.includes(s.suffix.slice(0, 20))) return prompt;
+            return prompt.trim() + s.suffix;
+        }
+
+
         function openImagineMode() {
+            scribeWorkspaceMode = 'imagine';
             startNewChat();
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             const btn = document.getElementById('nav-imagine');
             if (btn) btn.classList.add('active');
-            promptInput.value = '';
-            promptInput.placeholder = 'Describe an image to create… (then click + → Generate image, or type and use Imagine)';
-            promptInput.dispatchEvent(new Event('input'));
-            promptInput.focus();
-            // open attach menu path: direct generate after text
-            try { showToast('Imagine mode — describe your image, then Generate image', 'info'); } catch (e) {}
-            // If user already has text, offer generate
-            setTimeout(() => {
-                if (promptInput.value.trim()) triggerGenerateImage();
-            }, 100);
+            setDocumentTitle('Imagine');
+            renderImagineStyles();
+            const bar = document.getElementById('imagine-style-bar');
+            if (bar) bar.classList.add('visible');
+            const starters = document.getElementById('starters-wrap');
+            if (starters) starters.style.display = 'none';
+            if (promptInput) {
+                promptInput.value = '';
+                promptInput.placeholder = 'Describe your image… pick a style above, then Generate image (+ menu)';
+                promptInput.dispatchEvent(new Event('input'));
+                promptInput.focus();
+            }
+            try { showToast('Imagine — pick style, write prompt, generate', 'info'); } catch (e) {}
         }
 
         function openAutomations() {
