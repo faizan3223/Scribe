@@ -2824,6 +2824,150 @@
         .more-dropdown button.more-danger { color: #dc2626; }
         body.theme-dark .more-dropdown button.more-danger { color: #f87171; }
 
+
+        /* Slash command menu */
+        .slash-menu {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 12px;
+            margin-bottom: 8px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.1);
+            min-width: 260px;
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 40;
+            padding: 6px;
+        }
+        .slash-menu.open { display: block; }
+        .slash-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            font-size: 13px;
+            color: #333;
+        }
+        .slash-item:hover, .slash-item.active { background: #f0f0ee; }
+        .slash-item .sc-cmd { font-weight: 700; color: #4f46e5; min-width: 90px; }
+        .slash-item .sc-desc { color: #888; font-size: 12px; }
+        body.theme-dark .slash-menu { background: #1a1a1f; border-color: #333; }
+        body.theme-dark .slash-item { color: #ddd; }
+        body.theme-dark .slash-item:hover, body.theme-dark .slash-item.active { background: #2a2a30; }
+
+        /* Notes pad */
+        .notes-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 45;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            box-shadow: 0 6px 20px rgba(0,0,0,.12);
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notes-fab:hover { background: #f7f7f5; }
+        body.theme-dark .notes-fab { background: #1a1a1f; border-color: #333; color: #eee; }
+        .notes-panel {
+            display: none;
+            position: fixed;
+            bottom: 84px;
+            right: 24px;
+            width: min(360px, 92vw);
+            height: 420px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.15);
+            z-index: 46;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .notes-panel.open { display: flex; }
+        body.theme-dark .notes-panel { background: #141418; border-color: #333; }
+        .notes-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        body.theme-dark .notes-panel-head { border-color: #2a2a30; color: #eee; }
+        .notes-panel textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 14px;
+            font-size: 14px;
+            line-height: 1.55;
+            resize: none;
+            font-family: inherit;
+            background: transparent;
+            color: inherit;
+        }
+        .notes-panel-foot {
+            padding: 8px 14px;
+            border-top: 1px solid #eee;
+            font-size: 11px;
+            color: #888;
+        }
+        body.theme-dark .notes-panel-foot { border-color: #2a2a30; }
+
+        /* Bookmarks */
+        .bm-star { color: #f59e0b !important; }
+
+        /* Variant regen menu */
+        .regen-variants {
+            display: none;
+            position: absolute;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.1);
+            z-index: 50;
+            padding: 4px;
+            min-width: 160px;
+        }
+        .regen-variants.open { display: block; }
+        .regen-variants button {
+            display: block;
+            width: 100%;
+            border: none;
+            background: none;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: inherit;
+            color: #333;
+        }
+        .regen-variants button:hover { background: #f0f0ee; }
+        body.theme-dark .regen-variants { background: #1a1a1f; border-color: #333; }
+        body.theme-dark .regen-variants button { color: #ddd; }
+        body.theme-dark .regen-variants button:hover { background: #2a2a30; }
+
+        .msg-action-btn.bookmarked { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+
     </style>
 </head>
 <body>
@@ -3013,6 +3157,8 @@
                         <div class="more-dropdown" id="more-dropdown">
                             <button type="button" onclick="closeMoreMenu(); openSettingsModal();"><span class="mi">⚙</span> Settings</button>
                             <button type="button" onclick="closeMoreMenu(); openHelpModal();"><span class="mi">?</span> Help</button>
+                            <button type="button" onclick="closeMoreMenu(); openBookmarks();"><span class="mi">★</span> Bookmarks</button>
+                            <button type="button" onclick="closeMoreMenu(); summarizeCurrentChat();"><span class="mi">Σ</span> Summarize chat</button>
                             <button type="button" onclick="closeMoreMenu(); togglePricingModal();"><span class="mi">↑</span> Upgrade plan</button>
                             <button type="button" onclick="closeMoreMenu(); toggleIncognito();"><span class="mi">○</span> Incognito</button>
                             <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();"><span class="mi">≡</span> Instructions</button>
@@ -5140,12 +5286,16 @@
         function buildAiMessageHtml(rawText, boxId, userPrompt) {
             const body = formatMessageHtml(rawText);
             const safePrompt = escapeHtml(userPrompt || '').replace(/'/g, '&#39;');
+            const isBm = isMessageBookmarked(boxId, rawText);
             return `${body}
                 <div class="msg-actions">
-                    <button type="button" class="msg-action-btn" onclick="speakText(document.getElementById('${boxId}').dataset.speak || '')">🔊 Suno</button>
+                    <button type="button" class="msg-action-btn" onclick="speakText(document.getElementById('${boxId}').dataset.speak || '')">Suno</button>
                     <button type="button" class="msg-action-btn" onclick="navigator.clipboard.writeText(document.getElementById('${boxId}').dataset.speak || '').then(()=>showToast('Copied','success')).catch(()=>{})">Copy</button>
-                    <button type="button" class="msg-action-btn" onclick="regenerateFromBox('${boxId}')">↻ Regenerate</button>
-                    <button type="button" class="msg-action-btn" onclick="editLastUserPrompt('${safePrompt}')">✏️ Edit</button>
+                    <button type="button" class="msg-action-btn" onclick="continueFromBox('${boxId}')">Continue</button>
+                    <button type="button" class="msg-action-btn" onclick="showRegenVariants(event, '${boxId}')">↻ More</button>
+                    <button type="button" class="msg-action-btn ${isBm ? 'bookmarked' : ''}" onclick="toggleBookmark('${boxId}')">${isBm ? '★' : '☆'}</button>
+                    <button type="button" class="msg-action-btn" onclick="addToNotes('${boxId}')">→ Notes</button>
+                    <button type="button" class="msg-action-btn" onclick="editLastUserPrompt('${safePrompt}')">Edit</button>
                 </div>
                 <div class="msg-time">${formatMsgTime()}</div>`;
         }
@@ -6206,11 +6356,298 @@
         }
 
 
+
+        // ========== COMPETITIVE FEATURES ==========
+        const SLASH_COMMANDS = [
+            { cmd: '/summarize', desc: 'Summarize the text after', fill: 'Summarize this clearly in bullets:\n\n' },
+            { cmd: '/translate', desc: 'Translate to Urdu or English', fill: 'Translate the following to clear Urdu (or English if already Urdu):\n\n' },
+            { cmd: '/fix', desc: 'Fix grammar & clarity', fill: 'Improve grammar, clarity, and flow. Keep meaning the same:\n\n' },
+            { cmd: '/shorter', desc: 'Make text shorter', fill: 'Make this much shorter while keeping key points:\n\n' },
+            { cmd: '/longer', desc: 'Expand with detail', fill: 'Expand this with more useful detail and examples:\n\n' },
+            { cmd: '/code', desc: 'Answer as code expert', fill: 'As a senior engineer, solve this with complete runnable code:\n\n' },
+            { cmd: '/explain', desc: 'Explain simply', fill: 'Explain this simply as if to a beginner:\n\n' },
+            { cmd: '/email', desc: 'Turn into email', fill: 'Turn these notes into a professional email:\n\n' },
+            { cmd: '/steps', desc: 'Step-by-step plan', fill: 'Give a clear step-by-step plan for:\n\n' },
+            { cmd: '/review', desc: 'Code review', fill: 'Review this code for bugs, security, and clarity:\n\n' }
+        ];
+
+        function getSlashMenu() { return document.getElementById('slash-menu'); }
+
+        function positionSlashMenu() {
+            const menu = getSlashMenu();
+            const box = document.getElementById('master-prompt-enclosure');
+            if (!menu || !box) return;
+            const r = box.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.left = r.left + 'px';
+            menu.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+            menu.style.top = 'auto';
+        }
+
+        function renderSlashMenu(filter) {
+            const menu = getSlashMenu();
+            if (!menu) return;
+            const q = (filter || '').toLowerCase();
+            const items = SLASH_COMMANDS.filter(c => !q || c.cmd.includes(q) || c.desc.toLowerCase().includes(q));
+            if (!items.length) { menu.classList.remove('open'); return; }
+            menu.innerHTML = items.map((c, i) =>
+                `<button type="button" class="slash-item ${i===0?'active':''}" data-idx="${i}" onclick="applySlash('${c.cmd}')">
+                    <span class="sc-cmd">${c.cmd}</span><span class="sc-desc">${c.desc}</span>
+                </button>`
+            ).join('');
+            menu._items = items;
+            menu._active = 0;
+            positionSlashMenu();
+            menu.classList.add('open');
+        }
+
+        function applySlash(cmd) {
+            const c = SLASH_COMMANDS.find(x => x.cmd === cmd);
+            if (!c) return;
+            const val = promptInput.value;
+            // replace leading /word
+            promptInput.value = val.replace(/^\s*\/\w*/, c.fill);
+            promptInput.focus();
+            promptInput.dispatchEvent(new Event('input'));
+            const menu = getSlashMenu();
+            if (menu) menu.classList.remove('open');
+        }
+
+        function closeSlashMenu() {
+            const menu = getSlashMenu();
+            if (menu) menu.classList.remove('open');
+        }
+
+        // Wire slash on input
+        if (promptInput) {
+            promptInput.addEventListener('input', () => {
+                const v = promptInput.value;
+                if (/^\s*\/\w*$/.test(v)) {
+                    const filter = v.trim().slice(1);
+                    renderSlashMenu(filter);
+                } else {
+                    closeSlashMenu();
+                }
+            });
+        }
+
+        // Slash keyboard nav - extend keydown
+        const _slashKeyHandler = (e) => {
+            const menu = getSlashMenu();
+            if (!menu || !menu.classList.contains('open')) return false;
+            const items = menu._items || [];
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                menu._active = Math.min((menu._active || 0) + 1, items.length - 1);
+                [...menu.querySelectorAll('.slash-item')].forEach((el, i) => el.classList.toggle('active', i === menu._active));
+                return true;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                menu._active = Math.max((menu._active || 0) - 1, 0);
+                [...menu.querySelectorAll('.slash-item')].forEach((el, i) => el.classList.toggle('active', i === menu._active));
+                return true;
+            }
+            if (e.key === 'Enter' && items[menu._active]) {
+                e.preventDefault();
+                applySlash(items[menu._active].cmd);
+                return true;
+            }
+            if (e.key === 'Escape') {
+                closeSlashMenu();
+                return true;
+            }
+            return false;
+        };
+
+        // ---- Continue writing ----
+        function continueFromBox(boxId) {
+            const box = document.getElementById(boxId);
+            const text = (box && (box.dataset.speak || box.textContent)) || '';
+            const clip = text.slice(0, 2500);
+            processPromptSubmission(
+                'Continue the following answer from where it left off. Do not repeat what is already written — only continue:\n\n' + clip,
+                { skipUserBubble: false }
+            );
+        }
+
+        // ---- Regen variants ----
+        function showRegenVariants(e, boxId) {
+            e.stopPropagation();
+            const menu = document.getElementById('regen-variants');
+            if (!menu) return;
+            menu.innerHTML = `
+                <button type="button" onclick="regenVariant('${boxId}','same')">↻ Same again</button>
+                <button type="button" onclick="regenVariant('${boxId}','shorter')">Shorter</button>
+                <button type="button" onclick="regenVariant('${boxId}','longer')">More detailed</button>
+                <button type="button" onclick="regenVariant('${boxId}','simpler')">Simpler words</button>
+                <button type="button" onclick="regenVariant('${boxId}','formal')">More formal</button>
+                <button type="button" onclick="regenVariant('${boxId}','bullets')">As bullets</button>
+            `;
+            menu.style.left = Math.min(window.innerWidth - 180, e.clientX) + 'px';
+            menu.style.top = (e.clientY + 8) + 'px';
+            menu.classList.add('open');
+        }
+        function closeRegenVariants() {
+            const menu = document.getElementById('regen-variants');
+            if (menu) menu.classList.remove('open');
+        }
+        document.addEventListener('click', () => { closeRegenVariants(); closeSlashMenu(); });
+
+        function regenVariant(boxId, kind) {
+            closeRegenVariants();
+            const box = document.getElementById(boxId);
+            const base = (box && (box.dataset.userPrompt || lastUserPromptForRegen)) || lastUserPromptForRegen;
+            if (!base) return;
+            const map = {
+                same: base,
+                shorter: 'Rewrite a shorter answer to:\n\n' + base,
+                longer: 'Give a more detailed, thorough answer to:\n\n' + base,
+                simpler: 'Answer in simpler words, easier to understand:\n\n' + base,
+                formal: 'Answer in a formal professional tone:\n\n' + base,
+                bullets: 'Answer using clear bullet points only:\n\n' + base
+            };
+            const prompt = map[kind] || base;
+            const row = box && box.closest('.console-stream-row');
+            if (row) row.remove();
+            processPromptSubmission(prompt, { skipUserBubble: true, skipLimit: true });
+        }
+
+        // ---- Bookmarks ----
+        function getBookmarks() {
+            try { return JSON.parse(safeStorage.getItem('scribe_bookmarks') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveBookmarks(list) {
+            safeStorage.setItem('scribe_bookmarks', JSON.stringify(list.slice(0, 50)));
+        }
+        function isMessageBookmarked(boxId, text) {
+            const list = getBookmarks();
+            const t = (text || '').slice(0, 120);
+            return list.some(b => b.preview === t || b.boxId === boxId);
+        }
+        function toggleBookmark(boxId) {
+            const box = document.getElementById(boxId);
+            if (!box) return;
+            const text = box.dataset.speak || '';
+            const preview = text.slice(0, 120);
+            let list = getBookmarks();
+            const idx = list.findIndex(b => b.preview === preview || b.boxId === boxId);
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                try { showToast('Bookmark removed', 'info'); } catch (e) {}
+            } else {
+                list.unshift({ boxId, text, preview, prompt: box.dataset.userPrompt || '', at: Date.now() });
+                try { showToast('Bookmarked', 'success'); } catch (e) {}
+            }
+            saveBookmarks(list);
+            // refresh star on button
+            const btn = box.querySelector('.msg-action-btn.bookmarked, .msg-actions .msg-action-btn:nth-child(5)');
+            // rebuild actions is heavy — just toggle class on star buttons
+            box.querySelectorAll('.msg-action-btn').forEach(b => {
+                if (b.textContent.includes('★') || b.textContent.includes('☆')) {
+                    const on = idx < 0;
+                    b.textContent = on ? '★' : '☆';
+                    b.classList.toggle('bookmarked', on);
+                }
+            });
+        }
+        function openBookmarks() {
+            const list = getBookmarks();
+            if (!list.length) {
+                try { showToast('No bookmarks yet — star any answer', 'info'); } catch (e) {}
+                return;
+            }
+            // show in a simple modal via help-style overlay reuse or toast list
+            let html = list.map((b, i) =>
+                `<div style="border-bottom:1px solid #333;padding:10px 0;">
+                    <div style="font-size:12px;color:#888;margin-bottom:4px;">${new Date(b.at).toLocaleString()}</div>
+                    <div style="font-size:13px;color:#ddd;white-space:pre-wrap;max-height:80px;overflow:hidden;">${escapeHtml(b.preview)}…</div>
+                    <button type="button" class="contact-submit-btn" style="margin-top:8px;padding:6px;font-size:12px;" onclick="useBookmark(${i})">Use in prompt</button>
+                </div>`
+            ).join('');
+            const card = document.getElementById('bookmarks-popup');
+            if (card) {
+                const body = document.getElementById('bookmarks-list');
+                if (body) body.innerHTML = html;
+                card.style.display = 'flex';
+            }
+        }
+        function useBookmark(i) {
+            const list = getBookmarks();
+            if (!list[i]) return;
+            promptInput.value = list[i].text.slice(0, 4000);
+            promptInput.dispatchEvent(new Event('input'));
+            promptInput.focus();
+            const card = document.getElementById('bookmarks-popup');
+            if (card) card.style.display = 'none';
+            try { showToast('Loaded bookmark into prompt', 'success'); } catch (e) {}
+        }
+        function closeBookmarks() {
+            const card = document.getElementById('bookmarks-popup');
+            if (card) card.style.display = 'none';
+        }
+
+        // ---- Notes pad ----
+        function toggleNotesPad() {
+            const p = document.getElementById('notes-panel');
+            if (!p) return;
+            const open = p.classList.toggle('open');
+            if (open) {
+                const ta = document.getElementById('notes-textarea');
+                if (ta) {
+                    ta.value = safeStorage.getItem('scribe_notes') || '';
+                    ta.focus();
+                }
+            }
+        }
+        function setupNotesPad() {
+            const ta = document.getElementById('notes-textarea');
+            if (!ta) return;
+            ta.value = safeStorage.getItem('scribe_notes') || '';
+            let t = null;
+            ta.addEventListener('input', () => {
+                clearTimeout(t);
+                t = setTimeout(() => safeStorage.setItem('scribe_notes', ta.value), 300);
+            });
+        }
+        function addToNotes(boxId) {
+            const box = document.getElementById(boxId);
+            const text = (box && box.dataset.speak) || '';
+            if (!text) return;
+            const ta = document.getElementById('notes-textarea');
+            const cur = safeStorage.getItem('scribe_notes') || '';
+            const next = (cur ? cur + '\n\n---\n\n' : '') + text.slice(0, 5000);
+            safeStorage.setItem('scribe_notes', next);
+            if (ta) ta.value = next;
+            const p = document.getElementById('notes-panel');
+            if (p) p.classList.add('open');
+            try { showToast('Added to Notes', 'success'); } catch (e) {}
+        }
+
+        // ---- Chat summary ----
+        function summarizeCurrentChat() {
+            const msgs = currentChatMessages || [];
+            if (msgs.length < 2) {
+                try { showToast('Need a longer chat to summarize', 'info'); } catch (e) {}
+                return;
+            }
+            const transcript = msgs.slice(-12).map(m =>
+                (m.role === 'user' ? 'User: ' : 'AI: ') + (m.text || '').slice(0, 500)
+            ).join('\n\n');
+            processPromptSubmission(
+                'Summarize this conversation in 5 bullets + 1-line takeaway. Be concise:\n\n' + transcript,
+                { skipLimit: true }
+            );
+        }
+
+
         submitBtn.addEventListener('click', processPromptSubmission);
         promptInput.addEventListener('keydown', (e) => {
+            if (typeof _slashKeyHandler === 'function' && _slashKeyHandler(e)) return;
             if (e.key === 'Enter' && !e.shiftKey) {
                 const s = getSettings();
-                if (s.enterSend === false) return; // allow newline
+                if (s.enterSend === false) return;
                 e.preventDefault();
                 processPromptSubmission();
             }
@@ -6302,7 +6739,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
@@ -6529,6 +6966,31 @@
             </div>
             <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
             <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
+        </div>
+    </div>
+
+
+    <!-- Slash commands -->
+    <div id="slash-menu" class="slash-menu"></div>
+    <!-- Regen variants -->
+    <div id="regen-variants" class="regen-variants"></div>
+    <!-- Notes pad -->
+    <button type="button" class="notes-fab" id="notes-fab" title="Quick notes" onclick="toggleNotesPad()">📝</button>
+    <div class="notes-panel" id="notes-panel">
+        <div class="notes-panel-head">
+            <span>Notes</span>
+            <button type="button" onclick="toggleNotesPad()" style="border:none;background:none;cursor:pointer;font-size:18px;color:#888;">×</button>
+        </div>
+        <textarea id="notes-textarea" placeholder="Scratch pad — ideas, code snippets, todos… (auto-saves)"></textarea>
+        <div class="notes-panel-foot">Saved on this device · Use “→ Notes” on any answer to capture it</div>
+    </div>
+
+
+    <div id="bookmarks-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeBookmarks()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Bookmarks</h2>
+            <div id="bookmarks-list"></div>
         </div>
     </div>
 
