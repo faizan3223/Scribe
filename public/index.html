@@ -2749,6 +2749,69 @@
             white-space: pre-wrap;
         }
 
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a30;
+            gap: 12px;
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-row .sr-label {
+            color: #e5e5e5;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .settings-row .sr-desc {
+            color: #888;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #3a3a42;
+            border-radius: 24px;
+            transition: .2s;
+        }
+        .toggle-switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .2s;
+        }
+        .toggle-switch input:checked + .slider { background: #4f46e5; }
+        .toggle-switch input:checked + .slider:before { transform: translateX(20px); }
+        .feedback-textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #1a1a1f;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #eee;
+            padding: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+        }
+        .feedback-textarea:focus { border-color: #6366f1; }
+
     </style>
 </head>
 <body>
@@ -2879,7 +2942,7 @@
                     <button type="button" class="nav-item" id="nav-search" title="Search" onclick="toggleChatSearch()">
                         <span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><span class="label">Search</span>
                     </button>
-                    <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="scribeWorkspaceMode='chat';startNewChat()">
+                    <button type="button" class="nav-item active" id="nav-new-chat" title="New Chat" onclick="scribeWorkspaceMode='chat';try{safeStorage.removeItem('scribe_active_skill')}catch(e){};startNewChat()">
                         <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="label">New Chat</span>
                     </button>
                     <button type="button" class="nav-item" id="nav-code" title="Code — coding workspace" onclick="openCodeMode()">
@@ -2936,9 +2999,11 @@
                     <div class="more-menu-wrap">
                         <button type="button" class="btn-more-dots" id="more-menu-btn" title="More" onclick="toggleMoreMenu(event)">⋯</button>
                         <div class="more-dropdown" id="more-dropdown">
+                            <button type="button" onclick="closeMoreMenu(); openSettingsModal();">⚙️ Settings</button>
+                            <button type="button" onclick="closeMoreMenu(); openHelpModal();">❓ Help &amp; feedback</button>
                             <button type="button" onclick="closeMoreMenu(); toggleIncognito();">🕶️ Incognito</button>
                             <button type="button" onclick="closeMoreMenu(); togglePricingModal();">💳 Pricing</button>
-                            <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();">⚙️ Instructions</button>
+                            <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();">📝 Instructions</button>
                             <button type="button" onclick="closeMoreMenu(); togglePromptLibrary();">📚 Prompts</button>
                             <button type="button" onclick="closeMoreMenu(); openCmdPalette();">⌘ Commands</button>
                         </div>
@@ -4982,6 +5047,75 @@
         </div>
     </div>
 
+
+    <!-- SETTINGS -->
+    <div id="settings-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Show timestamps</div>
+                    <div class="sr-desc">Time under each message</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Sound on reply</div>
+                    <div class="sr-desc">Soft chime when AI finishes</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Enter to send</div>
+                    <div class="sr-desc">Off = Enter makes new line</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Compact history</div>
+                    <div class="sr-desc">Start with history collapsed</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP & FEEDBACK -->
+    <div id="help-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
+                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
+                <strong style="color:#ddd;">Code</strong> = programming ·
+                <strong style="color:#ddd;">Imagine</strong> = images
+            </p>
+            <div class="contact-form-group">
+                <label>Your feedback</label>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
+            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
+        </div>
+    </div>
+
     <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
@@ -5057,6 +5191,75 @@
                 <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
                 <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- SETTINGS -->
+    <div id="settings-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Show timestamps</div>
+                    <div class="sr-desc">Time under each message</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Sound on reply</div>
+                    <div class="sr-desc">Soft chime when AI finishes</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Enter to send</div>
+                    <div class="sr-desc">Off = Enter makes new line</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Compact history</div>
+                    <div class="sr-desc">Start with history collapsed</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP & FEEDBACK -->
+    <div id="help-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
+                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
+                <strong style="color:#ddd;">Code</strong> = programming ·
+                <strong style="color:#ddd;">Imagine</strong> = images
+            </p>
+            <div class="contact-form-group">
+                <label>Your feedback</label>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
+            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
         </div>
     </div>
 
@@ -5147,6 +5350,75 @@
         </div>
     </div>
 
+
+    <!-- SETTINGS -->
+    <div id="settings-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Show timestamps</div>
+                    <div class="sr-desc">Time under each message</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Sound on reply</div>
+                    <div class="sr-desc">Soft chime when AI finishes</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Enter to send</div>
+                    <div class="sr-desc">Off = Enter makes new line</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Compact history</div>
+                    <div class="sr-desc">Start with history collapsed</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP & FEEDBACK -->
+    <div id="help-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
+                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
+                <strong style="color:#ddd;">Code</strong> = programming ·
+                <strong style="color:#ddd;">Imagine</strong> = images
+            </p>
+            <div class="contact-form-group">
+                <label>Your feedback</label>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
+            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
+        </div>
+    </div>
+
     <div class="toast-stack" id="toast-stack"></div>
 </body></html>`;
             }
@@ -5215,6 +5487,75 @@
                 <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
                 <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- SETTINGS -->
+    <div id="settings-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Show timestamps</div>
+                    <div class="sr-desc">Time under each message</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Sound on reply</div>
+                    <div class="sr-desc">Soft chime when AI finishes</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Enter to send</div>
+                    <div class="sr-desc">Off = Enter makes new line</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Compact history</div>
+                    <div class="sr-desc">Start with history collapsed</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP & FEEDBACK -->
+    <div id="help-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
+                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
+                <strong style="color:#ddd;">Code</strong> = programming ·
+                <strong style="color:#ddd;">Imagine</strong> = images
+            </p>
+            <div class="contact-form-group">
+                <label>Your feedback</label>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
+            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
         </div>
     </div>
 
@@ -5498,28 +5839,42 @@
             const instr = getCustomInstructions();
             const tone = (document.getElementById('tone-select') || {}).value || 'default';
             const skill = safeStorage.getItem('scribe_active_skill') || '';
+            const mode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
             const parts = [];
-            parts.push(
-                'You are Scribe AI — an elite coding and writing partner. For programming: ' +
-                '(1) Prefer complete, runnable solutions over sketches. ' +
-                '(2) Put all code in fenced markdown blocks with the language tag. ' +
-                '(3) Explain briefly before code, then code, then short notes if needed. ' +
-                '(4) Call out edge cases, complexity, and security when relevant. ' +
-                '(5) Never invent APIs — if unsure, say so. ' +
-                'Format: short paragraphs, ## headings, bullets; mark critical phrases with ==highlight==; use **bold** for key terms.'
-            );
-            if (skill === 'debug') {
-                parts.push('Active skill: DEBUGGER. Find root cause, minimal fix, and a test case. Show before/after if useful.');
-            } else if (skill === 'architect') {
-                parts.push('Active skill: ARCHITECT. Propose clean structure, files, interfaces, and tradeoffs before code.');
-            } else if (skill === 'review') {
-                parts.push('Active skill: CODE REVIEW. Rate severity, list issues (bugs/security/style), then suggested patches.');
-            } else if (skill === 'leetcode') {
-                parts.push('Active skill: ALGORITHMS. State approach, complexity O(...), then optimal code with comments on tricky lines.');
-            } else if (skill === 'frontend') {
-                parts.push('Active skill: FRONTEND. Prefer accessible, responsive HTML/CSS/JS; include full single-file demos when useful.');
-            } else if (skill === 'backend') {
-                parts.push('Active skill: BACKEND. Cover validation, errors, auth, and data models; production-minded.');
+
+            // NEW CHAT / normal mode — friendly general assistant (NOT coding pitch)
+            if (mode !== 'code') {
+                parts.push(
+                    'You are Scribe AI, a helpful friendly assistant for everyday questions, writing, brainstorming, and general chat. ' +
+                    'Reply naturally and briefly unless the user asks for depth. ' +
+                    'Do NOT introduce yourself as a coding partner or list programming topics unless the user asks about code. ' +
+                    'For a simple greeting (hi/hello/hlo), reply with a short warm greeting and ask how you can help — one or two sentences max. ' +
+                    'Format clearly when useful: short paragraphs, bullets, **bold** for key terms, ==highlight== for critical phrases.'
+                );
+            } else {
+                // CODE mode only
+                parts.push(
+                    'You are Scribe AI in CODE mode — an elite programming partner. ' +
+                    '(1) Prefer complete, runnable solutions. ' +
+                    '(2) Put code in fenced markdown blocks with language tags. ' +
+                    '(3) Brief explanation, then code, then short notes. ' +
+                    '(4) Mention edge cases, complexity, security when relevant. ' +
+                    '(5) Never invent APIs — if unsure, say so. ' +
+                    'Format: ## headings, bullets; **bold** key terms; ==highlight== critical phrases.'
+                );
+                if (skill === 'debug') {
+                    parts.push('Active skill: DEBUGGER. Find root cause, minimal fix, and a test case.');
+                } else if (skill === 'architect') {
+                    parts.push('Active skill: ARCHITECT. Propose clean structure, files, interfaces, tradeoffs before code.');
+                } else if (skill === 'review') {
+                    parts.push('Active skill: CODE REVIEW. List issues (bugs/security/style), then patches.');
+                } else if (skill === 'leetcode') {
+                    parts.push('Active skill: ALGORITHMS. Approach, complexity O(...), then optimal code.');
+                } else if (skill === 'frontend') {
+                    parts.push('Active skill: FRONTEND. Accessible responsive HTML/CSS/JS; full demos when useful.');
+                } else if (skill === 'backend') {
+                    parts.push('Active skill: BACKEND. Validation, errors, auth, data models.');
+                }
             }
             if (instr.about) parts.push('User context: ' + instr.about);
             if (instr.style) parts.push('Response style: ' + instr.style);
@@ -5695,6 +6050,7 @@
                     }
                     persistCurrentChat(promptPayload, aiResponseText);
                     if (!opts.skipUserBubble) incChatCount();
+                    playReplySound();
                     // light memory: remember preferred tone if set
                     try {
                         const mem = JSON.parse(safeStorage.getItem('scribe_memory') || '{}');
@@ -6096,13 +6452,92 @@
             }
         }
 
+
+        function getSettings() {
+            try { return JSON.parse(safeStorage.getItem('scribe_settings') || '{}'); }
+            catch (e) { return {}; }
+        }
+        function saveSetting(key, val) {
+            const s = getSettings();
+            s[key] = val;
+            safeStorage.setItem('scribe_settings', JSON.stringify(s));
+            applySettings();
+        }
+        function applySettings() {
+            const s = getSettings();
+            // timestamps
+            document.documentElement.classList.toggle('hide-timestamps', s.timestamps === false);
+            // compact history
+            if (s.compactHist && !document.getElementById('recent-chats-list')?.classList.contains('history-collapsed')) {
+                // only auto-collapse once on load via restore
+            }
+        }
+        function openSettingsModal() {
+            const card = document.getElementById('settings-popup');
+            if (!card) return;
+            const s = getSettings();
+            const t = document.getElementById('set-timestamps');
+            const sound = document.getElementById('set-sound');
+            const ent = document.getElementById('set-enter-send');
+            const ch = document.getElementById('set-compact-hist');
+            if (t) t.checked = s.timestamps !== false;
+            if (sound) sound.checked = !!s.sound;
+            if (ent) ent.checked = s.enterSend !== false;
+            if (ch) ch.checked = !!s.compactHist;
+            card.style.display = 'flex';
+        }
+        function closeSettingsModal() {
+            const card = document.getElementById('settings-popup');
+            if (card) card.style.display = 'none';
+        }
+        function openHelpModal() {
+            const card = document.getElementById('help-popup');
+            if (card) card.style.display = 'flex';
+            const done = document.getElementById('feedback-done');
+            if (done) done.style.display = 'none';
+        }
+        function closeHelpModal() {
+            const card = document.getElementById('help-popup');
+            if (card) card.style.display = 'none';
+        }
+        function submitFeedback() {
+            const ta = document.getElementById('feedback-text');
+            const text = (ta && ta.value || '').trim();
+            if (!text) { try { showToast('Write some feedback first', 'error'); } catch (e) {} return; }
+            try {
+                const list = JSON.parse(safeStorage.getItem('scribe_feedback') || '[]');
+                list.unshift({ text, at: Date.now() });
+                safeStorage.setItem('scribe_feedback', JSON.stringify(list.slice(0, 30)));
+            } catch (e) {}
+            if (ta) ta.value = '';
+            const done = document.getElementById('feedback-done');
+            if (done) done.style.display = 'block';
+            try { showToast('Feedback saved — thank you', 'success'); } catch (e) {}
+        }
+        function playReplySound() {
+            const s = getSettings();
+            if (!s.sound) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                o.frequency.value = 660;
+                g.gain.value = 0.04;
+                o.start();
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                o.stop(ctx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+
         function openCodeMode() {
             scribeWorkspaceMode = 'code';
             startNewChat();
+            scribeWorkspaceMode = 'code'; // keep after startNewChat
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             const btn = document.getElementById('nav-code');
             if (btn) btn.classList.add('active');
-            // auto coding skill
             safeStorage.setItem('scribe_active_skill', 'frontend');
             setDocumentTitle('Code');
             const bar = document.getElementById('imagine-style-bar');
@@ -6314,6 +6749,8 @@
         submitBtn.addEventListener('click', processPromptSubmission);
         promptInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
+                const s = getSettings();
+                if (s.enterSend === false) return; // allow newline
                 e.preventDefault();
                 processPromptSubmission();
             }
@@ -6405,7 +6842,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
@@ -6513,6 +6950,75 @@
                 <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
                 <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- SETTINGS -->
+    <div id="settings-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Show timestamps</div>
+                    <div class="sr-desc">Time under each message</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Sound on reply</div>
+                    <div class="sr-desc">Soft chime when AI finishes</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Enter to send</div>
+                    <div class="sr-desc">Off = Enter makes new line</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Compact history</div>
+                    <div class="sr-desc">Start with history collapsed</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP & FEEDBACK -->
+    <div id="help-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
+                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
+                <strong style="color:#ddd;">Code</strong> = programming ·
+                <strong style="color:#ddd;">Imagine</strong> = images
+            </p>
+            <div class="contact-form-group">
+                <label>Your feedback</label>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
+            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
         </div>
     </div>
 
