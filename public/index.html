@@ -2968,6 +2968,115 @@
 
         .msg-action-btn.bookmarked { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
 
+
+        /* Step 4: stronger mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0; top: 0; bottom: 0;
+                z-index: 100;
+                transform: translateX(-105%);
+                transition: transform .25s ease;
+                box-shadow: 8px 0 32px rgba(0,0,0,.15);
+            }
+            .sidebar.open-mobile { transform: translateX(0); }
+            .top-subnav { padding: 0 10px; gap: 6px; height: auto; min-height: 56px; flex-wrap: wrap; }
+            .badge-tier, .usage-chip { font-size: 11px; padding: 4px 8px; }
+            .greeting-header-title { font-size: 26px; margin-bottom: 20px; text-align: center; }
+            .starters-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .master-prompt-enclosure { border-radius: 18px; padding: 12px; }
+            .chat-console-body { height: calc(100vh - 280px); padding-bottom: 12px; }
+            .notes-fab { bottom: 16px; right: 16px; width: 44px; height: 44px; }
+            .notes-panel { right: 12px; bottom: 70px; width: calc(100vw - 24px); height: 50vh; }
+            .artifact-panel { width: 100% !important; max-width: 100%; }
+            #chat-column { transform: none; padding: 12px; }
+            .btn-upgrade-top { padding: 5px 10px; font-size: 11px; }
+        }
+
+        /* Onboarding tour overlay */
+        .tour-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .tour-overlay.open { display: flex; }
+        .tour-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            text-align: center;
+        }
+        body.theme-dark .tour-card { background: #1a1a1f; color: #eee; }
+        .tour-card h3 { margin: 0 0 10px; font-size: 20px; }
+        .tour-card p { color: #666; font-size: 14px; line-height: 1.5; margin: 0 0 20px; }
+        body.theme-dark .tour-card p { color: #aaa; }
+        .tour-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 18px; }
+        .tour-dots span {
+            width: 8px; height: 8px; border-radius: 50%; background: #ddd;
+        }
+        .tour-dots span.on { background: #4f46e5; }
+        .tour-actions { display: flex; gap: 10px; justify-content: center; }
+        .tour-actions button {
+            border: none; border-radius: 12px; padding: 10px 18px;
+            font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit;
+        }
+        .tour-actions .primary { background: #111; color: #fff; }
+        .tour-actions .ghost { background: #f0f0ee; color: #333; }
+        body.theme-dark .tour-actions .primary { background: #eee; color: #111; }
+        body.theme-dark .tour-actions .ghost { background: #2a2a30; color: #ddd; }
+
+        /* Web search toggle chip */
+        .web-search-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #e5e5e5;
+            background: #f7f7f5;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+            user-select: none;
+        }
+        .web-search-chip.on {
+            background: #ecfdf5;
+            border-color: #6ee7b7;
+            color: #047857;
+        }
+        body.theme-dark .web-search-chip {
+            background: #1a1a1f; border-color: #333; color: #aaa;
+        }
+        body.theme-dark .web-search-chip.on {
+            background: #064e3b; border-color: #10b981; color: #6ee7b7;
+        }
+
+        /* Share toast link box */
+        .share-link-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .share-link-box input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #1a1a1f;
+            color: #eee;
+            font-size: 12px;
+        }
+
     </style>
 </head>
 <body>
@@ -3146,9 +3255,11 @@
                         <button type="button" class="btn-upgrade-top" onclick="clearCurrentChat()" title="Clear this chat">Clear</button>
                         <button type="button" class="btn-upgrade-top" onclick="toggleExportMenu(event)" title="Export chat">Export ▾</button>
                         <div class="export-menu" id="export-menu">
-                            <button type="button" onclick="exportChat('md')">📄 Markdown (.md)</button>
-                            <button type="button" onclick="exportChat('txt')">📝 Plain text</button>
-                            <button type="button" onclick="exportChat('copy')">📋 Copy all</button>
+                            <button type="button" onclick="exportChat('md')">Markdown (.md)</button>
+                            <button type="button" onclick="exportChat('txt')">Plain text</button>
+                            <button type="button" onclick="exportChat('pdf')">PDF</button>
+                            <button type="button" onclick="exportChat('copy')">Copy all</button>
+                            <button type="button" onclick="shareCurrentChat()">Share link</button>
                         </div>
                     </div>
                     <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Dark / Light mode" onclick="toggleTheme()">🌙</button>
@@ -3159,6 +3270,9 @@
                             <button type="button" onclick="closeMoreMenu(); openHelpModal();"><span class="mi">?</span> Help</button>
                             <button type="button" onclick="closeMoreMenu(); openBookmarks();"><span class="mi">★</span> Bookmarks</button>
                             <button type="button" onclick="closeMoreMenu(); summarizeCurrentChat();"><span class="mi">Σ</span> Summarize chat</button>
+                            <button type="button" onclick="closeMoreMenu(); cloudSyncChats();"><span class="mi">☁</span> Sync to cloud</button>
+                            <button type="button" onclick="closeMoreMenu(); cloudPullChats();"><span class="mi">↓</span> Restore cloud</button>
+                            <button type="button" onclick="closeMoreMenu(); startTour();"><span class="mi">▶</span> Tour</button>
                             <button type="button" onclick="closeMoreMenu(); togglePricingModal();"><span class="mi">↑</span> Upgrade plan</button>
                             <button type="button" onclick="closeMoreMenu(); toggleIncognito();"><span class="mi">○</span> Incognito</button>
                             <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();"><span class="mi">≡</span> Instructions</button>
@@ -3240,6 +3354,7 @@
                                         <option value="urdu">Urdu style</option>
                                     </select>
                                 </div>
+                                <button type="button" class="web-search-chip" id="web-search-chip" title="Search the web for fresh info" onclick="toggleWebSearch()">🌐 Web</button>
                                 <div class="controls-right-group">
                                     <div class="action-icon-node" id="mic-btn" title="Voice input">🎙️</div>
                                     <button type="button" id="stop-gen-btn" class="btn-stop-gen" title="Stop generating" onclick="stopGenerating()">⏹</button>
@@ -4398,6 +4513,9 @@
                 const t = (getChatHistory().find(c => c.id === currentChatId) || {}).title;
                 if (t) setDocumentTitle(t);
             } catch (e) {}
+            // debounced cloud push
+            clearTimeout(window._cloudSyncTimer);
+            window._cloudSyncTimer = setTimeout(() => { try { cloudSyncChats(); } catch (e) {} }, 4000);
             // attach chat to active project
             if (currentProjectId && currentChatId) {
                 const projects = getProjects();
@@ -5600,7 +5718,9 @@
                         instructions: getCustomInstructions(),
                         images: imagesForApi,
                         hasImage: imagesForApi.length > 0,
-                        image: imagesForApi[0] ? imagesForApi[0].data : null
+                        image: imagesForApi[0] ? imagesForApi[0].data : null,
+                        webSearch: !!window._webSearchOn,
+                        mode: (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat'
                     }),
                     signal: activeAbort.signal
                 });
@@ -5966,8 +6086,10 @@
         function exportChat(kind) {
             const m = document.getElementById('export-menu');
             if (m) m.classList.remove('open');
+            if (kind === 'pdf') { exportChatPDF(); return; }
+            if (kind === 'share') { shareCurrentChat(); return; }
             const msgs = currentChatMessages || [];
-            if (!msgs.length) { alert('No messages to export yet.'); return; }
+            if (!msgs.length) { try { showToast('No messages to export yet', 'info'); } catch (e) {} return; }
             let text = '# Scribe AI Chat\n\n';
             msgs.forEach(msg => {
                 const role = msg.role === 'user' ? '**You**' : '**Scribe**';
@@ -6642,6 +6764,232 @@
         }
 
 
+
+        // ========== STEP 1: Web search toggle + vision already in payload ==========
+        window._webSearchOn = false;
+        function toggleWebSearch() {
+            window._webSearchOn = !window._webSearchOn;
+            const chip = document.getElementById('web-search-chip');
+            if (chip) {
+                chip.classList.toggle('on', window._webSearchOn);
+                chip.textContent = window._webSearchOn ? '🌐 Web on' : '🌐 Web';
+            }
+            try { showToast(window._webSearchOn ? 'Web search enabled for next message' : 'Web search off', 'info'); } catch (e) {}
+        }
+
+        // ========== STEP 2: Cloud chat sync (Worker KV) ==========
+        async function cloudSyncChats() {
+            const email = currentUserEmail;
+            if (!email) {
+                try { showToast('Sign in to sync chats to cloud', 'info'); } catch (e) {}
+                return;
+            }
+            const chats = getChatHistory();
+            try {
+                const r = await fetch(workerURL + '/api/sync-chats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, chats, action: 'push' })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (d.success) {
+                    try { showToast('Chats synced to cloud', 'success'); } catch (e) {}
+                } else {
+                    // local fallback marker
+                    safeStorage.setItem('scribe_cloud_backup', JSON.stringify({ email, chats, at: Date.now() }));
+                    try { showToast('Saved local cloud-backup (Worker sync pending)', 'info'); } catch (e) {}
+                }
+            } catch (e) {
+                safeStorage.setItem('scribe_cloud_backup', JSON.stringify({ email, chats, at: Date.now() }));
+                try { showToast('Offline — backup saved on device', 'info'); } catch (e) {}
+            }
+        }
+        async function cloudPullChats() {
+            const email = currentUserEmail;
+            if (!email) return;
+            try {
+                const r = await fetch(workerURL + '/api/sync-chats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, action: 'pull' })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (d.success && Array.isArray(d.chats) && d.chats.length) {
+                    const local = getChatHistory();
+                    // merge by id, prefer newer updatedAt
+                    const map = {};
+                    [...local, ...d.chats].forEach(c => {
+                        if (!c || !c.id) return;
+                        if (!map[c.id] || (c.updatedAt || 0) > (map[c.id].updatedAt || 0)) map[c.id] = c;
+                    });
+                    const merged = Object.values(map).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+                    saveChatHistory(merged);
+                    renderRecentChats();
+                    try { showToast('Cloud chats restored', 'success'); } catch (e) {}
+                }
+            } catch (e) {}
+        }
+        // auto-push after persist
+        const _persistCloud = (typeof persistCurrentChat === 'function') ? persistCurrentChat : null;
+        // hooked below after definition via wrap
+
+        // ========== STEP 3: Share link + PDF ==========
+        function shareCurrentChat() {
+            const msgs = currentChatMessages || [];
+            if (!msgs.length) {
+                try { showToast('Nothing to share yet', 'info'); } catch (e) {}
+                return;
+            }
+            const payload = {
+                v: 1,
+                title: (getChatHistory().find(c => c.id === currentChatId) || {}).title || 'Scribe chat',
+                messages: msgs.map(m => ({ role: m.role, text: (m.text || '').slice(0, 8000) })),
+                at: Date.now()
+            };
+            // compress with base64 in hash (works offline; long chats may truncate)
+            try {
+                const json = JSON.stringify(payload);
+                const b64 = btoa(unescape(encodeURIComponent(json)));
+                const url = location.origin + location.pathname + '#share=' + b64;
+                const input = document.getElementById('share-link-input');
+                if (input) input.value = url.length > 6000 ? url.slice(0, 6000) : url;
+                // also try Worker short link
+                fetch(workerURL + '/api/share-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(r => r.json()).then(d => {
+                    if (d.success && d.id) {
+                        const short = location.origin + location.pathname + '?share=' + d.id;
+                        if (input) input.value = short;
+                        const st = document.getElementById('share-status');
+                        if (st) st.textContent = 'Short link ready';
+                    }
+                }).catch(() => {});
+                const card = document.getElementById('share-popup');
+                if (card) card.style.display = 'flex';
+            } catch (e) {
+                try { showToast('Could not create share link', 'error'); } catch (e2) {}
+            }
+        }
+        function copyShareLink() {
+            const input = document.getElementById('share-link-input');
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                try { showToast('Link copied', 'success'); } catch (e) {}
+            }).catch(() => {
+                input.select();
+                try { showToast('Select & copy the link', 'info'); } catch (e) {}
+            });
+        }
+        function closeShareModal() {
+            const card = document.getElementById('share-popup');
+            if (card) card.style.display = 'none';
+        }
+        function loadSharedChatFromUrl() {
+            try {
+                const params = new URLSearchParams(location.search);
+                const sid = params.get('share');
+                if (sid) {
+                    fetch(workerURL + '/api/share-chat?id=' + encodeURIComponent(sid))
+                        .then(r => r.json())
+                        .then(d => {
+                            if (d.success && d.chat) renderSharedView(d.chat);
+                        }).catch(() => {});
+                    return;
+                }
+                if (location.hash.startsWith('#share=')) {
+                    const b64 = location.hash.slice(7);
+                    const json = decodeURIComponent(escape(atob(b64)));
+                    const data = JSON.parse(json);
+                    renderSharedView(data);
+                }
+            } catch (e) {}
+        }
+        function renderSharedView(data) {
+            try {
+                startNewChat();
+                greetingBanner.style.display = 'none';
+                chatConsole.style.display = 'flex';
+                chatConsole.innerHTML = '<div style="padding:12px 16px;background:#fef3c7;border-radius:12px;margin-bottom:12px;font-size:13px;color:#92400e;">Shared chat (read-only): ' + escapeHtml(data.title || 'Chat') + '</div>';
+                (data.messages || []).forEach((m, i) => {
+                    if (m.role === 'user') {
+                        chatConsole.insertAdjacentHTML('beforeend',
+                            `<div class="console-stream-row" style="justify-content:flex-end;"><div style="background:#f0f0ee;border:1px solid #e5e5e5;padding:12px 18px;border-radius:18px;max-width:80%;">${escapeHtml(m.text || '')}</div></div>`);
+                    } else {
+                        const id = 'shared-ai-' + i;
+                        chatConsole.insertAdjacentHTML('beforeend',
+                            `<div class="console-stream-row"><div class="console-avatar-bubble"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="" data-scribe-logo></div><div class="console-text-payload" id="${id}">${formatMessageHtml(m.text || '')}</div></div>`);
+                    }
+                });
+                setDocumentTitle(data.title || 'Shared');
+                try { showToast('Opened shared chat', 'success'); } catch (e) {}
+            } catch (e) {}
+        }
+
+        // extend exportChat for PDF
+        const _exportChatOrig = typeof exportChat === 'function' ? exportChat : null;
+        function exportChatPDF() {
+            const msgs = currentChatMessages || [];
+            if (!msgs.length) { try { showToast('No messages to export', 'info'); } catch (e) {} return; }
+            const w = window.open('', '_blank');
+            if (!w) { try { showToast('Allow popups to export PDF', 'error'); } catch (e) {} return; }
+            let body = '<h1 style="font-family:system-ui">Scribe AI Chat</h1>';
+            msgs.forEach(m => {
+                const who = m.role === 'user' ? 'You' : 'Scribe';
+                body += `<div style="margin:16px 0;padding:12px;border:1px solid #e5e5e5;border-radius:12px;font-family:system-ui;font-size:14px;line-height:1.5">
+                    <strong>${who}</strong><pre style="white-space:pre-wrap;font-family:inherit;margin:8px 0 0">${(m.text || '').replace(/</g,'&lt;')}</pre></div>`;
+            });
+            w.document.write(`<!DOCTYPE html><html><head><title>Scribe Chat</title></head><body style="max-width:720px;margin:40px auto;padding:20px">${body}
+                <script>setTimeout(function(){window.print()},400)<\/script></body></html>`);
+            w.document.close();
+        }
+
+        // ========== STEP 4: Onboarding tour ==========
+        const TOUR_STEPS = [
+            { title: 'Welcome to Scribe', body: 'Your AI workspace for chat, code, and images — in one place.' },
+            { title: 'New Chat', body: 'Use New Chat for everyday questions, writing, and brainstorming. Short and friendly answers.' },
+            { title: 'Code mode', body: 'Tap Code (</>) when you want full programming help — complete runnable solutions.' },
+            { title: 'Imagine', body: 'Create images from text. Pick a style, write a prompt, then Generate image.' },
+            { title: 'Power tips', body: 'Type / for slash commands. Use ⋯ for Settings, Bookmarks, and Summarize. Notes pad is bottom-right.' }
+        ];
+        let tourStep = 0;
+        function startTour() {
+            tourStep = 0;
+            renderTourStep();
+            const ov = document.getElementById('tour-overlay');
+            if (ov) ov.classList.add('open');
+        }
+        function renderTourStep() {
+            const s = TOUR_STEPS[tourStep];
+            if (!s) return endTour();
+            const t = document.getElementById('tour-title');
+            const b = document.getElementById('tour-body');
+            const dots = document.getElementById('tour-dots');
+            const next = document.getElementById('tour-next');
+            if (t) t.textContent = s.title;
+            if (b) b.textContent = s.body;
+            if (dots) dots.innerHTML = TOUR_STEPS.map((_, i) => `<span class="${i===tourStep?'on':''}"></span>`).join('');
+            if (next) next.textContent = tourStep >= TOUR_STEPS.length - 1 ? 'Done' : 'Next';
+        }
+        function nextTourStep() {
+            tourStep++;
+            if (tourStep >= TOUR_STEPS.length) endTour();
+            else renderTourStep();
+        }
+        function endTour() {
+            const ov = document.getElementById('tour-overlay');
+            if (ov) ov.classList.remove('open');
+            safeStorage.setItem('scribe_tour_done', '1');
+            dismissOnboarding();
+        }
+        function maybeStartTour() {
+            if (safeStorage.getItem('scribe_tour_done') === '1') return;
+            // slight delay after workspace shows
+            setTimeout(() => startTour(), 600);
+        }
+
+
         submitBtn.addEventListener('click', processPromptSubmission);
         promptInput.addEventListener('keydown', (e) => {
             if (typeof _slashKeyHandler === 'function' && _slashKeyHandler(e)) return;
@@ -6739,7 +7087,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
@@ -6991,6 +7339,34 @@
             <button class="popup-close-trigger" onclick="closeBookmarks()">×</button>
             <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Bookmarks</h2>
             <div id="bookmarks-list"></div>
+        </div>
+    </div>
+
+
+    <!-- ONBOARDING TOUR -->
+    <div id="tour-overlay" class="tour-overlay">
+        <div class="tour-card">
+            <div class="tour-dots" id="tour-dots"></div>
+            <h3 id="tour-title">Welcome</h3>
+            <p id="tour-body">…</p>
+            <div class="tour-actions">
+                <button type="button" class="ghost" id="tour-skip" onclick="endTour()">Skip</button>
+                <button type="button" class="primary" id="tour-next" onclick="nextTourStep()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div id="share-popup" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="closeShareModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Share chat</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:12px;">Anyone with the link can view a read-only copy.</p>
+            <div class="share-link-box">
+                <input type="text" id="share-link-input" readonly>
+                <button type="button" class="contact-submit-btn" style="width:auto;padding:10px 14px;" onclick="copyShareLink()">Copy</button>
+            </div>
+            <p id="share-status" style="color:#a3e635;font-size:12px;text-align:center;margin-top:10px;"></p>
         </div>
     </div>
 
