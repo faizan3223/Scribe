@@ -2812,6 +2812,18 @@
         }
         .feedback-textarea:focus { border-color: #6366f1; }
 
+
+        .more-dropdown button .mi,
+        .attach-menu-item .mi {
+            display: inline-flex;
+            width: 18px;
+            opacity: 0.7;
+            font-size: 13px;
+            justify-content: center;
+        }
+        .more-dropdown button.more-danger { color: #dc2626; }
+        body.theme-dark .more-dropdown button.more-danger { color: #f87171; }
+
     </style>
 </head>
 <body>
@@ -2999,13 +3011,14 @@
                     <div class="more-menu-wrap">
                         <button type="button" class="btn-more-dots" id="more-menu-btn" title="More" onclick="toggleMoreMenu(event)">⋯</button>
                         <div class="more-dropdown" id="more-dropdown">
-                            <button type="button" onclick="closeMoreMenu(); openSettingsModal();">⚙️ Settings</button>
-                            <button type="button" onclick="closeMoreMenu(); openHelpModal();">❓ Help &amp; feedback</button>
-                            <button type="button" onclick="closeMoreMenu(); toggleIncognito();">🕶️ Incognito</button>
-                            <button type="button" onclick="closeMoreMenu(); togglePricingModal();">💳 Pricing</button>
-                            <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();">📝 Instructions</button>
-                            <button type="button" onclick="closeMoreMenu(); togglePromptLibrary();">📚 Prompts</button>
-                            <button type="button" onclick="closeMoreMenu(); openCmdPalette();">⌘ Commands</button>
+                            <button type="button" onclick="closeMoreMenu(); openSettingsModal();"><span class="mi">⚙</span> Settings</button>
+                            <button type="button" onclick="closeMoreMenu(); openHelpModal();"><span class="mi">?</span> Help</button>
+                            <button type="button" onclick="closeMoreMenu(); togglePricingModal();"><span class="mi">↑</span> Upgrade plan</button>
+                            <button type="button" onclick="closeMoreMenu(); toggleIncognito();"><span class="mi">○</span> Incognito</button>
+                            <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();"><span class="mi">≡</span> Instructions</button>
+                            <button type="button" onclick="closeMoreMenu(); togglePromptLibrary();"><span class="mi">☰</span> Prompts</button>
+                            <button type="button" onclick="closeMoreMenu(); openCmdPalette();"><span class="mi">⌘</span> Commands</button>
+                            <button type="button" class="more-danger" onclick="closeMoreMenu(); confirmLogout();"><span class="mi">→</span> Sign Out</button>
                         </div>
                     </div>
                 </header>
@@ -3058,13 +3071,12 @@
                                     <div class="attach-menu-wrap">
                                         <div class="action-icon-node" id="attach-plus-btn" title="Add">+</div>
                                         <div class="attach-menu" id="attach-menu">
-                                            <div class="attach-menu-item" onclick="triggerFileSelect('image')">🖼️ <span>Upload image</span></div>
-                                            <div class="attach-menu-item" onclick="triggerFileSelect('file')">📄 <span>Upload file</span></div>
-                                            <div class="attach-menu-item" onclick="triggerGenerateImage()">🎨 <span>Generate image</span></div>
-                                            <div class="attach-menu-item" onclick="triggerGenerateVideo()">🎬 <span>Generate video</span></div>
-                                            <div class="attach-menu-item" onclick="insertTemplate('email')">✉️ <span>Template: Email</span></div>
-                                            <div class="attach-menu-item" onclick="insertTemplate('blog')">📝 <span>Template: Blog outline</span></div>
-                                            <div class="attach-menu-item" onclick="insertTemplate('cover')">📄 <span>Template: Cover letter</span></div>
+                                            <div class="attach-menu-item" onclick="triggerFileSelect('image')"><span class="mi">▣</span> <span>Upload image</span></div>
+                                            <div class="attach-menu-item" onclick="triggerFileSelect('file')"><span class="mi">▤</span> <span>Upload file</span></div>
+                                            <div class="attach-menu-item" onclick="triggerGenerateImage()"><span class="mi">◈</span> <span>Generate image</span></div>
+                                            <div class="attach-menu-item" onclick="insertTemplate('email')"><span class="mi">✉</span> <span>Template: Email</span></div>
+                                            <div class="attach-menu-item" onclick="insertTemplate('blog')"><span class="mi">☰</span> <span>Template: Blog outline</span></div>
+                                            <div class="attach-menu-item" onclick="insertTemplate('cover')"><span class="mi">▤</span> <span>Template: Cover letter</span></div>
                                         </div>
                                     </div>
                                     <input type="file" id="hidden-file-image" accept="image/*" style="display:none;">
@@ -3393,7 +3405,10 @@
                 showToast('Nothing to clear', 'info');
                 return;
             }
-            if (!confirm('Clear this conversation from the screen? (Saved history stays unless you delete the chat)')) return;
+            const s = getSettings();
+            if (s.confirmClear !== false) {
+                if (!confirm('Clear this conversation from the screen? (Saved history stays unless you delete the chat)')) return;
+            }
             chatConsole.innerHTML = '';
             currentChatMessages = [];
             // keep currentChatId so next message continues thread, or null for fresh
@@ -3846,7 +3861,7 @@
             const plan = getUserPlan();
             const lim = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
             if (getChatCount() >= lim.chats) {
-                alert('Free plan limit: 15 chats. Upgrade to Pro ($20) or Ultra ($100) for unlimited chats.');
+                try { showToast('Chat limit reached — upgrade for unlimited', 'info'); } catch (e) {}
                 togglePricingModal();
                 return false;
             }
@@ -3857,7 +3872,7 @@
             const lim = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
             if (plan === 'free') {
                 if (getImagesToday() >= lim.imagesPerDay) {
-                    alert('Free plan: 1 image per day. Upgrade for more images.');
+                    try { showToast('Daily image limit reached — upgrade for more', 'info'); } catch (e) {}
                     togglePricingModal();
                     return false;
                 }
@@ -4980,587 +4995,23 @@
                 return src;
             }
             if (l === 'svg' || /^\s*<svg/i.test(src)) {
-                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fafafa}</style></head><body>${src}
-
-    <!-- PROMPT LIBRARY -->
-    <div id="prompt-lib-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
-            <div class="contact-form-group">
-                <label>New prompt title</label>
-                <input type="text" id="plib-title" placeholder="e.g. Client email">
-            </div>
-            <div class="contact-form-group">
-                <label>Prompt text</label>
-                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
-            <div id="plib-list" style="margin-top:18px;"></div>
-        </div>
-    </div>
-
-    <!-- IMAGE LIGHTBOX -->
-    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
-        <div class="lb-top">
-            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
-            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
-        </div>
-        <img id="img-lightbox-img" src="" alt="Preview">
-        <div class="lb-caption" id="img-lightbox-caption"></div>
-    </div>
-
-
-    <!-- AUTOMATIONS -->
-    <div id="automations-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div id="skills-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
-                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
-                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
-                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
-                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
-                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
-                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SETTINGS -->
-    <div id="settings-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Show timestamps</div>
-                    <div class="sr-desc">Time under each message</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Sound on reply</div>
-                    <div class="sr-desc">Soft chime when AI finishes</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Enter to send</div>
-                    <div class="sr-desc">Off = Enter makes new line</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Compact history</div>
-                    <div class="sr-desc">Start with history collapsed</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <!-- HELP & FEEDBACK -->
-    <div id="help-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
-                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
-                <strong style="color:#ddd;">Code</strong> = programming ·
-                <strong style="color:#ddd;">Imagine</strong> = images
-            </p>
-            <div class="contact-form-group">
-                <label>Your feedback</label>
-                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
-            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
-        </div>
-    </div>
-
-    <div class="toast-stack" id="toast-stack"></div>
-</body></html>`;
+                return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fafafa}</style></head><body>' + src + '</body></html>';
             }
             if (l === 'css') {
-                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${src}</style></head><body>
-                    <div style="font-family:system-ui;padding:24px;max-width:480px;margin:40px auto;border:1px solid #e5e5e5;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06)">
-                        <h1 style="margin:0 0 8px;font-size:22px">CSS Preview</h1>
-                        <p style="margin:0 0 16px;color:#666">Sample elements styled by your CSS</p>
-                        <button style="margin-right:8px">Button</button>
-                        <a href="#">Link</a>
-                        <div class="card" style="margin-top:16px;padding:12px;border-radius:8px;background:#f7f7f5">Card</div>
-                    </div>
-
-    <!-- PROMPT LIBRARY -->
-    <div id="prompt-lib-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
-            <div class="contact-form-group">
-                <label>New prompt title</label>
-                <input type="text" id="plib-title" placeholder="e.g. Client email">
-            </div>
-            <div class="contact-form-group">
-                <label>Prompt text</label>
-                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
-            <div id="plib-list" style="margin-top:18px;"></div>
-        </div>
-    </div>
-
-    <!-- IMAGE LIGHTBOX -->
-    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
-        <div class="lb-top">
-            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
-            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
-        </div>
-        <img id="img-lightbox-img" src="" alt="Preview">
-        <div class="lb-caption" id="img-lightbox-caption"></div>
-    </div>
-
-
-    <!-- AUTOMATIONS -->
-    <div id="automations-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div id="skills-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
-                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
-                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
-                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
-                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
-                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
-                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SETTINGS -->
-    <div id="settings-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Show timestamps</div>
-                    <div class="sr-desc">Time under each message</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Sound on reply</div>
-                    <div class="sr-desc">Soft chime when AI finishes</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Enter to send</div>
-                    <div class="sr-desc">Off = Enter makes new line</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Compact history</div>
-                    <div class="sr-desc">Start with history collapsed</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <!-- HELP & FEEDBACK -->
-    <div id="help-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
-                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
-                <strong style="color:#ddd;">Code</strong> = programming ·
-                <strong style="color:#ddd;">Imagine</strong> = images
-            </p>
-            <div class="contact-form-group">
-                <label>Your feedback</label>
-                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
-            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
-        </div>
-    </div>
-
-    <div class="toast-stack" id="toast-stack"></div>
-</body></html>`;
+                return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + src + '</style></head><body>' +
+                    '<div style="font-family:system-ui;padding:24px;max-width:480px;margin:40px auto;border:1px solid #e5e5e5;border-radius:16px;background:#fff">' +
+                    '<h1 style="margin:0 0 8px;font-size:22px">CSS Preview</h1>' +
+                    '<p style="margin:0 0 16px;color:#666">Sample elements</p>' +
+                    '<button style="margin-right:8px">Button</button><a href="#">Link</a>' +
+                    '<div style="margin-top:16px;padding:12px;border-radius:8px;background:#f7f7f5">Card</div></div></body></html>';
             }
             if (l === 'javascript' || l === 'js') {
-                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:20px;background:#0f0f12;color:#e8e8ec} #out{white-space:pre-wrap;background:#1a1a1f;padding:14px;border-radius:10px;border:1px solid #2a2a30;min-height:80px}</style></head><body>
-                    <h3 style="margin:0 0 12px">JS Preview</h3>
-                    <div id="out">Running…</div>
-                    <script>
-                    (function(){
-                        const out = document.getElementById('out');
-                        const log = (...a) => { out.textContent += a.map(x => typeof x === 'object' ? JSON.stringify(x,null,2) : String(x)).join(' ') + '\\n'; };
-                        const originalLog = console.log;
-                        console.log = function(){ log.apply(null, arguments); originalLog.apply(console, arguments); };
-                        try {
-                            ${src.replace(/<\/script>/gi, '<\\/script>')}
-                            if (!out.textContent || out.textContent === 'Running…') out.textContent = 'Script ran (no console output).';
-                        } catch (e) {
-                            out.textContent = 'Error: ' + e.message;
-                        }
-                    })();
-                    <\/script>
-
-    <!-- PROMPT LIBRARY -->
-    <div id="prompt-lib-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
-            <div class="contact-form-group">
-                <label>New prompt title</label>
-                <input type="text" id="plib-title" placeholder="e.g. Client email">
-            </div>
-            <div class="contact-form-group">
-                <label>Prompt text</label>
-                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
-            <div id="plib-list" style="margin-top:18px;"></div>
-        </div>
-    </div>
-
-    <!-- IMAGE LIGHTBOX -->
-    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
-        <div class="lb-top">
-            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
-            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
-        </div>
-        <img id="img-lightbox-img" src="" alt="Preview">
-        <div class="lb-caption" id="img-lightbox-caption"></div>
-    </div>
-
-
-    <!-- AUTOMATIONS -->
-    <div id="automations-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div id="skills-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
-                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
-                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
-                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
-                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
-                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
-                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SETTINGS -->
-    <div id="settings-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Show timestamps</div>
-                    <div class="sr-desc">Time under each message</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Sound on reply</div>
-                    <div class="sr-desc">Soft chime when AI finishes</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Enter to send</div>
-                    <div class="sr-desc">Off = Enter makes new line</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Compact history</div>
-                    <div class="sr-desc">Start with history collapsed</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <!-- HELP & FEEDBACK -->
-    <div id="help-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
-                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
-                <strong style="color:#ddd;">Code</strong> = programming ·
-                <strong style="color:#ddd;">Imagine</strong> = images
-            </p>
-            <div class="contact-form-group">
-                <label>Your feedback</label>
-                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
-            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
-        </div>
-    </div>
-
-    <div class="toast-stack" id="toast-stack"></div>
-</body></html>`;
+                return '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>' +
+                    '<pre id="out" style="font-family:ui-monospace;padding:16px;white-space:pre-wrap"></pre>' +
+                    '<script>try{const r=(function(){\n' + src + '\n})();document.getElementById("out").textContent=r!==undefined?String(r):"(ran)";}catch(e){document.getElementById("out").textContent="Error: "+e.message;}<\/script></body></html>';
             }
-            // Fallback: treat as HTML fragment
-            return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:16px}</style></head><body>${src}
-
-    <!-- PROMPT LIBRARY -->
-    <div id="prompt-lib-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="togglePromptLibrary()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Prompt library</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">Save and reuse your best prompts.</p>
-            <div class="contact-form-group">
-                <label>New prompt title</label>
-                <input type="text" id="plib-title" placeholder="e.g. Client email">
-            </div>
-            <div class="contact-form-group">
-                <label>Prompt text</label>
-                <textarea class="settings-textarea" id="plib-body" placeholder="Write the prompt…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="savePromptToLibrary()">Save prompt</button>
-            <div id="plib-list" style="margin-top:18px;"></div>
-        </div>
-    </div>
-
-    <!-- IMAGE LIGHTBOX -->
-    <div id="img-lightbox" onclick="if(event.target===this)closeImageLightbox()">
-        <div class="lb-top">
-            <button type="button" class="lb-btn" title="Download" onclick="downloadLightboxImage()">⬇</button>
-            <button type="button" class="lb-btn" title="Close" onclick="closeImageLightbox()">✕</button>
-        </div>
-        <img id="img-lightbox-img" src="" alt="Preview">
-        <div class="lb-caption" id="img-lightbox-caption"></div>
-    </div>
-
-
-    <!-- AUTOMATIONS -->
-    <div id="automations-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeAutomations()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Automations</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">One-click workflows — edit the prompt, then send.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('daily')">Daily standup</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('email')">Notes → Email</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('summary')">Long text → Summary</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('refactor')">Code → Refactor</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('tests')">Code → Unit tests</button>
-                <button type="button" class="contact-submit-btn" style="background:#2a2a30;" onclick="runAutomation('docs')">Code → Docs</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div id="skills-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSkills()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
-            <div style="display:grid;gap:8px;">
-                <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
-                <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
-                <button type="button" class="contact-submit-btn" data-skill="review" style="background:#2a2a30;" onclick="setSkill('review')">Code review — issues + patches</button>
-                <button type="button" class="contact-submit-btn" data-skill="leetcode" style="background:#2a2a30;" onclick="setSkill('leetcode')">Algorithms — optimal + complexity</button>
-                <button type="button" class="contact-submit-btn" data-skill="frontend" style="background:#2a2a30;" onclick="setSkill('frontend')">Frontend — UI / HTML / CSS / JS</button>
-                <button type="button" class="contact-submit-btn" data-skill="backend" style="background:#2a2a30;" onclick="setSkill('backend')">Backend — APIs &amp; data</button>
-                <button type="button" class="contact-submit-btn" data-skill="off" style="background:#111;" onclick="setSkill('off')">Default (no skill)</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SETTINGS -->
-    <div id="settings-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeSettingsModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Settings</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Preferences saved on this device.</p>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Show timestamps</div>
-                    <div class="sr-desc">Time under each message</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-timestamps" onchange="saveSetting('timestamps', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Sound on reply</div>
-                    <div class="sr-desc">Soft chime when AI finishes</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-sound" onchange="saveSetting('sound', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Enter to send</div>
-                    <div class="sr-desc">Off = Enter makes new line</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-enter-send" onchange="saveSetting('enterSend', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-row">
-                <div>
-                    <div class="sr-label">Compact history</div>
-                    <div class="sr-desc">Start with history collapsed</div>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <!-- HELP & FEEDBACK -->
-    <div id="help-popup" class="global-popup-overlay">
-        <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="closeHelpModal()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Help &amp; feedback</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:14px;">
-                <strong style="color:#ddd;">New Chat</strong> = normal questions ·
-                <strong style="color:#ddd;">Code</strong> = programming ·
-                <strong style="color:#ddd;">Imagine</strong> = images
-            </p>
-            <div class="contact-form-group">
-                <label>Your feedback</label>
-                <textarea class="feedback-textarea" id="feedback-text" placeholder="Bug, idea, or anything else…"></textarea>
-            </div>
-            <button type="button" class="contact-submit-btn" onclick="submitFeedback()">Send feedback</button>
-            <p id="feedback-done" style="display:none;color:#a3e635;text-align:center;margin-top:12px;font-size:13px;">Thanks — feedback saved on this device.</p>
-        </div>
-    </div>
-
-    <div class="toast-stack" id="toast-stack"></div>
-</body></html>`;
+            return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui;padding:16px}</style></head><body><pre style="white-space:pre-wrap">' +
+                src.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</pre></body></html>';
         }
 
         function openArtifact(code, lang, ext) {
@@ -6026,9 +5477,10 @@
                                 const parsed = JSON.parse(dataStr);
                                 if (parsed.text) {
                                     aiResponseText += parsed.text;
-                                    // Live markdown-ish formatting while streaming
                                     try {
-                                        targetOutputBox.innerHTML = formatMessageHtml(aiResponseText);
+                                        const s = getSettings();
+                                        if (s.liveMd === false) targetOutputBox.textContent = aiResponseText;
+                                        else targetOutputBox.innerHTML = formatMessageHtml(aiResponseText);
                                     } catch (e) {
                                         targetOutputBox.textContent = aiResponseText;
                                     }
@@ -6046,7 +5498,10 @@
                     targetOutputBox.dataset.userPrompt = promptPayload;
                     targetOutputBox.innerHTML = buildAiMessageHtml(aiResponseText, targetId, promptPayload);
                     if (window._pendingArtifact && window._pendingArtifact.code) {
-                        openArtifact(window._pendingArtifact.code, window._pendingArtifact.lang, window._pendingArtifact.ext);
+                        const s = getSettings();
+                        if (s.autoArtifact !== false) {
+                            openArtifact(window._pendingArtifact.code, window._pendingArtifact.lang, window._pendingArtifact.ext);
+                        }
                     }
                     persistCurrentChat(promptPayload, aiResponseText);
                     if (!opts.skipUserBubble) incChatCount();
@@ -6465,25 +5920,30 @@
         }
         function applySettings() {
             const s = getSettings();
-            // timestamps
             document.documentElement.classList.toggle('hide-timestamps', s.timestamps === false);
-            // compact history
-            if (s.compactHist && !document.getElementById('recent-chats-list')?.classList.contains('history-collapsed')) {
-                // only auto-collapse once on load via restore
-            }
+            document.documentElement.classList.toggle('reduce-motion', !!s.reduceMotion);
+            const starters = document.getElementById('starters-wrap');
+            if (starters && s.starters === false) starters.style.display = 'none';
         }
         function openSettingsModal() {
             const card = document.getElementById('settings-popup');
             if (!card) return;
             const s = getSettings();
-            const t = document.getElementById('set-timestamps');
-            const sound = document.getElementById('set-sound');
-            const ent = document.getElementById('set-enter-send');
-            const ch = document.getElementById('set-compact-hist');
-            if (t) t.checked = s.timestamps !== false;
-            if (sound) sound.checked = !!s.sound;
-            if (ent) ent.checked = s.enterSend !== false;
-            if (ch) ch.checked = !!s.compactHist;
+            const map = {
+                'set-timestamps': s.timestamps !== false,
+                'set-sound': !!s.sound,
+                'set-enter-send': s.enterSend !== false,
+                'set-compact-hist': !!s.compactHist,
+                'set-auto-artifact': s.autoArtifact !== false,
+                'set-live-md': s.liveMd !== false,
+                'set-starters': s.starters !== false,
+                'set-confirm-clear': s.confirmClear !== false,
+                'set-reduce-motion': !!s.reduceMotion
+            };
+            Object.keys(map).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = map[id];
+            });
             card.style.display = 'flex';
         }
         function closeSettingsModal() {
@@ -6997,6 +6457,56 @@
                 </div>
                 <label class="toggle-switch">
                     <input type="checkbox" id="set-compact-hist" onchange="saveSetting('compactHist', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Auto-open code panel</div>
+                    <div class="sr-desc">Open side panel when AI returns code</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-auto-artifact" onchange="saveSetting('autoArtifact', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Live markdown</div>
+                    <div class="sr-desc">Format text while AI is streaming</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-live-md" onchange="saveSetting('liveMd', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Show starters</div>
+                    <div class="sr-desc">Suggestion chips on empty chat</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-starters" onchange="saveSetting('starters', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Confirm before clear</div>
+                    <div class="sr-desc">Ask before clearing the chat</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-confirm-clear" onchange="saveSetting('confirmClear', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="sr-label">Reduce motion</div>
+                    <div class="sr-desc">Less animation for accessibility</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="set-reduce-motion" onchange="saveSetting('reduceMotion', this.checked)">
                     <span class="slider"></span>
                 </label>
             </div>
