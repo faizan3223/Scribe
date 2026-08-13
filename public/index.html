@@ -3266,6 +3266,79 @@
             color: #999;
         }
 
+
+        /* Unique future features */
+        .future-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+            max-width: 800px;
+            width: 100%;
+        }
+        .future-chip {
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            border-radius: 20px;
+            padding: 5px 11px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .future-chip.on {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+        .future-chip.honest.on { background: #7c2d12; border-color: #7c2d12; }
+        .future-chip.contract.on { background: #1e3a8a; border-color: #1e3a8a; }
+        body.theme-dark .future-chip {
+            background: #1a1a1f; border-color: #333; color: #ccc;
+        }
+        body.theme-dark .future-chip.on { background: #eee; color: #111; }
+        .contract-bar {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 8px;
+        }
+        .contract-bar.visible { display: block; }
+        .contract-bar input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px dashed #6366f1;
+            border-radius: 12px;
+            background: #f5f3ff;
+            font-size: 13px;
+            outline: none;
+            font-family: inherit;
+        }
+        body.theme-dark .contract-bar input {
+            background: #1e1b4b; border-color: #6366f1; color: #e0e7ff;
+        }
+        .flash-card {
+            background: linear-gradient(145deg, #1e1b4b, #312e81);
+            color: #e0e7ff;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            min-height: 100px;
+        }
+        .flash-card .fc-q { font-weight: 600; font-size: 15px; }
+        .flash-card .fc-a { display: none; margin-top: 12px; font-size: 14px; opacity: .95; }
+        .flash-card.revealed .fc-a { display: block; }
+        .decision-item, .capsule-item {
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-size: 13px;
+        }
+
     </style>
 </head>
 <body>
@@ -3482,6 +3555,9 @@
                             <button type="button" onclick="closeMoreMenu(); openSettingsModal();"><span class="mi">⚙</span> Settings</button>
                             <button type="button" onclick="closeMoreMenu(); openHelpModal();"><span class="mi">?</span> Help</button>
                             <button type="button" onclick="closeMoreMenu(); openBookmarks();"><span class="mi">★</span> Bookmarks</button>
+                            <button type="button" onclick="closeMoreMenu(); openDecisionJournal();"><span class="mi">◇</span> Decisions</button>
+                            <button type="button" onclick="closeMoreMenu(); openFlashcards();"><span class="mi">▦</span> Flashcards</button>
+                            <button type="button" onclick="closeMoreMenu(); openTimeCapsule();"><span class="mi">⌛</span> Time capsule</button>
                             <button type="button" onclick="closeMoreMenu(); summarizeCurrentChat();"><span class="mi">Σ</span> Summarize chat</button>
                             <button type="button" onclick="closeMoreMenu(); cloudSyncChats();"><span class="mi">☁</span> Sync to cloud</button>
                             <button type="button" onclick="closeMoreMenu(); cloudPullChats();"><span class="mi">↓</span> Restore cloud</button>
@@ -3536,6 +3612,17 @@
                         <div id="chat-stream-console" class="chat-console-body"></div>
                         <button type="button" class="scroll-bottom-btn" id="scroll-bottom-btn" title="Scroll to bottom" onclick="scrollChatToBottom()">↓</button>
 
+                        <div class="future-chip-row" id="future-chip-row">
+                            <button type="button" class="future-chip" id="chip-honest" onclick="toggleHonestMode()">Honest mode</button>
+                            <button type="button" class="future-chip" id="chip-contract" onclick="toggleContractBar()">Output contract</button>
+                            <button type="button" class="future-chip" id="chip-debate" onclick="toggleDebateMode()">Debate mode</button>
+                            <button type="button" class="future-chip" onclick="openDecisionJournal()">Decision journal</button>
+                            <button type="button" class="future-chip" onclick="openFlashcards()">Flashcards</button>
+                            <button type="button" class="future-chip" onclick="openTimeCapsule()">Time capsule</button>
+                        </div>
+                        <div class="contract-bar" id="contract-bar">
+                            <input type="text" id="output-contract" placeholder="Required structure e.g. Verdict · 3 reasons · Risks · Next step">
+                        </div>
                         <div class="master-prompt-enclosure" id="master-prompt-enclosure">
                             <div id="attachment-preview-row" class="attachment-preview-row"></div>
                             <textarea id="prompt-input" placeholder="Ask Scribe" rows="1"></textarea>
@@ -5627,6 +5714,8 @@
                     <button type="button" class="msg-action-btn" onclick="showRegenVariants(event, '${boxId}')">↻ More</button>
                     <button type="button" class="msg-action-btn ${isBm ? 'bookmarked' : ''}" onclick="toggleBookmark('${boxId}')">${isBm ? '★' : '☆'}</button>
                     <button type="button" class="msg-action-btn" onclick="addToNotes('${boxId}')">→ Notes</button>
+                    <button type="button" class="msg-action-btn" onclick="makeFlashcard('${boxId}')">Card</button>
+                    <button type="button" class="msg-action-btn" onclick="logDecisionFromBox('${boxId}')">Decision</button>
                     <button type="button" class="msg-action-btn" onclick="editLastUserPrompt('${safePrompt}')">Edit</button>
                 </div>
                 <div class="msg-time">${formatMsgTime()}</div>`;
@@ -5820,6 +5909,39 @@
                     urdu: 'Prefer Urdu (Roman or Nastaliq) when natural; mix if needed.'
                 };
                 if (toneMap[tone]) parts.push(toneMap[tone]);
+            }
+                        if (instr.about) parts.push('User context: ' + instr.about);
+            if (instr.style) parts.push('Response style: ' + instr.style);
+            if (tone && tone !== 'default') {
+                const toneMap = {
+                    formal: 'Write in a formal, professional tone.',
+                    casual: 'Write in a casual, friendly tone.',
+                    persuasive: 'Write in a persuasive, compelling tone.',
+                    simple: 'Use simple words and short sentences.',
+                    urdu: 'Prefer Urdu (Roman or Nastaliq) when natural; mix if needed.'
+                };
+                if (toneMap[tone]) parts.push(toneMap[tone]);
+            }
+            // Future-unique modes
+            if (window._honestMode) {
+                parts.push(
+                    'HONEST MODE is ON (anti-sycophancy). Do not flatter the user. Challenge weak assumptions. ' +
+                    'If the user is wrong or the idea is risky, say so clearly. Prefer truth over agreeableness. ' +
+                    'End with a short "Pushback" bullet if you disagreed with anything.'
+                );
+            }
+            if (window._debateMode) {
+                parts.push(
+                    'DEBATE MODE is ON. Structure the answer as: ## Side A (strongest case) then ## Side B (strongest opposing case) ' +
+                    'then ## Referee verdict (which side is stronger and why). Do not collapse into one-sided advice.'
+                );
+            }
+            const contract = (document.getElementById('output-contract') || {}).value || '';
+            if (contract.trim()) {
+                parts.push(
+                    'OUTPUT CONTRACT (must follow exactly): The user requires this structure/sections in your answer: ' +
+                    contract.trim() + '. Do not skip required sections.'
+                );
             }
             return parts.join('\n');
         }
@@ -7569,6 +7691,255 @@
         });
 
 
+
+        // ========== UNIQUE FUTURE FEATURES ==========
+        window._honestMode = false;
+        window._debateMode = false;
+
+        function toggleHonestMode() {
+            window._honestMode = !window._honestMode;
+            const el = document.getElementById('chip-honest');
+            if (el) el.classList.toggle('on', window._honestMode);
+            try { showToast(window._honestMode ? 'Honest mode ON — AI will push back' : 'Honest mode off', 'info'); } catch (e) {}
+        }
+        function toggleDebateMode() {
+            window._debateMode = !window._debateMode;
+            const el = document.getElementById('chip-debate');
+            if (el) el.classList.toggle('on', window._debateMode);
+            try { showToast(window._debateMode ? 'Debate mode ON — both sides + verdict' : 'Debate mode off', 'info'); } catch (e) {}
+        }
+        function toggleContractBar() {
+            const bar = document.getElementById('contract-bar');
+            const chip = document.getElementById('chip-contract');
+            if (!bar) return;
+            const on = bar.classList.toggle('visible');
+            if (chip) chip.classList.toggle('on', on);
+            if (on) {
+                const inp = document.getElementById('output-contract');
+                if (inp) inp.focus();
+            }
+        }
+
+        // ---- Decision journal ----
+        function getDecisions() {
+            try { return JSON.parse(safeStorage.getItem('scribe_decisions') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveDecisions(list) {
+            safeStorage.setItem('scribe_decisions', JSON.stringify(list.slice(0, 50)));
+        }
+        function openDecisionJournal() {
+            const card = document.getElementById('decision-popup');
+            if (card) card.style.display = 'flex';
+            renderDecisions();
+            checkDueDecisions();
+        }
+        function closeDecisionJournal() {
+            const card = document.getElementById('decision-popup');
+            if (card) card.style.display = 'none';
+        }
+        function saveDecision() {
+            const title = (document.getElementById('dec-title') || {}).value || '';
+            const choice = (document.getElementById('dec-choice') || {}).value || '';
+            const why = (document.getElementById('dec-why') || {}).value || '';
+            const days = parseFloat((document.getElementById('dec-when') || {}).value || '7');
+            if (!title.trim() || !choice.trim()) {
+                try { showToast('Decision and your call required', 'error'); } catch (e) {}
+                return;
+            }
+            const list = getDecisions();
+            list.unshift({
+                id: 'd_' + Date.now(),
+                title: title.trim(),
+                choice: choice.trim(),
+                why: why.trim(),
+                at: Date.now(),
+                revisitAt: Date.now() + days * 86400000,
+                outcome: ''
+            });
+            saveDecisions(list);
+            document.getElementById('dec-title').value = '';
+            document.getElementById('dec-choice').value = '';
+            document.getElementById('dec-why').value = '';
+            renderDecisions();
+            try { showToast('Decision saved — revisit scheduled', 'success'); } catch (e) {}
+            try { pushNotification('Decision logged', title.trim() + ' → ' + choice.trim(), 'info'); } catch (e) {}
+        }
+        function renderDecisions() {
+            const el = document.getElementById('decision-list');
+            if (!el) return;
+            const list = getDecisions();
+            if (!list.length) {
+                el.innerHTML = '<p style="color:#888;font-size:13px;text-align:center;">No decisions yet.</p>';
+                return;
+            }
+            el.innerHTML = list.map(d => {
+                const due = d.revisitAt <= Date.now();
+                return `<div class="decision-item">
+                    <strong>${escapeHtml(d.title)}</strong><br>
+                    Call: ${escapeHtml(d.choice)}
+                    ${d.why ? '<br><span style="color:#888">' + escapeHtml(d.why.slice(0, 120)) + '</span>' : ''}
+                    <div style="margin-top:6px;font-size:11px;color:${due ? '#fbbf24' : '#888'}">
+                        ${due ? 'Due for revisit' : 'Revisit ' + new Date(d.revisitAt).toLocaleDateString()}
+                    </div>
+                    ${due && !d.outcome ? `<button type="button" class="contact-submit-btn" style="margin-top:8px;padding:6px;font-size:12px;" onclick="markDecisionOutcome('${d.id}')">How did it go?</button>` : ''}
+                    ${d.outcome ? '<div style="margin-top:6px;color:#a3e635">Outcome: ' + escapeHtml(d.outcome) + '</div>' : ''}
+                </div>`;
+            }).join('');
+        }
+        function markDecisionOutcome(id) {
+            const outcome = prompt('How did this decision go?');
+            if (outcome === null) return;
+            const list = getDecisions();
+            const d = list.find(x => x.id === id);
+            if (d) {
+                d.outcome = outcome.trim() || 'Noted';
+                d.reviewedAt = Date.now();
+                saveDecisions(list);
+                renderDecisions();
+                try { pushNotification('Decision reviewed', d.title, 'success'); } catch (e) {}
+            }
+        }
+        function logDecisionFromBox(boxId) {
+            const box = document.getElementById(boxId);
+            const text = (box && box.dataset.speak) || '';
+            openDecisionJournal();
+            const t = document.getElementById('dec-title');
+            const w = document.getElementById('dec-why');
+            if (t && !t.value) t.value = (box && box.dataset.userPrompt || 'From chat').slice(0, 80);
+            if (w) w.value = text.slice(0, 500);
+        }
+        function checkDueDecisions() {
+            getDecisions().filter(d => !d.outcome && d.revisitAt <= Date.now()).forEach(d => {
+                try { pushNotification('Decision revisit', 'Time to review: ' + d.title, 'info'); } catch (e) {}
+            });
+        }
+
+        // ---- Flashcards / spaced repetition ----
+        function getFlashcards() {
+            try { return JSON.parse(safeStorage.getItem('scribe_flashcards') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveFlashcards(list) {
+            safeStorage.setItem('scribe_flashcards', JSON.stringify(list.slice(0, 80)));
+        }
+        function makeFlashcard(boxId) {
+            const box = document.getElementById(boxId);
+            if (!box) return;
+            const answer = (box.dataset.speak || '').slice(0, 1200);
+            const question = (box.dataset.userPrompt || 'Key idea from chat').slice(0, 200);
+            const list = getFlashcards();
+            list.unshift({
+                id: 'f_' + Date.now(),
+                q: question,
+                a: answer,
+                at: Date.now(),
+                nextReview: Date.now() + 86400000,
+                level: 0
+            });
+            saveFlashcards(list);
+            try { showToast('Flashcard saved', 'success'); } catch (e) {}
+            try { pushNotification('Flashcard created', question.slice(0, 60), 'info'); } catch (e) {}
+        }
+        function openFlashcards() {
+            const card = document.getElementById('flash-popup');
+            if (card) card.style.display = 'flex';
+            renderFlashcards();
+        }
+        function closeFlashcards() {
+            const card = document.getElementById('flash-popup');
+            if (card) card.style.display = 'none';
+        }
+        function renderFlashcards() {
+            const el = document.getElementById('flash-list');
+            if (!el) return;
+            const list = getFlashcards();
+            if (!list.length) {
+                el.innerHTML = '<p style="color:#888;font-size:13px;text-align:center;">No cards yet. Use “Card” on any AI answer.</p>';
+                return;
+            }
+            el.innerHTML = list.map((c, i) =>
+                `<div class="flash-card" onclick="this.classList.toggle('revealed')">
+                    <div class="fc-q">${escapeHtml(c.q)}</div>
+                    <div class="fc-a">${escapeHtml(c.a.slice(0, 600))}${c.a.length > 600 ? '…' : ''}</div>
+                </div>`
+            ).join('');
+        }
+        function clearFlashcards() {
+            if (!confirm('Clear all flashcards?')) return;
+            saveFlashcards([]);
+            renderFlashcards();
+        }
+
+        // ---- Time capsule ----
+        function getCapsules() {
+            try { return JSON.parse(safeStorage.getItem('scribe_capsules') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveCapsules(list) {
+            safeStorage.setItem('scribe_capsules', JSON.stringify(list.slice(0, 30)));
+        }
+        function openTimeCapsule() {
+            const card = document.getElementById('capsule-popup');
+            if (card) card.style.display = 'flex';
+            renderCapsules();
+            unlockDueCapsules();
+        }
+        function closeTimeCapsule() {
+            const card = document.getElementById('capsule-popup');
+            if (card) card.style.display = 'none';
+        }
+        function saveTimeCapsule() {
+            const text = (document.getElementById('capsule-text') || {}).value || '';
+            const days = parseFloat((document.getElementById('capsule-when') || {}).value || '7');
+            if (!text.trim()) {
+                try { showToast('Write a message first', 'error'); } catch (e) {}
+                return;
+            }
+            const list = getCapsules();
+            list.unshift({
+                id: 'c_' + Date.now(),
+                text: text.trim(),
+                at: Date.now(),
+                unlockAt: Date.now() + days * 86400000,
+                unlocked: false
+            });
+            saveCapsules(list);
+            document.getElementById('capsule-text').value = '';
+            renderCapsules();
+            try { showToast('Time capsule sealed', 'success'); } catch (e) {}
+        }
+        function renderCapsules() {
+            const el = document.getElementById('capsule-list');
+            if (!el) return;
+            const list = getCapsules();
+            if (!list.length) {
+                el.innerHTML = '<p style="color:#888;font-size:13px;text-align:center;">No capsules yet.</p>';
+                return;
+            }
+            el.innerHTML = list.map(c => {
+                const open = c.unlocked || c.unlockAt <= Date.now();
+                return `<div class="capsule-item">
+                    ${open
+                        ? '<div>' + escapeHtml(c.text) + '</div><div style="font-size:11px;color:#a3e635;margin-top:6px;">Unlocked</div>'
+                        : '<div style="color:#888">🔒 Locked until ' + new Date(c.unlockAt).toLocaleString() + '</div>'}
+                </div>`;
+            }).join('');
+        }
+        function unlockDueCapsules() {
+            const list = getCapsules();
+            let changed = false;
+            list.forEach(c => {
+                if (!c.unlocked && c.unlockAt <= Date.now()) {
+                    c.unlocked = true;
+                    changed = true;
+                    try { pushNotification('Time capsule opened', c.text.slice(0, 100), 'success'); } catch (e) {}
+                }
+            });
+            if (changed) saveCapsules(list);
+        }
+
+
         submitBtn.addEventListener('click', processPromptSubmission);
         promptInput.addEventListener('keydown', (e) => {
             if (typeof _slashKeyHandler === 'function' && _slashKeyHandler(e)) return;
@@ -7671,7 +8042,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup','decision-popup','flash-popup','capsule-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
@@ -7952,6 +8323,74 @@
                 <button type="button" class="contact-submit-btn" style="width:auto;padding:10px 14px;" onclick="copyShareLink()">Copy</button>
             </div>
             <p id="share-status" style="color:#a3e635;font-size:12px;text-align:center;margin-top:10px;"></p>
+        </div>
+    </div>
+
+
+    <!-- DECISION JOURNAL -->
+    <div id="decision-popup" class="global-popup-overlay">
+        <div class="popup-window-box" style="max-width:520px;">
+            <button class="popup-close-trigger" onclick="closeDecisionJournal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Decision journal</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:12px;">Log a choice now — revisit later. Rare in mainstream chatbots.</p>
+            <div class="contact-form-group">
+                <label>Decision</label>
+                <input type="text" id="dec-title" placeholder="e.g. Launch Ultra plan this month?">
+            </div>
+            <div class="contact-form-group">
+                <label>Your call</label>
+                <input type="text" id="dec-choice" placeholder="e.g. Yes — ship it">
+            </div>
+            <div class="contact-form-group">
+                <label>Why (optional)</label>
+                <textarea class="feedback-textarea" id="dec-why" placeholder="Reasons…"></textarea>
+            </div>
+            <div class="contact-form-group">
+                <label>Revisit in</label>
+                <select id="dec-when" style="width:100%;padding:10px;border-radius:10px;background:#1a1a1f;color:#eee;border:1px solid #333;">
+                    <option value="1">1 day</option>
+                    <option value="7" selected>7 days</option>
+                    <option value="30">30 days</option>
+                    <option value="90">90 days</option>
+                </select>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="saveDecision()">Save decision</button>
+            <div id="decision-list" style="margin-top:16px;"></div>
+        </div>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <div id="flash-popup" class="global-popup-overlay">
+        <div class="popup-window-box" style="max-width:480px;">
+            <button class="popup-close-trigger" onclick="closeFlashcards()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Flashcards</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:12px;">Spaced practice from your chats — click a card to reveal.</p>
+            <div id="flash-list"></div>
+            <button type="button" class="contact-submit-btn" style="margin-top:12px;background:#2a2a30;" onclick="clearFlashcards()">Clear all cards</button>
+        </div>
+    </div>
+
+    <!-- TIME CAPSULE -->
+    <div id="capsule-popup" class="global-popup-overlay">
+        <div class="popup-window-box" style="max-width:480px;">
+            <button class="popup-close-trigger" onclick="closeTimeCapsule()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Time capsule</h2>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:12px;">Write a note to future-you. It unlocks later as a notification.</p>
+            <div class="contact-form-group">
+                <label>Message to future you</label>
+                <textarea class="feedback-textarea" id="capsule-text" placeholder="What should future-you remember or check?"></textarea>
+            </div>
+            <div class="contact-form-group">
+                <label>Unlock after</label>
+                <select id="capsule-when" style="width:100%;padding:10px;border-radius:10px;background:#1a1a1f;color:#eee;border:1px solid #333;">
+                    <option value="0.0035">1 minute (test)</option>
+                    <option value="1">1 day</option>
+                    <option value="7" selected>7 days</option>
+                    <option value="30">30 days</option>
+                </select>
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="saveTimeCapsule()">Seal capsule</button>
+            <div id="capsule-list" style="margin-top:16px;"></div>
         </div>
     </div>
 
