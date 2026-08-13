@@ -3339,6 +3339,166 @@
             font-size: 13px;
         }
 
+
+        /* Custom payment dashboard */
+        .pay-dash {
+            max-width: 520px !important;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .pay-summary {
+            background: #111;
+            border: 1px solid #2a2a30;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .pay-summary .ps-plan {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .pay-summary .ps-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: #a3e635;
+            margin: 8px 0 4px;
+        }
+        .pay-summary .ps-meta {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .pay-methods {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .pay-method {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 1px solid #2a2a30;
+            border-radius: 14px;
+            background: #141418;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            font-family: inherit;
+            color: #e5e5e5;
+            transition: border-color .15s, background .15s;
+        }
+        .pay-method:hover, .pay-method.selected {
+            border-color: #6366f1;
+            background: #1e1b4b;
+        }
+        .pay-method .pm-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #2a2a30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .pay-method .pm-title {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .pay-method .pm-sub {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        .pay-details-box {
+            display: none;
+            background: #111;
+            border: 1px solid #2a2a30;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        .pay-details-box.visible { display: block; }
+        .pay-details-box label {
+            display: block;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+            margin-top: 10px;
+        }
+        .pay-details-box input, .pay-details-box textarea, .pay-details-box select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #1a1a1f;
+            color: #eee;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+        }
+        .pay-details-box .copy-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .pay-details-box .copy-row input { flex: 1; }
+        .pay-details-box .copy-row button {
+            border: none;
+            background: #2a2a30;
+            color: #eee;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .pay-account-card {
+            background: #0a0a0a;
+            border: 1px dashed #444;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 13px;
+            color: #ddd;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+        .pay-submit-btn {
+            width: 100%;
+            background: #fff;
+            color: #111;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .pay-submit-btn:hover { background: #e5e5e5; }
+        .pay-submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .seller-pay-item {
+            border: 1px solid #2a2a30;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #ddd;
+        }
+        .seller-pay-item .sp-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .sp-status.pending { background: #422006; color: #fbbf24; }
+        .sp-status.approved { background: #14532d; color: #86efac; }
+        .sp-status.rejected { background: #450a0a; color: #fca5a5; }
+
     </style>
 </head>
 <body>
@@ -3563,6 +3723,7 @@
                             <button type="button" onclick="closeMoreMenu(); cloudPullChats();"><span class="mi">↓</span> Restore cloud</button>
                             <button type="button" onclick="closeMoreMenu(); startTour();"><span class="mi">▶</span> Tour</button>
                             <button type="button" onclick="closeMoreMenu(); togglePricingModal();"><span class="mi">↑</span> Upgrade plan</button>
+                            <button type="button" onclick="closeMoreMenu(); openSellerPayments();"><span class="mi">₨</span> Payments inbox</button>
                             <button type="button" onclick="closeMoreMenu(); toggleIncognito();"><span class="mi">○</span> Incognito</button>
                             <button type="button" onclick="closeMoreMenu(); toggleCustomInstructions();"><span class="mi">≡</span> Instructions</button>
                             <button type="button" onclick="closeMoreMenu(); togglePromptLibrary();"><span class="mi">☰</span> Prompts</button>
@@ -3727,7 +3888,7 @@
                         <li>Prompt library &amp; projects</li>
                         <li>Editable artifacts</li>
                     </ul>
-                    <button class="price-tier-btn" id="stripe-checkout-node" onclick="handleUpgradeClick(this, 'pro')">Upgrade — $20</button>
+                    <button class="price-tier-btn" id="stripe-checkout-node" onclick="openPaymentDashboard('pro')">Upgrade — $20</button>
                 </div>
                 <div class="price-tier-card" id="tier-card-ultra">
                     <h3>Ultra</h3>
@@ -3739,13 +3900,103 @@
                         <li>Priority support</li>
                         <li>Advanced writing tools</li>
                     </ul>
-                    <button class="price-tier-btn" onclick="handleUpgradeClick(this, 'ultra')">Upgrade — $100</button>
+                    <button class="price-tier-btn" onclick="openPaymentDashboard('ultra')">Upgrade — $100</button>
                 </div>
             </div>
             <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:18px;line-height:1.5;">
                 Pro = <strong style="color:#e5e5e5;">$20/mo</strong> · Ultra = <strong style="color:#e5e5e5;">$100/mo</strong>.<br>
                 Checkout sends the exact amount to Stripe. If Ultra still shows $20, update your Worker price IDs.
             </p>
+        </div>
+    </div>
+
+
+    <!-- PAYMENT DASHBOARD (custom — not direct Stripe) -->
+    <div id="payment-dashboard" class="global-popup-overlay">
+        <div class="popup-window-box pay-dash">
+            <button class="popup-close-trigger" onclick="closePaymentDashboard()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:6px;">Checkout</h2>
+            <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:16px;">Pay with card, JazzCash, EasyPaisa, or bank transfer</p>
+
+            <div class="pay-summary">
+                <div class="ps-plan" id="pay-plan-name">Pro Build</div>
+                <div class="ps-price" id="pay-plan-price">$20</div>
+                <div class="ps-meta" id="pay-plan-meta">Billed monthly · Cancel anytime</div>
+                <div class="ps-meta" id="pay-plan-pkr" style="margin-top:6px;color:#a3e635;"></div>
+            </div>
+
+            <p style="color:#9ca3af;font-size:12px;margin-bottom:8px;font-weight:600;">Choose payment method</p>
+            <div class="pay-methods">
+                <button type="button" class="pay-method selected" data-method="jazzcash" onclick="selectPayMethod('jazzcash')">
+                    <span class="pm-icon">📱</span>
+                    <span><span class="pm-title">JazzCash</span><span class="pm-sub">Pakistan mobile wallet — easy for local cards/mobile</span></span>
+                </button>
+                <button type="button" class="pay-method" data-method="easypaisa" onclick="selectPayMethod('easypaisa')">
+                    <span class="pm-icon">💚</span>
+                    <span><span class="pm-title">EasyPaisa</span><span class="pm-sub">Pakistan mobile wallet</span></span>
+                </button>
+                <button type="button" class="pay-method" data-method="bank" onclick="selectPayMethod('bank')">
+                    <span class="pm-icon">🏦</span>
+                    <span><span class="pm-title">Bank transfer</span><span class="pm-sub">IBAN / account transfer (PKR)</span></span>
+                </button>
+                <button type="button" class="pay-method" data-method="stripe" onclick="selectPayMethod('stripe')">
+                    <span class="pm-icon">💳</span>
+                    <span><span class="pm-title">International card</span><span class="pm-sub">Visa / Mastercard via Stripe (USD)</span></span>
+                </button>
+            </div>
+
+            <div class="pay-details-box visible" id="pay-box-local">
+                <div class="pay-account-card" id="pay-account-info">
+                    <!-- filled by JS -->
+                </div>
+                <label>Your name</label>
+                <input type="text" id="pay-payer-name" placeholder="Full name">
+                <label>Your WhatsApp / phone</label>
+                <input type="text" id="pay-payer-phone" placeholder="03XX-XXXXXXX">
+                <label>Transaction ID / reference</label>
+                <input type="text" id="pay-txn-id" placeholder="JazzCash / EasyPaisa / bank reference no.">
+                <label>Notes (optional)</label>
+                <textarea id="pay-notes" rows="2" placeholder="Any note for the seller"></textarea>
+                <p style="color:#9ca3af;font-size:11px;margin-top:10px;line-height:1.4;">
+                    Send the exact amount shown above, then submit. Seller will verify and activate your plan (usually within a few hours).
+                </p>
+            </div>
+
+            <div class="pay-details-box" id="pay-box-stripe">
+                <p style="color:#ccc;font-size:13px;line-height:1.5;margin:0;">
+                    You’ll continue to a secure Stripe page for international cards. Amount will be charged in <strong style="color:#fff;">USD</strong>.
+                </p>
+            </div>
+
+            <button type="button" class="pay-submit-btn" id="pay-submit-btn" onclick="submitPaymentDashboard()">Continue</button>
+            <p style="text-align:center;margin-top:12px;">
+                <button type="button" onclick="closePaymentDashboard(); togglePricingModal();" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;text-decoration:underline;">← Back to plans</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- SELLER PAYMENTS INBOX -->
+    <div id="seller-payments-popup" class="global-popup-overlay">
+        <div class="popup-window-box pay-dash">
+            <button class="popup-close-trigger" onclick="closeSellerPayments()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Payments inbox</h2>
+            <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:14px;">See local payments · approve to activate plan</p>
+            <div class="contact-form-group">
+                <label>Seller PIN (protects this panel)</label>
+                <input type="password" id="seller-pin-input" placeholder="Enter PIN">
+            </div>
+            <button type="button" class="contact-submit-btn" onclick="unlockSellerPayments()">Unlock inbox</button>
+            <div id="seller-payments-list" style="margin-top:16px;display:none;"></div>
+            <div class="contact-form-group" style="margin-top:16px;">
+                <label>Set / change seller PIN</label>
+                <input type="password" id="seller-pin-set" placeholder="New PIN (min 4 digits)">
+                <button type="button" class="contact-submit-btn" style="margin-top:8px;background:#2a2a30;" onclick="setSellerPin()">Save PIN</button>
+            </div>
+            <div class="contact-form-group">
+                <label>Your JazzCash / EasyPaisa / Bank details (shown to buyers)</label>
+                <textarea class="feedback-textarea" id="seller-account-details" placeholder="JazzCash: 03XX-XXXXXXX (Name)&#10;EasyPaisa: 03XX-XXXXXXX&#10;Bank: HBL · IBAN PK00… · Title: Your Name"></textarea>
+                <button type="button" class="contact-submit-btn" style="margin-top:8px;background:#2a2a30;" onclick="saveSellerAccountDetails()">Save account details</button>
+            </div>
         </div>
     </div>
 
@@ -7951,13 +8202,235 @@
             }
         });
 
+
+        // ========== CUSTOM PAYMENT DASHBOARD ==========
+        let _payTier = 'pro';
+        let _payMethod = 'jazzcash';
+        // Rough PKR display rates (update as needed)
+        const USD_TO_PKR = 278;
+
+        function openPaymentDashboard(tier) {
+            _payTier = tier === 'ultra' ? 'ultra' : 'pro';
+            _payMethod = 'jazzcash';
+            const amount = _payTier === 'ultra' ? 100 : 20;
+            const pkr = Math.round(amount * USD_TO_PKR);
+            const nameEl = document.getElementById('pay-plan-name');
+            const priceEl = document.getElementById('pay-plan-price');
+            const metaEl = document.getElementById('pay-plan-meta');
+            const pkrEl = document.getElementById('pay-plan-pkr');
+            if (nameEl) nameEl.textContent = _payTier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build';
+            if (priceEl) priceEl.textContent = '$' + amount;
+            if (metaEl) metaEl.textContent = 'Billed monthly · ' + (_payTier === 'ultra' ? 'Unlimited everything' : 'Unlimited chats + images');
+            if (pkrEl) pkrEl.textContent = '≈ PKR ' + pkr.toLocaleString() + ' (for JazzCash / EasyPaisa / bank)';
+            document.querySelectorAll('.pay-method').forEach(b => {
+                b.classList.toggle('selected', b.getAttribute('data-method') === 'jazzcash');
+            });
+            selectPayMethod('jazzcash');
+            try { togglePricingModal(); } catch (e) {}
+            const card = document.getElementById('payment-dashboard');
+            if (card) card.style.display = 'flex';
+        }
+        function closePaymentDashboard() {
+            const card = document.getElementById('payment-dashboard');
+            if (card) card.style.display = 'none';
+        }
+        function selectPayMethod(method) {
+            _payMethod = method;
+            document.querySelectorAll('.pay-method').forEach(b => {
+                b.classList.toggle('selected', b.getAttribute('data-method') === method);
+            });
+            const localBox = document.getElementById('pay-box-local');
+            const stripeBox = document.getElementById('pay-box-stripe');
+            const btn = document.getElementById('pay-submit-btn');
+            if (method === 'stripe') {
+                if (localBox) localBox.classList.remove('visible');
+                if (stripeBox) stripeBox.classList.add('visible');
+                if (btn) btn.textContent = 'Continue to secure card payment';
+            } else {
+                if (localBox) localBox.classList.add('visible');
+                if (stripeBox) stripeBox.classList.remove('visible');
+                if (btn) btn.textContent = 'I have paid — submit for approval';
+                renderPayAccountInfo(method);
+            }
+        }
+        function getSellerAccountDetails() {
+            return safeStorage.getItem('scribe_seller_accounts') ||
+                'JazzCash: 03XX-XXXXXXX (Your Name)\nEasyPaisa: 03XX-XXXXXXX (Your Name)\nBank: Your Bank · IBAN PK00… · Account title: Your Name\n\n(Update these in ⋯ → Payments inbox)';
+        }
+        function renderPayAccountInfo(method) {
+            const el = document.getElementById('pay-account-info');
+            if (!el) return;
+            const amount = _payTier === 'ultra' ? 100 : 20;
+            const pkr = Math.round(amount * USD_TO_PKR);
+            const all = getSellerAccountDetails();
+            let focus = all;
+            if (method === 'jazzcash') focus = all.split('\n').filter(l => /jazz/i.test(l) || !/easy|iban|bank/i.test(l)).join('\n') || all;
+            if (method === 'easypaisa') focus = all.split('\n').filter(l => /easy/i.test(l) || !/jazz|iban|bank/i.test(l)).join('\n') || all;
+            if (method === 'bank') focus = all.split('\n').filter(l => /bank|iban|hbl|meezan|ubl|allied/i.test(l) || !/jazz|easy/i.test(l)).join('\n') || all;
+            el.innerHTML = '<strong style="color:#a3e635">Send PKR ' + pkr.toLocaleString() + '</strong> for <strong>' +
+                (_payTier === 'ultra' ? 'Ultra' : 'Pro') + '</strong><br><br>' +
+                escapeHtml(focus).replace(/\n/g, '<br>') +
+                '<br><br><span style="color:#888;font-size:11px">After sending, enter transaction ID below and submit.</span>';
+        }
+        function getPaymentOrders() {
+            try { return JSON.parse(safeStorage.getItem('scribe_payment_orders') || '[]'); }
+            catch (e) { return []; }
+        }
+        function savePaymentOrders(list) {
+            safeStorage.setItem('scribe_payment_orders', JSON.stringify(list.slice(0, 100)));
+        }
+        async function submitPaymentDashboard() {
+            const amount = _payTier === 'ultra' ? 100 : 20;
+            if (_payMethod === 'stripe') {
+                closePaymentDashboard();
+                await handleUpgradeClick({ innerText: '', disabled: false }, _payTier);
+                return;
+            }
+            const name = (document.getElementById('pay-payer-name') || {}).value || '';
+            const phone = (document.getElementById('pay-payer-phone') || {}).value || '';
+            const txn = (document.getElementById('pay-txn-id') || {}).value || '';
+            const notes = (document.getElementById('pay-notes') || {}).value || '';
+            if (!name.trim() || !phone.trim() || !txn.trim()) {
+                try { showToast('Name, phone, and transaction ID required', 'error'); } catch (e) {}
+                return;
+            }
+            const order = {
+                id: 'ord_' + Date.now(),
+                tier: _payTier,
+                amountUsd: amount,
+                amountPkr: Math.round(amount * USD_TO_PKR),
+                method: _payMethod,
+                name: name.trim(),
+                phone: phone.trim(),
+                txnId: txn.trim(),
+                notes: notes.trim(),
+                email: currentUserEmail || '',
+                status: 'pending',
+                at: Date.now()
+            };
+            const list = getPaymentOrders();
+            list.unshift(order);
+            savePaymentOrders(list);
+            // Also try Worker so seller can see centrally later
+            try {
+                await fetch(workerURL + '/api/payment-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(order)
+                });
+            } catch (e) {}
+            safeStorage.setItem('scribe_pending_plan', _payTier);
+            closePaymentDashboard();
+            try {
+                pushNotification('Payment submitted', 'Your ' + _payTier.toUpperCase() + ' payment is pending verification.', 'info');
+                showToast('Payment submitted — waiting for seller approval', 'success');
+            } catch (e) {}
+            // Clear form
+            ['pay-payer-name','pay-payer-phone','pay-txn-id','pay-notes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        }
+
+        // Seller inbox
+        function openSellerPayments() {
+            const card = document.getElementById('seller-payments-popup');
+            if (card) card.style.display = 'flex';
+            const ta = document.getElementById('seller-account-details');
+            if (ta) ta.value = safeStorage.getItem('scribe_seller_accounts') || '';
+            document.getElementById('seller-payments-list').style.display = 'none';
+        }
+        function closeSellerPayments() {
+            const card = document.getElementById('seller-payments-popup');
+            if (card) card.style.display = 'none';
+        }
+        function setSellerPin() {
+            const pin = (document.getElementById('seller-pin-set') || {}).value || '';
+            if (pin.length < 4) {
+                try { showToast('PIN must be at least 4 characters', 'error'); } catch (e) {}
+                return;
+            }
+            safeStorage.setItem('scribe_seller_pin', pin);
+            try { showToast('Seller PIN saved', 'success'); } catch (e) {}
+        }
+        function saveSellerAccountDetails() {
+            const v = (document.getElementById('seller-account-details') || {}).value || '';
+            safeStorage.setItem('scribe_seller_accounts', v.trim());
+            try { showToast('Account details saved for buyers', 'success'); } catch (e) {}
+        }
+        function unlockSellerPayments() {
+            const pin = (document.getElementById('seller-pin-input') || {}).value || '';
+            const saved = safeStorage.getItem('scribe_seller_pin') || '';
+            if (!saved) {
+                try { showToast('Set a seller PIN first (below)', 'info'); } catch (e) {}
+                return;
+            }
+            if (pin !== saved) {
+                try { showToast('Wrong PIN', 'error'); } catch (e) {}
+                return;
+            }
+            const listEl = document.getElementById('seller-payments-list');
+            if (listEl) {
+                listEl.style.display = 'block';
+                renderSellerPayments();
+            }
+        }
+        function renderSellerPayments() {
+            const el = document.getElementById('seller-payments-list');
+            if (!el) return;
+            const list = getPaymentOrders();
+            if (!list.length) {
+                el.innerHTML = '<p style="color:#888;text-align:center;font-size:13px;">No payment orders yet.</p>';
+                return;
+            }
+            el.innerHTML = list.map(o => `
+                <div class="seller-pay-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <strong>${escapeHtml((o.tier || '').toUpperCase())} · $${o.amountUsd} · PKR ${(o.amountPkr||0).toLocaleString()}</strong>
+                        <span class="sp-status ${o.status}">${escapeHtml(o.status)}</span>
+                    </div>
+                    <div>${escapeHtml(o.name)} · ${escapeHtml(o.phone)}</div>
+                    <div style="color:#9ca3af;margin-top:4px;">${escapeHtml(o.method)} · TXN: ${escapeHtml(o.txnId)}</div>
+                    ${o.notes ? '<div style="color:#888;margin-top:4px;">' + escapeHtml(o.notes) + '</div>' : ''}
+                    <div style="font-size:11px;color:#666;margin-top:4px;">${new Date(o.at).toLocaleString()}</div>
+                    ${o.status === 'pending' ? `
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button type="button" class="contact-submit-btn" style="padding:8px;font-size:12px;" onclick="approvePaymentOrder('${o.id}')">Approve &amp; activate</button>
+                        <button type="button" class="contact-submit-btn" style="padding:8px;font-size:12px;background:#450a0a;" onclick="rejectPaymentOrder('${o.id}')">Reject</button>
+                    </div>` : ''}
+                </div>
+            `).join('');
+        }
+        function approvePaymentOrder(id) {
+            const list = getPaymentOrders();
+            const o = list.find(x => x.id === id);
+            if (!o) return;
+            o.status = 'approved';
+            o.approvedAt = Date.now();
+            savePaymentOrders(list);
+            // Activate plan on this device for that user session if same browser
+            setUserPlan(o.tier);
+            try {
+                pushNotification('Payment approved', (o.tier || '').toUpperCase() + ' plan activated for ' + o.name, 'success');
+                showToast('Approved — plan activated', 'success');
+            } catch (e) {}
+            renderSellerPayments();
+        }
+        function rejectPaymentOrder(id) {
+            const list = getPaymentOrders();
+            const o = list.find(x => x.id === id);
+            if (!o) return;
+            o.status = 'rejected';
+            savePaymentOrders(list);
+            try { pushNotification('Payment rejected', 'Order ' + id + ' rejected', 'error'); } catch (e) {}
+            renderSellerPayments();
+        }
+
         async function handleUpgradeClick(btn, tier) {
-            const original = btn.innerText;
-            // Always map tier → dollars → cents for Stripe
+            const original = (btn && btn.innerText) || '';
             const amountDollars = (tier === 'ultra') ? 100 : (tier === 'pro' ? 20 : (PLAN_PRICES[tier] || 20));
-            const unitAmountCents = amountDollars * 100; // Stripe uses cents: 2000 or 10000
-            btn.innerText = "Connecting to Stripe…";
-            btn.disabled = true;
+            const unitAmountCents = amountDollars * 100;
+            if (btn) { btn.innerText = 'Connecting to Stripe…'; btn.disabled = true; }
             safeStorage.setItem('scribe_pending_plan', tier);
             safeStorage.setItem('scribe_pending_amount', String(amountDollars));
             try {
@@ -7982,30 +8455,24 @@
                 });
                 const d = await r.json().catch(() => ({}));
                 if (d.success && d.url) {
-                    // Verify server echoed correct amount if it returns one
-                    if (d.amount && Number(d.amount) !== amountDollars && Number(d.unit_amount) !== unitAmountCents) {
-                        console.warn('Stripe session amount mismatch', d);
-                    }
                     window.location.href = d.url;
                     return;
                 }
-                // Fallback local unlock for demo when Worker has no separate Ultra price
-                if (confirm('Payment server unavailable or misconfigured.\n\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) on this device for testing?')) {
+                if (confirm('Payment server unavailable.\\n\\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) on this device for testing?')) {
                     setUserPlan(tier);
                     safeStorage.removeItem('scribe_pending_plan');
                     try { showToast(tier.toUpperCase() + ' activated — $' + amountDollars + '/mo', 'success'); } catch (e) {}
-                    togglePricingModal();
+                    try { togglePricingModal(); } catch (e) {}
                 }
             } catch (err) {
                 try { pushNotification('Payment error', 'Could not reach Stripe checkout.', 'error'); } catch (e) {}
-                if (confirm('Could not reach Stripe.\n\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) locally for testing?')) {
+                if (confirm('Could not reach Stripe.\\n\\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) locally for testing?')) {
                     setUserPlan(tier);
                     try { showToast(tier.toUpperCase() + ' activated — $' + amountDollars + '/mo', 'success'); } catch (e) {}
-                    togglePricingModal();
+                    try { togglePricingModal(); } catch (e) {}
                 }
             } finally {
-                btn.innerText = original;
-                btn.disabled = false;
+                if (btn) { btn.innerText = original; btn.disabled = false; }
             }
         }
 
@@ -8042,7 +8509,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup','decision-popup','flash-popup','capsule-popup']
+                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup','decision-popup','flash-popup','capsule-popup','payment-dashboard','seller-payments-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
