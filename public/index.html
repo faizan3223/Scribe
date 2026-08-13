@@ -3126,6 +3126,146 @@
             line-height: 1.2;
         }
 
+
+        /* Notification bell */
+        .notif-wrap {
+            position: relative;
+            margin-left: 2px;
+        }
+        .btn-notif {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0;
+            color: #111;
+            transition: background .15s;
+        }
+        .btn-notif:hover { background: #f0f0ee; }
+        .btn-notif svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        body.theme-dark .btn-notif {
+            background: #1a1a1f;
+            border-color: #333;
+            color: #f5f5f5;
+        }
+        body.theme-dark .btn-notif:hover { background: #2a2a30; }
+        .notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            /* light theme: black badge */
+            background: #111;
+            color: #fff;
+        }
+        .notif-badge.show { display: inline-flex; }
+        /* dark theme: white badge */
+        body.theme-dark .notif-badge {
+            background: #fff;
+            color: #111;
+        }
+        .notif-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: min(340px, 92vw);
+            max-height: 380px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.14);
+            z-index: 80;
+            padding: 8px;
+        }
+        .notif-panel.open { display: block; }
+        body.theme-dark .notif-panel {
+            background: #1a1a1f;
+            border-color: #333;
+        }
+        .notif-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #111;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 6px;
+        }
+        body.theme-dark .notif-panel-head {
+            color: #eee;
+            border-color: #2a2a30;
+        }
+        .notif-panel-head button {
+            border: none;
+            background: none;
+            font-size: 12px;
+            color: #6366f1;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+        .notif-item {
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: default;
+            margin-bottom: 2px;
+        }
+        .notif-item:hover { background: #f7f7f5; }
+        body.theme-dark .notif-item:hover { background: #222; }
+        .notif-item.unread { background: #f0f4ff; }
+        body.theme-dark .notif-item.unread { background: #1e1b4b; }
+        .notif-item .ni-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 2px;
+        }
+        body.theme-dark .notif-item .ni-title { color: #eee; }
+        .notif-item .ni-body {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        body.theme-dark .notif-item .ni-body { color: #aaa; }
+        .notif-item .ni-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .notif-empty {
+            padding: 24px 12px;
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+        }
+
     </style>
 </head>
 <body>
@@ -3320,6 +3460,19 @@
                             <button type="button" onclick="exportChat('pdf')">PDF</button>
                             <button type="button" onclick="exportChat('copy')">Copy all</button>
                             <button type="button" onclick="shareCurrentChat()">Share link</button>
+                        </div>
+                    </div>
+                    <div class="notif-wrap" id="notif-wrap">
+                        <button type="button" class="btn-notif" id="btn-notif" title="Notifications" onclick="toggleNotifPanel(event)" aria-label="Notifications">
+                            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <span class="notif-badge" id="notif-badge">0</span>
+                        </button>
+                        <div class="notif-panel" id="notif-panel">
+                            <div class="notif-panel-head">
+                                <span>Notifications</span>
+                                <button type="button" onclick="markAllNotifsRead()">Mark all read</button>
+                            </div>
+                            <div id="notif-list"></div>
                         </div>
                     </div>
                     <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Dark / Light mode" onclick="toggleTheme()">🌙</button>
@@ -3936,11 +4089,11 @@
             const nameEl = document.getElementById('google-auth-name');
             const email = (emailEl && emailEl.value || '').trim();
             if (!email || !email.includes('@')) {
-                alert('Please enter a valid Google email');
+                try { notifyLoginError('Please enter a valid Google email'); } catch (e) {} alert('Please enter a valid Google email');
                 return;
             }
             const nickname = (nameEl && nameEl.value.trim()) || email.split('@')[0];
-            safeStorage.setItem('user_session', JSON.stringify({ email, nickname, provider: 'google' }));
+            safeStorage.setItem('user_session', JSON.stringify({ email, nickname, provider: 'google' })); try { notifyLoginSuccess(email); } catch (e) {}
             closeGoogleAuthSheet();
             switchToWorkspaceUI(email, nickname);
         }
@@ -4060,7 +4213,7 @@
                             accounts[emailVal].passHash = passHash;
                         }
                         saveLocalAccounts(accounts);
-                        safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nick }));
+                        safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nick })); try { notifyLoginSuccess(emailVal); } catch (e) {}
                         switchToWorkspaceUI(emailVal, nick);
                     } else if (landingAuthMode === 'login') {
                         // Server rejected — still enforce local check if account exists
@@ -4099,7 +4252,7 @@
                     passHash
                 };
                 saveLocalAccounts(accounts);
-                safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal }));
+                safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: nicknameVal })); try { notifyLoginSuccess(emailVal); } catch (e) {}
                 switchToWorkspaceUI(emailVal, nicknameVal);
             } else {
                 const acc = accounts[emailVal];
@@ -4115,7 +4268,7 @@
                     btn.disabled = false;
                     return;
                 }
-                safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: acc.nickname || nicknameVal }));
+                safeStorage.setItem('user_session', JSON.stringify({ email: emailVal, nickname: acc.nickname || nicknameVal })); try { notifyLoginSuccess(emailVal); } catch (e) {}
                 switchToWorkspaceUI(emailVal, acc.nickname || nicknameVal);
             }
             btn.disabled = false;
@@ -4541,6 +4694,7 @@
 
             // Incognito: keep messages in memory only — never write to storage
             if (isIncognito) return;
+            try { updateLongTermMemory(userText, aiText); } catch (e) {}
 
             let chats = getChatHistory();
             if (!currentChatId) {
@@ -5763,7 +5917,11 @@
             setGeneratingUI(true);
 
             const systemCtx = buildSystemContext();
-            let question = systemCtx ? systemCtx + '\n\nUser: ' + promptPayload : promptPayload;
+            const memoryBlock = buildConversationMemory(promptPayload);
+            let question = '';
+            if (systemCtx) question += systemCtx + '\n\n';
+            if (memoryBlock) question += memoryBlock + '\n\n';
+            question += 'User: ' + promptPayload;
             if (imagesForApi.length) {
                 question += '\n\n[User attached ' + imagesForApi.length + ' image(s). Analyze the image content and answer based on what you see. Image data is included in the request.]';
             }
@@ -5858,7 +6016,7 @@
                     }
                 } else {
                     showRetryError(targetId, promptPayload, 'Connection lost with server. Check network or try again.');
-                    persistCurrentChat(promptPayload, 'Connection lost with background server.');
+                    persistCurrentChat(promptPayload, 'Connection lost with background server.'); try { pushNotification('Connection error', 'Could not reach the AI server. Check your network.', 'error'); } catch (e) {}
                 }
             } finally {
                 setGeneratingUI(false);
@@ -7286,6 +7444,131 @@
         }
 
 
+
+        // ========== CONVERSATION MEMORY (Grok-style) ==========
+        function getLongTermMemory() {
+            try { return safeStorage.getItem('scribe_long_memory') || ''; }
+            catch (e) { return ''; }
+        }
+        function updateLongTermMemory(userText, aiText) {
+            // Keep a rolling summary of facts the user shared (lightweight)
+            try {
+                let mem = getLongTermMemory();
+                const snippet = ('User said: ' + (userText || '').slice(0, 200) +
+                    (aiText ? ' | AI noted: ' + aiText.slice(0, 120) : '')).replace(/\s+/g, ' ');
+                mem = (mem ? mem + '\n' : '') + snippet;
+                // cap size
+                if (mem.length > 2500) mem = mem.slice(mem.length - 2500);
+                safeStorage.setItem('scribe_long_memory', mem);
+            } catch (e) {}
+        }
+        function buildConversationMemory(currentPrompt) {
+            const parts = [];
+            // Long-term across chats
+            const longMem = getLongTermMemory();
+            if (longMem && !isIncognito) {
+                parts.push('Long-term memory (things to remember about this user from past chats):\n' + longMem.slice(-1500));
+            }
+            // Short-term: previous turns in THIS chat
+            const msgs = (currentChatMessages || []).slice(-12); // last 12 messages
+            if (msgs.length) {
+                parts.push('Previous messages in this conversation (use for continuity — answer with full context, do not pretend you forgot):');
+                msgs.forEach(m => {
+                    const role = m.role === 'user' ? 'User' : 'Assistant';
+                    const t = (m.text || '').replace(/\s+/g, ' ').slice(0, 900);
+                    if (t) parts.push(role + ': ' + t);
+                });
+            }
+            if (!parts.length) return '';
+            return parts.join('\n');
+        }
+
+        // ========== NOTIFICATIONS ==========
+        function getNotifications() {
+            try { return JSON.parse(safeStorage.getItem('scribe_notifs') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveNotifications(list) {
+            safeStorage.setItem('scribe_notifs', JSON.stringify(list.slice(0, 40)));
+        }
+        function notifyLoginSuccess(email) {
+            pushNotification('Login successful', 'Signed in as ' + (email || 'user') + '. Welcome to Scribe AI.', 'success');
+        }
+        function notifyLoginError(msg) {
+            pushNotification('Login failed', msg || 'Please check your email and password.', 'error');
+        }
+        function pushNotification(title, body, type) {
+            const list = getNotifications();
+            list.unshift({
+                id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                title: title || 'Scribe',
+                body: body || '',
+                type: type || 'info',
+                read: false,
+                at: Date.now()
+            });
+            saveNotifications(list);
+            renderNotifBadge();
+            // soft toast too for visibility
+            try { showToast(title + (body ? ': ' + body : ''), type === 'error' ? 'error' : 'info'); } catch (e) {}
+        }
+        function unreadNotifCount() {
+            return getNotifications().filter(n => !n.read).length;
+        }
+        function renderNotifBadge() {
+            const badge = document.getElementById('notif-badge');
+            if (!badge) return;
+            const n = unreadNotifCount();
+            if (n > 0) {
+                badge.textContent = n > 9 ? '9+' : String(n);
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+        function renderNotifList() {
+            const listEl = document.getElementById('notif-list');
+            if (!listEl) return;
+            const list = getNotifications();
+            if (!list.length) {
+                listEl.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+                return;
+            }
+            listEl.innerHTML = list.map(n => {
+                const t = new Date(n.at);
+                const time = t.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `<div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+                    <div class="ni-title">${escapeHtml(n.title)}</div>
+                    <div class="ni-body">${escapeHtml(n.body)}</div>
+                    <div class="ni-time">${time}</div>
+                </div>`;
+            }).join('');
+        }
+        function toggleNotifPanel(e) {
+            if (e) e.stopPropagation();
+            const panel = document.getElementById('notif-panel');
+            if (!panel) return;
+            const open = panel.classList.toggle('open');
+            if (open) {
+                renderNotifList();
+            }
+        }
+        function closeNotifPanel() {
+            const panel = document.getElementById('notif-panel');
+            if (panel) panel.classList.remove('open');
+        }
+        function markAllNotifsRead() {
+            const list = getNotifications().map(n => ({ ...n, read: true }));
+            saveNotifications(list);
+            renderNotifBadge();
+            renderNotifList();
+        }
+        document.addEventListener('click', (e) => {
+            const wrap = document.getElementById('notif-wrap');
+            if (wrap && !wrap.contains(e.target)) closeNotifPanel();
+        });
+
+
         submitBtn.addEventListener('click', processPromptSubmission);
         promptInput.addEventListener('keydown', (e) => {
             if (typeof _slashKeyHandler === 'function' && _slashKeyHandler(e)) return;
@@ -7343,6 +7626,7 @@
                     togglePricingModal();
                 }
             } catch (err) {
+                try { pushNotification('Payment error', 'Could not reach Stripe checkout.', 'error'); } catch (e) {}
                 if (confirm('Could not reach Stripe.\n\nActivate ' + tier.toUpperCase() + ' ($' + amountDollars + '/mo) locally for testing?')) {
                     setUserPlan(tier);
                     try { showToast(tier.toUpperCase() + ' activated — $' + amountDollars + '/mo', 'success'); } catch (e) {}
@@ -7362,11 +7646,15 @@
                 if (q === 'pro' || q === 'ultra') {
                     setUserPlan(q);
                     safeStorage.removeItem('scribe_pending_plan');
+                    try { pushNotification('Payment successful', 'Your ' + q.toUpperCase() + ' plan is now active. Thank you!', 'success'); } catch (e) {}
                 } else {
                     const pending = safeStorage.getItem('scribe_pending_plan');
                     if (pending && (params.get('success') === '1' || params.get('checkout') === 'success')) {
                         setUserPlan(pending);
                         safeStorage.removeItem('scribe_pending_plan');
+                        try { pushNotification('Payment successful', 'Your ' + pending.toUpperCase() + ' plan is now active via Stripe.', 'success'); } catch (e) {}
+                    } else if (params.get('checkout') === 'cancel') {
+                        try { pushNotification('Checkout cancelled', 'Stripe payment was cancelled. You can upgrade anytime.', 'info'); } catch (e) {}
                     }
                 }
             } catch (e) {}
@@ -7388,6 +7676,7 @@
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
                 closeImageLightbox();
+                closeNotifPanel();
             }
         });
     </script>
