@@ -3499,6 +3499,62 @@
         .sp-status.approved { background: #14532d; color: #86efac; }
         .sp-status.rejected { background: #450a0a; color: #fca5a5; }
 
+
+        .bank-search-wrap {
+            margin-top: 10px;
+        }
+        .bank-search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #1a1a1f;
+            color: #eee;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 8px;
+        }
+        .bank-search-input:focus { border-color: #6366f1; }
+        .bank-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #2a2a30;
+            border-radius: 12px;
+            background: #0a0a0a;
+        }
+        .bank-result-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            border: none;
+            border-bottom: 1px solid #1a1a1f;
+            background: transparent;
+            color: #ddd;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        .bank-result-item:hover, .bank-result-item.selected {
+            background: #1e1b4b;
+        }
+        .bank-result-item .br-name { font-weight: 600; color: #fff; }
+        .bank-result-item .br-meta { font-size: 11px; color: #888; }
+        .bank-selected-pill {
+            display: none;
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #14532d;
+            color: #bbf7d0;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .bank-selected-pill.visible { display: block; }
+
     </style>
 </head>
 <body>
@@ -3948,6 +4004,12 @@
             <div class="pay-details-box visible" id="pay-box-local">
                 <div class="pay-account-card" id="pay-account-info">
                     <!-- filled by JS -->
+                </div>
+                <div class="bank-search-wrap" id="bank-search-wrap" style="display:none;">
+                    <label>Search any bank (world)</label>
+                    <input type="text" class="bank-search-input" id="bank-search-input" placeholder="Type bank or country… e.g. HBL, SBI, Chase, HSBC" autocomplete="off">
+                    <div class="bank-results" id="bank-results"></div>
+                    <div class="bank-selected-pill" id="bank-selected-pill"></div>
                 </div>
                 <label>Your name</label>
                 <input type="text" id="pay-payer-name" placeholder="Full name">
@@ -8203,6 +8265,199 @@
         });
 
 
+
+        // ========== WORLD BANK DIRECTORY (major banks by region) ==========
+        const WORLD_BANKS = [
+            // Pakistan
+            { name: 'HBL (Habib Bank Limited)', country: 'Pakistan', region: 'Asia', code: 'HBL' },
+            { name: 'UBL (United Bank Limited)', country: 'Pakistan', region: 'Asia', code: 'UBL' },
+            { name: 'MCB Bank', country: 'Pakistan', region: 'Asia', code: 'MCB' },
+            { name: 'Allied Bank (ABL)', country: 'Pakistan', region: 'Asia', code: 'ABL' },
+            { name: 'Meezan Bank', country: 'Pakistan', region: 'Asia', code: 'MEZN' },
+            { name: 'Bank Alfalah', country: 'Pakistan', region: 'Asia', code: 'BAFL' },
+            { name: 'Askari Bank', country: 'Pakistan', region: 'Asia', code: 'AKBL' },
+            { name: 'Faysal Bank', country: 'Pakistan', region: 'Asia', code: 'FABL' },
+            { name: 'Bank of Punjab (BOP)', country: 'Pakistan', region: 'Asia', code: 'BOP' },
+            { name: 'JS Bank', country: 'Pakistan', region: 'Asia', code: 'JSBL' },
+            { name: 'Standard Chartered Pakistan', country: 'Pakistan', region: 'Asia', code: 'SCB-PK' },
+            { name: 'Habib Metropolitan Bank', country: 'Pakistan', region: 'Asia', code: 'HMB' },
+            { name: 'National Bank of Pakistan (NBP)', country: 'Pakistan', region: 'Asia', code: 'NBP' },
+            { name: 'Samba Bank', country: 'Pakistan', region: 'Asia', code: 'SAMP' },
+            { name: 'Dubai Islamic Bank Pakistan', country: 'Pakistan', region: 'Asia', code: 'DIB-PK' },
+            // India
+            { name: 'State Bank of India (SBI)', country: 'India', region: 'Asia', code: 'SBI' },
+            { name: 'HDFC Bank', country: 'India', region: 'Asia', code: 'HDFC' },
+            { name: 'ICICI Bank', country: 'India', region: 'Asia', code: 'ICICI' },
+            { name: 'Axis Bank', country: 'India', region: 'Asia', code: 'AXIS' },
+            { name: 'Kotak Mahindra Bank', country: 'India', region: 'Asia', code: 'KOTAK' },
+            { name: 'Punjab National Bank (PNB)', country: 'India', region: 'Asia', code: 'PNB' },
+            { name: 'Bank of Baroda', country: 'India', region: 'Asia', code: 'BOB' },
+            { name: 'Canara Bank', country: 'India', region: 'Asia', code: 'CANARA' },
+            { name: 'Union Bank of India', country: 'India', region: 'Asia', code: 'UNION' },
+            { name: 'Yes Bank', country: 'India', region: 'Asia', code: 'YES' },
+            { name: 'IndusInd Bank', country: 'India', region: 'Asia', code: 'INDUS' },
+            { name: 'IDFC FIRST Bank', country: 'India', region: 'Asia', code: 'IDFC' },
+            // Bangladesh / Sri Lanka / Nepal
+            { name: 'Dutch-Bangla Bank', country: 'Bangladesh', region: 'Asia', code: 'DBBL' },
+            { name: 'BRAC Bank', country: 'Bangladesh', region: 'Asia', code: 'BRAC' },
+            { name: 'Islami Bank Bangladesh', country: 'Bangladesh', region: 'Asia', code: 'IBBL' },
+            { name: 'Bank of Ceylon', country: 'Sri Lanka', region: 'Asia', code: 'BOC-LK' },
+            { name: 'Commercial Bank of Ceylon', country: 'Sri Lanka', region: 'Asia', code: 'COMB' },
+            { name: 'Nabil Bank', country: 'Nepal', region: 'Asia', code: 'NABIL' },
+            // Middle East
+            { name: 'Emirates NBD', country: 'UAE', region: 'Middle East', code: 'ENBD' },
+            { name: 'First Abu Dhabi Bank (FAB)', country: 'UAE', region: 'Middle East', code: 'FAB' },
+            { name: 'Dubai Islamic Bank', country: 'UAE', region: 'Middle East', code: 'DIB' },
+            { name: 'Mashreq Bank', country: 'UAE', region: 'Middle East', code: 'MASH' },
+            { name: 'ADCB', country: 'UAE', region: 'Middle East', code: 'ADCB' },
+            { name: 'Qatar National Bank (QNB)', country: 'Qatar', region: 'Middle East', code: 'QNB' },
+            { name: 'Al Rajhi Bank', country: 'Saudi Arabia', region: 'Middle East', code: 'RJHI' },
+            { name: 'Saudi National Bank (SNB)', country: 'Saudi Arabia', region: 'Middle East', code: 'SNB' },
+            { name: 'Riyad Bank', country: 'Saudi Arabia', region: 'Middle East', code: 'RIBL' },
+            { name: 'National Bank of Kuwait (NBK)', country: 'Kuwait', region: 'Middle East', code: 'NBK' },
+            { name: 'BankMuscat', country: 'Oman', region: 'Middle East', code: 'BMUS' },
+            { name: 'Ahli United Bank', country: 'Bahrain', region: 'Middle East', code: 'AUB' },
+            // East / SE Asia
+            { name: 'Bank of China', country: 'China', region: 'Asia', code: 'BOC' },
+            { name: 'ICBC', country: 'China', region: 'Asia', code: 'ICBC' },
+            { name: 'China Construction Bank', country: 'China', region: 'Asia', code: 'CCB' },
+            { name: 'Agricultural Bank of China', country: 'China', region: 'Asia', code: 'ABC' },
+            { name: 'Mitsubishi UFJ (MUFG)', country: 'Japan', region: 'Asia', code: 'MUFG' },
+            { name: 'Sumitomo Mitsui (SMBC)', country: 'Japan', region: 'Asia', code: 'SMBC' },
+            { name: 'Mizuho Bank', country: 'Japan', region: 'Asia', code: 'MIZUHO' },
+            { name: 'Shinhan Bank', country: 'South Korea', region: 'Asia', code: 'SHINHAN' },
+            { name: 'KB Kookmin Bank', country: 'South Korea', region: 'Asia', code: 'KB' },
+            { name: 'DBS Bank', country: 'Singapore', region: 'Asia', code: 'DBS' },
+            { name: 'OCBC Bank', country: 'Singapore', region: 'Asia', code: 'OCBC' },
+            { name: 'UOB', country: 'Singapore', region: 'Asia', code: 'UOB' },
+            { name: 'Maybank', country: 'Malaysia', region: 'Asia', code: 'MAYBANK' },
+            { name: 'CIMB Bank', country: 'Malaysia', region: 'Asia', code: 'CIMB' },
+            { name: 'Bangkok Bank', country: 'Thailand', region: 'Asia', code: 'BBL' },
+            { name: 'Kasikornbank', country: 'Thailand', region: 'Asia', code: 'KBANK' },
+            { name: 'BCA', country: 'Indonesia', region: 'Asia', code: 'BCA' },
+            { name: 'Bank Mandiri', country: 'Indonesia', region: 'Asia', code: 'BMRI' },
+            { name: 'BDO Unibank', country: 'Philippines', region: 'Asia', code: 'BDO' },
+            { name: 'Vietcombank', country: 'Vietnam', region: 'Asia', code: 'VCB' },
+            // Europe
+            { name: 'HSBC', country: 'United Kingdom', region: 'Europe', code: 'HSBC' },
+            { name: 'Barclays', country: 'United Kingdom', region: 'Europe', code: 'BARC' },
+            { name: 'Lloyds Bank', country: 'United Kingdom', region: 'Europe', code: 'LLOY' },
+            { name: 'NatWest', country: 'United Kingdom', region: 'Europe', code: 'NWB' },
+            { name: 'Deutsche Bank', country: 'Germany', region: 'Europe', code: 'DB' },
+            { name: 'Commerzbank', country: 'Germany', region: 'Europe', code: 'CBK' },
+            { name: 'BNP Paribas', country: 'France', region: 'Europe', code: 'BNP' },
+            { name: 'Société Générale', country: 'France', region: 'Europe', code: 'GLE' },
+            { name: 'Crédit Agricole', country: 'France', region: 'Europe', code: 'ACA' },
+            { name: 'Santander', country: 'Spain', region: 'Europe', code: 'SAN' },
+            { name: 'BBVA', country: 'Spain', region: 'Europe', code: 'BBVA' },
+            { name: 'UniCredit', country: 'Italy', region: 'Europe', code: 'UCG' },
+            { name: 'Intesa Sanpaolo', country: 'Italy', region: 'Europe', code: 'ISP' },
+            { name: 'ING Bank', country: 'Netherlands', region: 'Europe', code: 'ING' },
+            { name: 'Rabobank', country: 'Netherlands', region: 'Europe', code: 'RABO' },
+            { name: 'UBS', country: 'Switzerland', region: 'Europe', code: 'UBS' },
+            { name: 'Credit Suisse', country: 'Switzerland', region: 'Europe', code: 'CS' },
+            { name: 'Nordea', country: 'Sweden', region: 'Europe', code: 'NDA' },
+            { name: 'SEB', country: 'Sweden', region: 'Europe', code: 'SEB' },
+            { name: 'Danske Bank', country: 'Denmark', region: 'Europe', code: 'DANSKE' },
+            { name: 'Sberbank', country: 'Russia', region: 'Europe', code: 'SBER' },
+            { name: 'PKO Bank Polski', country: 'Poland', region: 'Europe', code: 'PKO' },
+            { name: 'Erste Bank', country: 'Austria', region: 'Europe', code: 'EBS' },
+            { name: 'KBC Bank', country: 'Belgium', region: 'Europe', code: 'KBC' },
+            { name: 'CaixaBank', country: 'Spain', region: 'Europe', code: 'CABK' },
+            // Americas
+            { name: 'JPMorgan Chase', country: 'United States', region: 'Americas', code: 'JPM' },
+            { name: 'Bank of America', country: 'United States', region: 'Americas', code: 'BAC' },
+            { name: 'Wells Fargo', country: 'United States', region: 'Americas', code: 'WFC' },
+            { name: 'Citibank', country: 'United States', region: 'Americas', code: 'C' },
+            { name: 'Goldman Sachs', country: 'United States', region: 'Americas', code: 'GS' },
+            { name: 'US Bank', country: 'United States', region: 'Americas', code: 'USB' },
+            { name: 'PNC Bank', country: 'United States', region: 'Americas', code: 'PNC' },
+            { name: 'Capital One', country: 'United States', region: 'Americas', code: 'COF' },
+            { name: 'TD Bank', country: 'Canada', region: 'Americas', code: 'TD' },
+            { name: 'Royal Bank of Canada (RBC)', country: 'Canada', region: 'Americas', code: 'RBC' },
+            { name: 'Scotiabank', country: 'Canada', region: 'Americas', code: 'BNS' },
+            { name: 'BMO', country: 'Canada', region: 'Americas', code: 'BMO' },
+            { name: 'Itaú Unibanco', country: 'Brazil', region: 'Americas', code: 'ITUB' },
+            { name: 'Banco do Brasil', country: 'Brazil', region: 'Americas', code: 'BBAS' },
+            { name: 'Bradesco', country: 'Brazil', region: 'Americas', code: 'BBDC' },
+            { name: 'BBVA México', country: 'Mexico', region: 'Americas', code: 'BBVA-MX' },
+            { name: 'Banorte', country: 'Mexico', region: 'Americas', code: 'GFNORTE' },
+            // Africa
+            { name: 'Standard Bank', country: 'South Africa', region: 'Africa', code: 'SBK' },
+            { name: 'First National Bank (FNB)', country: 'South Africa', region: 'Africa', code: 'FNB' },
+            { name: 'Absa Bank', country: 'South Africa', region: 'Africa', code: 'ABSA' },
+            { name: 'Nedbank', country: 'South Africa', region: 'Africa', code: 'NED' },
+            { name: 'Equity Bank', country: 'Kenya', region: 'Africa', code: 'EQTY' },
+            { name: 'KCB Bank', country: 'Kenya', region: 'Africa', code: 'KCB' },
+            { name: 'GTBank', country: 'Nigeria', region: 'Africa', code: 'GTCO' },
+            { name: 'Access Bank', country: 'Nigeria', region: 'Africa', code: 'ACCESS' },
+            { name: 'Zenith Bank', country: 'Nigeria', region: 'Africa', code: 'ZENITH' },
+            { name: 'CIB Egypt', country: 'Egypt', region: 'Africa', code: 'CIB' },
+            { name: 'Attijariwafa Bank', country: 'Morocco', region: 'Africa', code: 'ATW' },
+            // Oceania
+            { name: 'Commonwealth Bank (CBA)', country: 'Australia', region: 'Oceania', code: 'CBA' },
+            { name: 'Westpac', country: 'Australia', region: 'Oceania', code: 'WBC' },
+            { name: 'ANZ', country: 'Australia', region: 'Oceania', code: 'ANZ' },
+            { name: 'NAB', country: 'Australia', region: 'Oceania', code: 'NAB' },
+            { name: 'ASB Bank', country: 'New Zealand', region: 'Oceania', code: 'ASB' },
+            { name: 'BNZ', country: 'New Zealand', region: 'Oceania', code: 'BNZ' },
+            // Global / digital
+            { name: 'Revolut', country: 'Global', region: 'Digital', code: 'REVOLUT' },
+            { name: 'Wise (TransferWise)', country: 'Global', region: 'Digital', code: 'WISE' },
+            { name: 'Payoneer', country: 'Global', region: 'Digital', code: 'PAYONEER' },
+            { name: 'N26', country: 'Europe', region: 'Digital', code: 'N26' },
+            { name: 'Monzo', country: 'United Kingdom', region: 'Digital', code: 'MONZO' },
+            { name: 'Cash App', country: 'United States', region: 'Digital', code: 'CASHAPP' }
+        ];
+
+        let _selectedBank = null;
+
+        function searchWorldBanks(query) {
+            const q = (query || '').trim().toLowerCase();
+            if (!q) return WORLD_BANKS.slice(0, 40);
+            return WORLD_BANKS.filter(b =>
+                b.name.toLowerCase().includes(q) ||
+                b.country.toLowerCase().includes(q) ||
+                b.region.toLowerCase().includes(q) ||
+                (b.code || '').toLowerCase().includes(q)
+            ).slice(0, 50);
+        }
+        function renderBankResults(query) {
+            const box = document.getElementById('bank-results');
+            if (!box) return;
+            const list = searchWorldBanks(query);
+            if (!list.length) {
+                box.innerHTML = '<div style="padding:14px;color:#888;font-size:13px;">No bank found — try another name or country</div>';
+                return;
+            }
+            box.innerHTML = list.map((b, i) =>
+                `<button type="button" class="bank-result-item ${(_selectedBank && _selectedBank.code === b.code) ? 'selected' : ''}" onclick='selectWorldBank(${JSON.stringify(b).replace(/'/g, "&#39;")})'>
+                    <span class="br-name">${escapeHtml(b.name)}</span>
+                    <span class="br-meta">${escapeHtml(b.country)} · ${escapeHtml(b.region)}${b.code ? ' · ' + escapeHtml(b.code) : ''}</span>
+                </button>`
+            ).join('');
+        }
+        function selectWorldBank(b) {
+            _selectedBank = b;
+            const pill = document.getElementById('bank-selected-pill');
+            if (pill) {
+                pill.textContent = '✓ ' + b.name + ' · ' + b.country;
+                pill.classList.add('visible');
+            }
+            const inp = document.getElementById('bank-search-input');
+            if (inp) inp.value = b.name;
+            renderBankResults(b.name);
+            try { showToast('Bank selected: ' + b.name, 'success'); } catch (e) {}
+        }
+        function setupBankSearch() {
+            const inp = document.getElementById('bank-search-input');
+            if (!inp || inp._bankBound) return;
+            inp._bankBound = true;
+            inp.addEventListener('input', () => renderBankResults(inp.value));
+            inp.addEventListener('focus', () => renderBankResults(inp.value));
+        }
+
+
         // ========== CUSTOM PAYMENT DASHBOARD ==========
         let _payTier = 'pro';
         let _payMethod = 'jazzcash';
@@ -8242,15 +8497,22 @@
             const localBox = document.getElementById('pay-box-local');
             const stripeBox = document.getElementById('pay-box-stripe');
             const btn = document.getElementById('pay-submit-btn');
+            const bankWrap = document.getElementById('bank-search-wrap');
             if (method === 'stripe') {
                 if (localBox) localBox.classList.remove('visible');
                 if (stripeBox) stripeBox.classList.add('visible');
                 if (btn) btn.textContent = 'Continue to secure card payment';
+                if (bankWrap) bankWrap.style.display = 'none';
             } else {
                 if (localBox) localBox.classList.add('visible');
                 if (stripeBox) stripeBox.classList.remove('visible');
                 if (btn) btn.textContent = 'I have paid — submit for approval';
                 renderPayAccountInfo(method);
+                if (bankWrap) {
+                    bankWrap.style.display = 'block';
+                    setupBankSearch();
+                    renderBankResults('');
+                }
             }
         }
         function getSellerAccountDetails() {
@@ -8294,12 +8556,18 @@
                 try { showToast('Name, phone, and transaction ID required', 'error'); } catch (e) {}
                 return;
             }
+            if (_payMethod === 'bank' && !_selectedBank) {
+                try { showToast('Please search and select your bank', 'error'); } catch (e) {}
+                return;
+            }
             const order = {
                 id: 'ord_' + Date.now(),
                 tier: _payTier,
                 amountUsd: amount,
                 amountPkr: Math.round(amount * USD_TO_PKR),
                 method: _payMethod,
+                bank: _selectedBank ? (_selectedBank.name + ' · ' + _selectedBank.country) : '',
+                bankCode: _selectedBank ? _selectedBank.code : '',
                 name: name.trim(),
                 phone: phone.trim(),
                 txnId: txn.trim(),
@@ -8390,7 +8658,7 @@
                         <span class="sp-status ${o.status}">${escapeHtml(o.status)}</span>
                     </div>
                     <div>${escapeHtml(o.name)} · ${escapeHtml(o.phone)}</div>
-                    <div style="color:#9ca3af;margin-top:4px;">${escapeHtml(o.method)} · TXN: ${escapeHtml(o.txnId)}</div>
+                    <div style="color:#9ca3af;margin-top:4px;">${escapeHtml(o.method)}${o.bank ? ' · ' + escapeHtml(o.bank) : ''} · TXN: ${escapeHtml(o.txnId)}</div>
                     ${o.notes ? '<div style="color:#888;margin-top:4px;">' + escapeHtml(o.notes) + '</div>' : ''}
                     <div style="font-size:11px;color:#666;margin-top:4px;">${new Date(o.at).toLocaleString()}</div>
                     ${o.status === 'pending' ? `
