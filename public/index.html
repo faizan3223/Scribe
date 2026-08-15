@@ -3555,6 +3555,193 @@
         }
         .bank-selected-pill.visible { display: block; }
 
+
+        /* Grok-style checkout */
+        .pay-grok-shell {
+            display: flex;
+            width: min(920px, 96vw);
+            max-height: 92vh;
+            overflow: auto;
+            border-radius: 16px;
+            background: #fff;
+            position: relative;
+            box-shadow: 0 24px 80px rgba(0,0,0,.35);
+        }
+        .pay-grok-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            z-index: 2;
+            border: none;
+            background: transparent;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            color: #888;
+        }
+        .pay-grok-left {
+            width: 42%;
+            background: #000;
+            color: #fff;
+            padding: 40px 32px;
+            flex-shrink: 0;
+        }
+        .pay-grok-brand {
+            font-size: 13px;
+            letter-spacing: .04em;
+            opacity: .7;
+            margin-bottom: 28px;
+        }
+        .pay-grok-sub {
+            font-size: 15px;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+        .pay-grok-amount {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 18px;
+        }
+        .pay-grok-amount span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #999;
+            margin-left: 6px;
+        }
+        .pay-currency-toggle {
+            display: inline-flex;
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 3px;
+            gap: 2px;
+            margin-bottom: 12px;
+        }
+        .pay-cur-btn {
+            border: none;
+            background: transparent;
+            color: #aaa;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .pay-cur-btn.on {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        .pay-rate-note {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.4;
+            margin-bottom: 28px;
+        }
+        .pay-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding-top: 16px;
+            border-top: 1px solid #222;
+            color: #ddd;
+        }
+        .pay-billed {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
+        }
+        .pay-grok-right {
+            flex: 1;
+            padding: 36px 32px 28px;
+            background: #fff;
+            color: #111;
+        }
+        .pay-grok-right h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0 0 12px;
+            color: #111;
+        }
+        .pay-field {
+            margin-bottom: 12px;
+        }
+        .pay-field label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .pay-field input, .pay-field select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+            color: #111;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .pay-field input:focus, .pay-field select:focus {
+            border-color: #111;
+        }
+        .pay-card-box {
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fafafa;
+        }
+        .pay-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .pay-card-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .pay-legal {
+            font-size: 11px;
+            color: #777;
+            line-height: 1.45;
+            margin: 16px 0 14px;
+        }
+        .pay-legal a {
+            color: #444;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .pay-subscribe-btn {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .pay-subscribe-btn:hover { background: #333; }
+        .pay-subscribe-btn:disabled { opacity: .55; cursor: not-allowed; }
+        .pay-powered {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin-top: 14px;
+        }
+        @media (max-width: 720px) {
+            .pay-grok-shell { flex-direction: column; width: 96vw; }
+            .pay-grok-left { width: 100%; padding: 28px 22px; }
+            .pay-grok-right { padding: 24px 20px; }
+            .pay-grok-amount { font-size: 28px; }
+        }
+
     </style>
 </head>
 <body>
@@ -3973,68 +4160,67 @@
 
     <!-- PAYMENT DASHBOARD (custom — not direct Stripe) -->
     <div id="payment-dashboard" class="global-popup-overlay">
-        <div class="popup-window-box pay-dash">
-            <button class="popup-close-trigger" onclick="closePaymentDashboard()">×</button>
-            <h2 style="text-align:center;color:#fff;margin-bottom:6px;">Checkout</h2>
-            <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:16px;">Search JazzCash, EasyPaisa, any bank, or card</p>
-
-            <div class="pay-summary">
-                <div class="ps-plan" id="pay-plan-name">Pro Build</div>
-                <div class="ps-price" id="pay-plan-price">$20</div>
-                <div class="ps-meta" id="pay-plan-meta">Billed monthly · Cancel anytime</div>
-                <div class="ps-meta" id="pay-plan-pkr" style="margin-top:6px;color:#a3e635;"></div>
-            </div>
-
-            <div class="pay-details-box visible" id="pay-box-local">
-                <div class="pay-account-card" id="pay-account-info"><!-- seller account --></div>
-
-                <div class="bank-search-wrap" id="bank-search-wrap">
-                    <label>Search payment method</label>
-                    <input type="text" class="bank-search-input" id="bank-search-input" placeholder="JazzCash, EasyPaisa, HBL, SBI, Chase, Card…" autocomplete="off">
-                    <div class="bank-results" id="bank-results"></div>
-                    <div class="bank-selected-pill" id="bank-selected-pill"></div>
+        <div class="pay-grok-shell">
+            <button type="button" class="pay-grok-close" onclick="closePaymentDashboard()" aria-label="Close">×</button>
+            <div class="pay-grok-left">
+                <div class="pay-grok-brand">Scribe AI</div>
+                <div class="pay-grok-sub">Subscribe to <span id="pay-plan-name">Pro Build</span></div>
+                <div class="pay-grok-amount" id="pay-plan-price-display">PKR 5,560<span> per month</span></div>
+                <div class="pay-currency-toggle">
+                    <button type="button" class="pay-cur-btn on" id="pay-cur-pkr" onclick="setPayCurrency('pkr')">🇵🇰 PKR</button>
+                    <button type="button" class="pay-cur-btn" id="pay-cur-usd" onclick="setPayCurrency('usd')">🇺🇸 USD</button>
                 </div>
-
-                <label>Your name</label>
-                <input type="text" id="pay-payer-name" placeholder="Full name">
-
-                <!-- Dynamic fields by method -->
-                <div id="pay-field-wallet" style="display:none;">
-                    <label id="pay-wallet-label">Wallet number</label>
-                    <input type="text" id="pay-wallet-number" placeholder="03XX-XXXXXXX">
-                    <div id="pay-field-pin" style="display:none;">
-                        <label>JazzCash PIN</label>
-                        <input type="password" id="pay-wallet-pin" placeholder="4–5 digit PIN" maxlength="6" inputmode="numeric">
+                <p class="pay-rate-note" id="pay-rate-note">1 USD ≈ 278 PKR. Charges may vary with exchange rates.</p>
+                <div class="pay-line">
+                    <span id="pay-line-name">Pro Build</span>
+                    <span id="pay-line-price">PKR 5,560</span>
+                </div>
+                <p class="pay-billed">Billed monthly · Cancel anytime</p>
+            </div>
+            <div class="pay-grok-right">
+                <h3>Contact information</h3>
+                <div class="pay-field">
+                    <label>Email</label>
+                    <input type="email" id="pay-email" placeholder="you@email.com" autocomplete="email">
+                </div>
+                <h3 style="margin-top:22px;">Payment method</h3>
+                <div class="pay-card-box">
+                    <div class="pay-card-title">💳 Card</div>
+                    <div class="pay-field">
+                        <label>Card information</label>
+                        <input type="text" id="pay-card-number" placeholder="1234 1234 1234 1234" inputmode="numeric" autocomplete="cc-number" maxlength="19">
+                        <div class="pay-card-row">
+                            <input type="text" id="pay-card-exp" placeholder="MM / YY" inputmode="numeric" autocomplete="cc-exp" maxlength="7">
+                            <input type="text" id="pay-card-cvc" placeholder="CVC" inputmode="numeric" autocomplete="cc-csc" maxlength="4">
+                        </div>
+                    </div>
+                    <div class="pay-field">
+                        <label>Cardholder name</label>
+                        <input type="text" id="pay-card-name" placeholder="Full name on card" autocomplete="cc-name">
+                    </div>
+                    <div class="pay-field">
+                        <label>Country or region</label>
+                        <select id="pay-card-country">
+                            <option value="PK" selected>Pakistan</option>
+                            <option value="IN">India</option>
+                            <option value="AE">United Arab Emirates</option>
+                            <option value="SA">Saudi Arabia</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="OTHER">Other</option>
+                        </select>
                     </div>
                 </div>
-                <div id="pay-field-account" style="display:none;">
-                    <label>Your bank account number / IBAN</label>
-                    <input type="text" id="pay-account-number" placeholder="Account number or IBAN">
-                </div>
-                <div id="pay-field-phone-optional" style="display:none;">
-                    <label>WhatsApp (optional)</label>
-                    <input type="text" id="pay-payer-phone" placeholder="03XX-XXXXXXX">
-                </div>
-
-                <label>Transaction ID / reference</label>
-                <input type="text" id="pay-txn-id" placeholder="Payment reference / TID">
-                <label>Notes (optional)</label>
-                <textarea id="pay-notes" rows="2" placeholder="Any note for the seller"></textarea>
-                <p style="color:#9ca3af;font-size:11px;margin-top:10px;line-height:1.4;">
-                    Send the exact amount to the seller details above, then submit your transaction ID. Plan activates after verification.
+                <p class="pay-legal">By subscribing, you agree to our <a onclick="toggleTermsModal()">Terms</a> and <a onclick="togglePrivacyModal()">Privacy Policy</a>. You authorize Scribe AI to charge your payment method monthly until you cancel.</p>
+                <button type="button" class="pay-subscribe-btn" id="pay-submit-btn" onclick="submitPaymentDashboard()">Subscribe</button>
+                <p class="pay-powered">Powered by <strong>stripe</strong> · Secure card checkout</p>
+                <p style="text-align:center;margin-top:10px;">
+                    <button type="button" onclick="closePaymentDashboard(); togglePricingModal();" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;text-decoration:underline;">← Back to plans</button>
                 </p>
             </div>
-
-            <div class="pay-details-box" id="pay-box-stripe">
-                <p style="color:#ccc;font-size:13px;line-height:1.5;margin:0;">
-                    You’ll continue to a secure Stripe page for international cards. Amount will be charged in <strong style="color:#fff;">USD</strong>.
-                </p>
-            </div>
-
-            <button type="button" class="pay-submit-btn" id="pay-submit-btn" onclick="submitPaymentDashboard()">I have paid — submit for approval</button>
-            <p style="text-align:center;margin-top:12px;">
-                <button type="button" onclick="closePaymentDashboard(); togglePricingModal();" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;text-decoration:underline;">← Back to plans</button>
-            </p>
         </div>
     </div>
 
@@ -8347,9 +8533,6 @@
         // ========== WORLD BANK DIRECTORY (major banks by region) ==========
         const WORLD_BANKS = [
             // Wallets & card
-            { name: 'JazzCash', country: 'Pakistan', region: 'Wallet', code: 'JAZZCASH', kind: 'jazzcash' },
-            { name: 'EasyPaisa', country: 'Pakistan', region: 'Wallet', code: 'EASYPAISA', kind: 'easypaisa' },
-            { name: 'International card (Stripe)', country: 'Global', region: 'Card', code: 'STRIPE', kind: 'stripe' },
             // Pakistan
             { name: 'HBL (Habib Bank Limited)', country: 'Pakistan', region: 'Asia', code: 'HBL' },
             { name: 'UBL (United Bank Limited)', country: 'Pakistan', region: 'Asia', code: 'UBL' },
@@ -8589,35 +8772,43 @@
         // Rough PKR display rates (update as needed)
         const USD_TO_PKR = 278;
 
-        function openPaymentDashboard(tier) {
-            _payTier = tier === 'ultra' ? 'ultra' : 'pro';
-            _payMethod = '';
-            _selectedBank = null;
+        let _payCurrency = 'pkr';
+        function setPayCurrency(cur) {
+            _payCurrency = cur === 'usd' ? 'usd' : 'pkr';
+            const pkrBtn = document.getElementById('pay-cur-pkr');
+            const usdBtn = document.getElementById('pay-cur-usd');
+            if (pkrBtn) pkrBtn.classList.toggle('on', _payCurrency === 'pkr');
+            if (usdBtn) usdBtn.classList.toggle('on', _payCurrency === 'usd');
+            refreshPayAmounts();
+        }
+        function refreshPayAmounts() {
             const amount = _payTier === 'ultra' ? 100 : 20;
             const pkr = Math.round(amount * USD_TO_PKR);
+            const main = document.getElementById('pay-plan-price-display');
+            const line = document.getElementById('pay-line-price');
+            const lineName = document.getElementById('pay-line-name');
+            const planName = _payTier === 'ultra' ? 'Scribe Ultra' : 'Pro Build';
+            if (lineName) lineName.textContent = planName;
             const nameEl = document.getElementById('pay-plan-name');
-            const priceEl = document.getElementById('pay-plan-price');
-            const metaEl = document.getElementById('pay-plan-meta');
-            const pkrEl = document.getElementById('pay-plan-pkr');
-            if (nameEl) nameEl.textContent = _payTier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build';
-            if (priceEl) priceEl.textContent = '$' + amount;
-            if (metaEl) metaEl.textContent = 'Billed monthly · ' + (_payTier === 'ultra' ? 'Unlimited everything' : 'Unlimited chats + images');
-            if (pkrEl) pkrEl.textContent = '≈ PKR ' + pkr.toLocaleString() + ' (local payment methods)';
-            const pill = document.getElementById('bank-selected-pill');
-            if (pill) { pill.classList.remove('visible'); pill.textContent = ''; }
-            const inp = document.getElementById('bank-search-input');
-            if (inp) inp.value = '';
-            const localBox = document.getElementById('pay-box-local');
-            const stripeBox = document.getElementById('pay-box-stripe');
-            if (localBox) localBox.classList.add('visible');
-            if (stripeBox) stripeBox.classList.remove('visible');
-            ['pay-field-wallet','pay-field-pin','pay-field-account','pay-field-phone-optional'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
-            });
-            renderPayAccountInfo('all');
-            setupBankSearch();
-            renderBankResults('');
+            if (nameEl) nameEl.textContent = planName;
+            if (_payCurrency === 'usd') {
+                if (main) main.innerHTML = '$' + amount + '<span> per month</span>';
+                if (line) line.textContent = '$' + amount + '.00';
+            } else {
+                if (main) main.innerHTML = 'PKR ' + pkr.toLocaleString() + '<span> per month</span>';
+                if (line) line.textContent = 'PKR ' + pkr.toLocaleString();
+            }
+            const note = document.getElementById('pay-rate-note');
+            if (note) note.textContent = '1 USD ≈ ' + USD_TO_PKR + ' PKR. Charges may vary with exchange rates.';
+        }
+        function openPaymentDashboard(tier) {
+            _payTier = tier === 'ultra' ? 'ultra' : 'pro';
+            _payMethod = 'stripe';
+            _payCurrency = 'pkr';
+            setPayCurrency('pkr');
+            refreshPayAmounts();
+            const emailEl = document.getElementById('pay-email');
+            if (emailEl && currentUserEmail) emailEl.value = currentUserEmail;
             try { togglePricingModal(); } catch (e) {}
             const card = document.getElementById('payment-dashboard');
             if (card) card.style.display = 'flex';
@@ -8658,80 +8849,51 @@
             safeStorage.setItem('scribe_payment_orders', JSON.stringify(list.slice(0, 100)));
         }
         async function submitPaymentDashboard() {
-            const amount = _payTier === 'ultra' ? 100 : 20;
-            if (!_payMethod) {
-                try { showToast('Search and select JazzCash, EasyPaisa, a bank, or Card', 'error'); } catch (e) {}
+            const email = ((document.getElementById('pay-email') || {}).value || '').trim();
+            const num = ((document.getElementById('pay-card-number') || {}).value || '').replace(/\s+/g, '');
+            const exp = ((document.getElementById('pay-card-exp') || {}).value || '').trim();
+            const cvc = ((document.getElementById('pay-card-cvc') || {}).value || '').trim();
+            const name = ((document.getElementById('pay-card-name') || {}).value || '').trim();
+            if (!email || !email.includes('@')) {
+                try { showToast('Enter a valid email', 'error'); } catch (e) {}
                 return;
             }
-            if (_payMethod === 'stripe') {
-                closePaymentDashboard();
-                await handleUpgradeClick({ innerText: '', disabled: false }, _payTier);
+            if (num.length < 13 || !exp || cvc.length < 3 || !name) {
+                try { showToast('Enter complete card details', 'error'); } catch (e) {}
                 return;
             }
-            const name = (document.getElementById('pay-payer-name') || {}).value || '';
-            const txn = (document.getElementById('pay-txn-id') || {}).value || '';
-            const notes = (document.getElementById('pay-notes') || {}).value || '';
-            const walletNum = (document.getElementById('pay-wallet-number') || {}).value || '';
-            const walletPin = (document.getElementById('pay-wallet-pin') || {}).value || '';
-            const accountNum = (document.getElementById('pay-account-number') || {}).value || '';
-            const phone = (document.getElementById('pay-payer-phone') || {}).value || '';
-
-            if (!name.trim() || !txn.trim()) {
-                try { showToast('Name and transaction ID required', 'error'); } catch (e) {}
-                return;
-            }
-            if (_payMethod === 'jazzcash') {
-                if (!walletNum.trim()) { try { showToast('JazzCash number required', 'error'); } catch (e) {} return; }
-                if (!walletPin.trim()) { try { showToast('JazzCash PIN required', 'error'); } catch (e) {} return; }
-            }
-            if (_payMethod === 'easypaisa') {
-                if (!walletNum.trim()) { try { showToast('EasyPaisa number required', 'error'); } catch (e) {} return; }
-            }
-            if (_payMethod === 'bank') {
-                if (!_selectedBank) { try { showToast('Select your bank from search', 'error'); } catch (e) {} return; }
-                if (!accountNum.trim()) { try { showToast('Bank account number / IBAN required', 'error'); } catch (e) {} return; }
-            }
-            const order = {
-                id: 'ord_' + Date.now(),
-                tier: _payTier,
-                amountUsd: amount,
-                amountPkr: Math.round(amount * USD_TO_PKR),
-                method: _payMethod,
-                bank: _selectedBank ? (_selectedBank.name + ' · ' + (_selectedBank.country || '')) : '',
-                bankCode: _selectedBank ? _selectedBank.code : '',
-                name: name.trim(),
-                phone: phone.trim() || walletNum.trim(),
-                walletNumber: walletNum.trim(),
-                accountNumber: accountNum.trim(),
-                // PIN stored only for seller verification of this order (local inbox)
-                walletPin: _payMethod === 'jazzcash' ? walletPin.trim() : '',
-                txnId: txn.trim(),
-                notes: notes.trim(),
-                email: currentUserEmail || '',
-                status: 'pending',
-                at: Date.now()
-            };
-            const list = getPaymentOrders();
-            list.unshift(order);
-            savePaymentOrders(list);
-            try {
-                await fetch(workerURL + '/api/payment-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...order, walletPin: undefined })
-                });
-            } catch (e) {}
+            // Never send raw card data to our server — Stripe Checkout handles PCI-compliant entry
+            const btn = document.getElementById('pay-submit-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to secure checkout…'; }
             safeStorage.setItem('scribe_pending_plan', _payTier);
-            closePaymentDashboard();
+            safeStorage.setItem('scribe_pay_email', email);
             try {
-                pushNotification('Payment submitted', 'Your ' + _payTier.toUpperCase() + ' payment is pending verification.', 'info');
-                showToast('Payment submitted — waiting for seller approval', 'success');
-            } catch (e) {}
-            ['pay-payer-name','pay-payer-phone','pay-txn-id','pay-notes','pay-wallet-number','pay-wallet-pin','pay-account-number'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-            });
+                // Prefer real Stripe hosted page (same as Grok / SuperGrok)
+                await handleUpgradeClick({ innerText: '', disabled: false }, _payTier);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+            }
         }
+
+
+        (function setupCardFormatters() {
+            document.addEventListener('input', (e) => {
+                const t = e.target;
+                if (!t || !t.id) return;
+                if (t.id === 'pay-card-number') {
+                    let v = t.value.replace(/\D/g, '').slice(0, 16);
+                    t.value = v.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+                }
+                if (t.id === 'pay-card-exp') {
+                    let v = t.value.replace(/\D/g, '').slice(0, 4);
+                    if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2);
+                    t.value = v;
+                }
+                if (t.id === 'pay-card-cvc') {
+                    t.value = t.value.replace(/\D/g, '').slice(0, 4);
+                }
+            });
+        })();
 
         // Seller inbox
         function openSellerPayments() {
