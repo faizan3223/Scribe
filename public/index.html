@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI,YouTube, Facebook, Google Pixel 11, Google Flights, Weather update, Dollar rate in PKR, Gold price Pakistan, Cricket match live score, Breaking news, CapCut templates, Chat GPT, Amazon, Netflix, Instagram login, Web Cric, Bise result update,scribe AI Workspace,14 August status, 14 August dress design, Jashn e Azadi Mubarak wishes, 14 August poetry in Urdu, Pakistan Independence Day quotes, Green and white dresses, 14 August DP maker, National songs download, Pakistan flag wallpaper 4k, Mili naghmay list, 14 August speech in Urdu, Quaid e Azam quotes, Google Doodle Pakistan, Minar e Pakistan lighting time, Azadi sales and discounts, 14 August WhatsApp status video download, Pakistan Zindabad logos, Jashn e Azadi songs lyrics.">
+    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
     <meta name="theme-color" content="#0a0a0a">
     <meta property="og:title" content="Scribe AI">
     <meta property="og:description" content="Write faster, think clearer — your AI writing workspace.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230a0a0a' width='32' height='32' rx='8'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='20' font-weight='700' fill='%23fff'%3ES%3C/text%3E%3Cline x1='6' y1='26' x2='26' y2='6' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
-    <title>Scribe AI </title>
+    <title>Scribe AI Workspace</title>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3570,6 +3570,8 @@
             </div>
             <div class="intro-nav-links">
                 <span class="link-btn" onclick="toggleAboutModal()">About</span>
+                <span class="link-btn" onclick="toggleGuidesModal()">Guides</span>
+                <span class="link-btn" onclick="toggleFaqModal()">FAQ</span>
                 <span class="link-btn" onclick="togglePrivacyModal()">Privacy</span>
                 <span class="link-btn" onclick="toggleTermsModal()">Terms</span>
                 <span class="link-btn" onclick="toggleContactModal()">Contact</span>
@@ -3637,6 +3639,8 @@
             </div>
             <div class="landing-nav-links">
                 <span onclick="toggleAboutModal()">About</span>
+                <span onclick="toggleGuidesModal()">Guides</span>
+                <span onclick="toggleFaqModal()">FAQ</span>
                 <span onclick="togglePrivacyModal()">Privacy</span>
                 <span onclick="toggleTermsModal()">Terms</span>
                 <span onclick="toggleContactModal()">Contact</span>
@@ -3972,7 +3976,7 @@
         <div class="popup-window-box pay-dash">
             <button class="popup-close-trigger" onclick="closePaymentDashboard()">×</button>
             <h2 style="text-align:center;color:#fff;margin-bottom:6px;">Checkout</h2>
-            <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:16px;">Pay with card, JazzCash, EasyPaisa, or bank transfer</p>
+            <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:16px;">Search JazzCash, EasyPaisa, any bank, or card</p>
 
             <div class="pay-summary">
                 <div class="ps-plan" id="pay-plan-name">Pro Build</div>
@@ -3981,46 +3985,43 @@
                 <div class="ps-meta" id="pay-plan-pkr" style="margin-top:6px;color:#a3e635;"></div>
             </div>
 
-            <p style="color:#9ca3af;font-size:12px;margin-bottom:8px;font-weight:600;">Choose payment method</p>
-            <div class="pay-methods">
-                <button type="button" class="pay-method selected" data-method="jazzcash" onclick="selectPayMethod('jazzcash')">
-                    <span class="pm-icon">📱</span>
-                    <span><span class="pm-title">JazzCash</span><span class="pm-sub">Pakistan mobile wallet — easy for local cards/mobile</span></span>
-                </button>
-                <button type="button" class="pay-method" data-method="easypaisa" onclick="selectPayMethod('easypaisa')">
-                    <span class="pm-icon">💚</span>
-                    <span><span class="pm-title">EasyPaisa</span><span class="pm-sub">Pakistan mobile wallet</span></span>
-                </button>
-                <button type="button" class="pay-method" data-method="bank" onclick="selectPayMethod('bank')">
-                    <span class="pm-icon">🏦</span>
-                    <span><span class="pm-title">Bank transfer</span><span class="pm-sub">IBAN / account transfer (PKR)</span></span>
-                </button>
-                <button type="button" class="pay-method" data-method="stripe" onclick="selectPayMethod('stripe')">
-                    <span class="pm-icon">💳</span>
-                    <span><span class="pm-title">International card</span><span class="pm-sub">Visa / Mastercard via Stripe (USD)</span></span>
-                </button>
-            </div>
-
             <div class="pay-details-box visible" id="pay-box-local">
-                <div class="pay-account-card" id="pay-account-info">
-                    <!-- filled by JS -->
-                </div>
-                <div class="bank-search-wrap" id="bank-search-wrap" style="display:none;">
-                    <label>Search any bank (world)</label>
-                    <input type="text" class="bank-search-input" id="bank-search-input" placeholder="Type bank or country… e.g. HBL, SBI, Chase, HSBC" autocomplete="off">
+                <div class="pay-account-card" id="pay-account-info"><!-- seller account --></div>
+
+                <div class="bank-search-wrap" id="bank-search-wrap">
+                    <label>Search payment method</label>
+                    <input type="text" class="bank-search-input" id="bank-search-input" placeholder="JazzCash, EasyPaisa, HBL, SBI, Chase, Card…" autocomplete="off">
                     <div class="bank-results" id="bank-results"></div>
                     <div class="bank-selected-pill" id="bank-selected-pill"></div>
                 </div>
+
                 <label>Your name</label>
                 <input type="text" id="pay-payer-name" placeholder="Full name">
-                <label>Your WhatsApp / phone</label>
-                <input type="text" id="pay-payer-phone" placeholder="03XX-XXXXXXX">
+
+                <!-- Dynamic fields by method -->
+                <div id="pay-field-wallet" style="display:none;">
+                    <label id="pay-wallet-label">Wallet number</label>
+                    <input type="text" id="pay-wallet-number" placeholder="03XX-XXXXXXX">
+                    <div id="pay-field-pin" style="display:none;">
+                        <label>JazzCash PIN</label>
+                        <input type="password" id="pay-wallet-pin" placeholder="4–5 digit PIN" maxlength="6" inputmode="numeric">
+                    </div>
+                </div>
+                <div id="pay-field-account" style="display:none;">
+                    <label>Your bank account number / IBAN</label>
+                    <input type="text" id="pay-account-number" placeholder="Account number or IBAN">
+                </div>
+                <div id="pay-field-phone-optional" style="display:none;">
+                    <label>WhatsApp (optional)</label>
+                    <input type="text" id="pay-payer-phone" placeholder="03XX-XXXXXXX">
+                </div>
+
                 <label>Transaction ID / reference</label>
-                <input type="text" id="pay-txn-id" placeholder="JazzCash / EasyPaisa / bank reference no.">
+                <input type="text" id="pay-txn-id" placeholder="Payment reference / TID">
                 <label>Notes (optional)</label>
                 <textarea id="pay-notes" rows="2" placeholder="Any note for the seller"></textarea>
                 <p style="color:#9ca3af;font-size:11px;margin-top:10px;line-height:1.4;">
-                    Send the exact amount shown above, then submit. Seller will verify and activate your plan (usually within a few hours).
+                    Send the exact amount to the seller details above, then submit your transaction ID. Plan activates after verification.
                 </p>
             </div>
 
@@ -4030,7 +4031,7 @@
                 </p>
             </div>
 
-            <button type="button" class="pay-submit-btn" id="pay-submit-btn" onclick="submitPaymentDashboard()">Continue</button>
+            <button type="button" class="pay-submit-btn" id="pay-submit-btn" onclick="submitPaymentDashboard()">I have paid — submit for approval</button>
             <p style="text-align:center;margin-top:12px;">
                 <button type="button" onclick="closePaymentDashboard(); togglePricingModal();" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;text-decoration:underline;">← Back to plans</button>
             </p>
@@ -4062,22 +4063,85 @@
         </div>
     </div>
 
+
+    <!-- GUIDES / BLOG (AdSense-quality content) -->
+    <div id="guides-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box wide">
+            <button class="popup-close-trigger" onclick="toggleGuidesModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Guides</h2>
+            <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:18px;">Practical articles on writing, coding, and using AI responsibly</p>
+            <div class="legal-content" style="max-height:65vh;overflow-y:auto;">
+                <h3>1. How to write a professional email with AI (without sounding robotic)</h3>
+                <p>Start with your real goal: what should the reader do after reading? Paste a rough draft into Scribe and ask for a clearer version in a formal tone. Then edit names, numbers, and deadlines yourself. Good AI email workflow: (1) bullet your points, (2) ask for a draft, (3) cut fluff, (4) add a specific subject line. Never send AI text that still contains placeholders like [Name] or generic praise.</p>
+                <p>For Pakistani workplace context, ask Scribe to keep polite openings and a short closing. If you need Urdu, request Roman Urdu first so you can adjust tone before converting to Urdu script.</p>
+
+                <h3>2. Code mode vs New Chat — when to use which</h3>
+                <p>Use <strong>New Chat</strong> for explanations, writing, planning, and everyday questions. Use <strong>Code</strong> when you need runnable solutions, debugging, or HTML/CSS/JS previews. Mixing both in one thread is fine, but starting in Code mode gives better complete examples. After you get code, click the preview card to open the side panel, edit, and download.</p>
+
+                <h3>3. Prompt tips that actually improve answers</h3>
+                <p>Weak prompt: “Write about marketing.” Strong prompt: “Write a 200-word Instagram caption for a Lahore bakery launching weekend discounts; friendly tone; include a clear call to action.” Add constraints: length, audience, language, and format (bullets, table, email). Use Output Contract on Scribe to force sections such as Verdict · Reasons · Risks · Next step.</p>
+
+                <h3>4. Honest mode and Debate mode — reduce AI flattery</h3>
+                <p>Many chatbots agree too quickly. Scribe’s Honest mode asks the model to challenge weak assumptions. Debate mode returns Side A, Side B, and a referee verdict. Use these when you are making a business or study decision and need pushback, not cheerleading.</p>
+
+                <h3>5. Privacy basics: what to share and what to avoid</h3>
+                <p>Do not paste passwords, full bank cards, CNIC scans, or private customer databases into any AI chat. Prefer Incognito for sensitive drafts. Review our Privacy Policy for how account data and messages are handled. You are responsible for content you upload.</p>
+
+                <h3>6. Studying with flashcards from chat</h3>
+                <p>After a long explanation, click <strong>Card</strong> on the answer to save a flashcard. Review cards later from the Flashcards panel. This spaced practice loop helps more than re-reading the same chat. Combine with Decision Journal when you commit to a study plan, then revisit in 7 days.</p>
+
+                <h3>7. Free vs Pro vs Ultra — practical differences</h3>
+                <p>Free is for light daily use with chat and image limits. Pro removes chat limits and increases image capacity for regular creators. Ultra is for heavy image and priority workflows. Choose based on real usage for two weeks on Free before upgrading.</p>
+
+                <h3>8. Mobile and desktop use</h3>
+                <p>Scribe works in the mobile browser. For a desktop-like window, use the Download for Windows/Mac package or your browser’s “Install app” option when available. Keep the launcher file next to Scribe-AI.html so app mode can open correctly.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div id="faq-popup-card" class="global-popup-overlay">
+        <div class="popup-window-box">
+            <button class="popup-close-trigger" onclick="toggleFaqModal()">×</button>
+            <h2 style="text-align:center;color:#fff;margin-bottom:16px;">FAQ</h2>
+            <div class="legal-content">
+                <h3>Is Scribe AI free?</h3>
+                <p>Yes. Free includes limited chats and one AI image per day. Pro and Ultra unlock higher limits.</p>
+                <h3>Can I pay from Pakistan?</h3>
+                <p>Yes. Checkout supports JazzCash, EasyPaisa, bank transfer (search your bank), and international cards via Stripe where available.</p>
+                <h3>Does Scribe remember past chats?</h3>
+                <p>Within a conversation, recent messages are used for continuity. Long-term notes may be stored on your device unless you use Incognito.</p>
+                <h3>Is AI always correct?</h3>
+                <p>No. Always verify facts, code, and important advice. Scribe is a productivity assistant, not a certified professional advisor.</p>
+                <h3>How do I get my plan activated after local payment?</h3>
+                <p>Submit your transaction ID in Checkout. The seller verifies payment and approves the order, then your plan activates.</p>
+                <h3>How do I contact support?</h3>
+                <p>Use the Contact form linked in the site header and footer.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ABOUT MODAL -->
     <div id="about-popup-card" class="global-popup-overlay">
         <div class="popup-window-box">
             <button class="popup-close-trigger" onclick="toggleAboutModal()">×</button>
             <h2 style="text-align: center; color: white; margin-bottom: 20px;">About <span style="color: #fff;">Scribe AI</span></h2>
             <div class="legal-content">
-                <p>Scribe AI is your everyday writing and thinking partner. Draft emails, summarize documents, brainstorm ideas, and get quick answers — all from one simple chat window.</p>
-                <h3>What we offer</h3>
+                <p>Scribe AI is a writing and productivity workspace designed for students, freelancers, developers, and teams. It combines everyday chat, specialized code help, image generation, and structured tools such as decision journals and flashcards — so you can move from idea to finished draft in one place.</p>
+                <h3>What you can do with Scribe</h3>
                 <ul>
-                    <li>Fast, clear AI chat for writing and research</li>
-                    <li>Voice input and spoken replies</li>
-                    <li>Image and file attachments</li>
-                    <li>Optional AI image generation (Pro / Ultra)</li>
+                    <li><strong>Write faster:</strong> emails, essays, reports, captions, and rewrites with clear formatting</li>
+                    <li><strong>Code mode:</strong> full solutions, explanations, and side-panel previews for HTML/CSS/JS</li>
+                    <li><strong>Learn:</strong> turn answers into flashcards and revisit decisions over time</li>
+                    <li><strong>Create:</strong> generate images from prompts and attach files for context</li>
+                    <li><strong>Stay in control:</strong> custom instructions, honest mode, output contracts, and incognito chat</li>
                 </ul>
-                <h3>Our mission</h3>
-                <p>We help people write faster and think clearer — without unnecessary complexity. Scribe is built for students, creators, teams, and anyone who works with words every day.</p>
+                <h3>Who it is for</h3>
+                <p>Scribe is built for people who work with words and code every day — especially users in Pakistan and across Asia who need both English and Urdu-friendly workflows, local payment options, and a simple interface that works on mobile and desktop.</p>
+                <h3>Our approach</h3>
+                <p>We focus on practical outcomes: shorter drafts, clearer explanations, and tools that remember context within a chat. We do not claim to replace professional legal, medical, or financial advice. AI can be wrong; you should always review important results.</p>
+                <h3>Contact</h3>
+                <p>Questions about the product or privacy can be sent through the Contact form on this website.</p>
             </div>
         </div>
     </div>
@@ -4106,8 +4170,14 @@
                 <p>We do not sell your personal data. We may use trusted processors (hosting, AI inference, payment) who process data only to provide the service.</p>
                 <h3>4. Your choices</h3>
                 <p>You can request access, correction, or deletion of your account data by contacting us via the Contact page.</p>
-                <h3>5. Contact</h3>
-                <p>For privacy questions, use the Contact form on this site.</p>
+                <h3>5. Cookies and local storage</h3>
+                <p>We use browser local storage to keep preferences, chat history on-device, and session state. You can clear site data from your browser settings. Analytics or advertising cookies, if enabled later, will be disclosed here.</p>
+                <h3>6. Children</h3>
+                <p>Scribe AI is not directed at children under 13. If you believe a child has provided personal data, contact us to remove it.</p>
+                <h3>7. International users</h3>
+                <p>Service infrastructure may process data in regions where our providers operate. By using Scribe you understand transfers may occur as needed to deliver the product.</p>
+                <h3>8. Contact</h3>
+                <p>For privacy questions, use the Contact form on this site. We aim to respond within a reasonable time.</p>
             </div>
         </div>
     </div>
@@ -6109,8 +6179,16 @@
             const card = document.getElementById('pricing-popup-card');
             card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
         }
+        function toggleGuidesModal() {
+            const card = document.getElementById('guides-popup-card');
+            if (card) card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function toggleFaqModal() {
+            const card = document.getElementById('faq-popup-card');
+            if (card) card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+        }
         function toggleAboutModal() {
-            const card = document.getElementById('about-popup-card');
+            const card = document.getElementById('about-popup-card','guides-popup-card','faq-popup-card');
             card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
         }
         function togglePrivacyModal() {
@@ -8268,6 +8346,10 @@
 
         // ========== WORLD BANK DIRECTORY (major banks by region) ==========
         const WORLD_BANKS = [
+            // Wallets & card
+            { name: 'JazzCash', country: 'Pakistan', region: 'Wallet', code: 'JAZZCASH', kind: 'jazzcash' },
+            { name: 'EasyPaisa', country: 'Pakistan', region: 'Wallet', code: 'EASYPAISA', kind: 'easypaisa' },
+            { name: 'International card (Stripe)', country: 'Global', region: 'Card', code: 'STRIPE', kind: 'stripe' },
             // Pakistan
             { name: 'HBL (Habib Bank Limited)', country: 'Pakistan', region: 'Asia', code: 'HBL' },
             { name: 'UBL (United Bank Limited)', country: 'Pakistan', region: 'Asia', code: 'UBL' },
@@ -8439,15 +8521,58 @@
         }
         function selectWorldBank(b) {
             _selectedBank = b;
+            const kind = b.kind || 'bank';
+            _payMethod = kind;
             const pill = document.getElementById('bank-selected-pill');
             if (pill) {
-                pill.textContent = '✓ ' + b.name + ' · ' + b.country;
+                pill.textContent = '✓ ' + b.name + (b.country ? ' · ' + b.country : '');
                 pill.classList.add('visible');
             }
             const inp = document.getElementById('bank-search-input');
             if (inp) inp.value = b.name;
             renderBankResults(b.name);
-            try { showToast('Bank selected: ' + b.name, 'success'); } catch (e) {}
+            applyPayMethodFields(kind);
+            renderPayAccountInfo(kind);
+            try { showToast('Selected: ' + b.name, 'success'); } catch (e) {}
+        }
+        function applyPayMethodFields(kind) {
+            const wallet = document.getElementById('pay-field-wallet');
+            const pinBox = document.getElementById('pay-field-pin');
+            const acct = document.getElementById('pay-field-account');
+            const phoneOpt = document.getElementById('pay-field-phone-optional');
+            const localBox = document.getElementById('pay-box-local');
+            const stripeBox = document.getElementById('pay-box-stripe');
+            const btn = document.getElementById('pay-submit-btn');
+            const wLabel = document.getElementById('pay-wallet-label');
+            if (kind === 'stripe') {
+                if (localBox) localBox.classList.remove('visible');
+                if (stripeBox) stripeBox.classList.add('visible');
+                if (btn) btn.textContent = 'Continue to secure card payment';
+                return;
+            }
+            if (localBox) localBox.classList.add('visible');
+            if (stripeBox) stripeBox.classList.remove('visible');
+            if (btn) btn.textContent = 'I have paid — submit for approval';
+            if (wallet) wallet.style.display = 'none';
+            if (pinBox) pinBox.style.display = 'none';
+            if (acct) acct.style.display = 'none';
+            if (phoneOpt) phoneOpt.style.display = 'none';
+            if (kind === 'jazzcash') {
+                if (wallet) wallet.style.display = 'block';
+                if (pinBox) pinBox.style.display = 'block';
+                if (wLabel) wLabel.textContent = 'Your JazzCash number';
+                const wn = document.getElementById('pay-wallet-number');
+                if (wn) wn.placeholder = '03XX-XXXXXXX';
+            } else if (kind === 'easypaisa') {
+                if (wallet) wallet.style.display = 'block';
+                if (wLabel) wLabel.textContent = 'Your EasyPaisa number';
+                const wn = document.getElementById('pay-wallet-number');
+                if (wn) wn.placeholder = '03XX-XXXXXXX';
+            } else {
+                // bank — account number, not phone
+                if (acct) acct.style.display = 'block';
+                if (phoneOpt) phoneOpt.style.display = 'block';
+            }
         }
         function setupBankSearch() {
             const inp = document.getElementById('bank-search-input');
@@ -8466,7 +8591,8 @@
 
         function openPaymentDashboard(tier) {
             _payTier = tier === 'ultra' ? 'ultra' : 'pro';
-            _payMethod = 'jazzcash';
+            _payMethod = '';
+            _selectedBank = null;
             const amount = _payTier === 'ultra' ? 100 : 20;
             const pkr = Math.round(amount * USD_TO_PKR);
             const nameEl = document.getElementById('pay-plan-name');
@@ -8476,11 +8602,22 @@
             if (nameEl) nameEl.textContent = _payTier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build';
             if (priceEl) priceEl.textContent = '$' + amount;
             if (metaEl) metaEl.textContent = 'Billed monthly · ' + (_payTier === 'ultra' ? 'Unlimited everything' : 'Unlimited chats + images');
-            if (pkrEl) pkrEl.textContent = '≈ PKR ' + pkr.toLocaleString() + ' (for JazzCash / EasyPaisa / bank)';
-            document.querySelectorAll('.pay-method').forEach(b => {
-                b.classList.toggle('selected', b.getAttribute('data-method') === 'jazzcash');
+            if (pkrEl) pkrEl.textContent = '≈ PKR ' + pkr.toLocaleString() + ' (local payment methods)';
+            const pill = document.getElementById('bank-selected-pill');
+            if (pill) { pill.classList.remove('visible'); pill.textContent = ''; }
+            const inp = document.getElementById('bank-search-input');
+            if (inp) inp.value = '';
+            const localBox = document.getElementById('pay-box-local');
+            const stripeBox = document.getElementById('pay-box-stripe');
+            if (localBox) localBox.classList.add('visible');
+            if (stripeBox) stripeBox.classList.remove('visible');
+            ['pay-field-wallet','pay-field-pin','pay-field-account','pay-field-phone-optional'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
             });
-            selectPayMethod('jazzcash');
+            renderPayAccountInfo('all');
+            setupBankSearch();
+            renderBankResults('');
             try { togglePricingModal(); } catch (e) {}
             const card = document.getElementById('payment-dashboard');
             if (card) card.style.display = 'flex';
@@ -8491,29 +8628,8 @@
         }
         function selectPayMethod(method) {
             _payMethod = method;
-            document.querySelectorAll('.pay-method').forEach(b => {
-                b.classList.toggle('selected', b.getAttribute('data-method') === method);
-            });
-            const localBox = document.getElementById('pay-box-local');
-            const stripeBox = document.getElementById('pay-box-stripe');
-            const btn = document.getElementById('pay-submit-btn');
-            const bankWrap = document.getElementById('bank-search-wrap');
-            if (method === 'stripe') {
-                if (localBox) localBox.classList.remove('visible');
-                if (stripeBox) stripeBox.classList.add('visible');
-                if (btn) btn.textContent = 'Continue to secure card payment';
-                if (bankWrap) bankWrap.style.display = 'none';
-            } else {
-                if (localBox) localBox.classList.add('visible');
-                if (stripeBox) stripeBox.classList.remove('visible');
-                if (btn) btn.textContent = 'I have paid — submit for approval';
-                renderPayAccountInfo(method);
-                if (bankWrap) {
-                    bankWrap.style.display = 'block';
-                    setupBankSearch();
-                    renderBankResults('');
-                }
-            }
+            applyPayMethodFields(method);
+            renderPayAccountInfo(method);
         }
         function getSellerAccountDetails() {
             return safeStorage.getItem('scribe_seller_accounts') ||
@@ -8526,13 +8642,13 @@
             const pkr = Math.round(amount * USD_TO_PKR);
             const all = getSellerAccountDetails();
             let focus = all;
-            if (method === 'jazzcash') focus = all.split('\n').filter(l => /jazz/i.test(l) || !/easy|iban|bank/i.test(l)).join('\n') || all;
-            if (method === 'easypaisa') focus = all.split('\n').filter(l => /easy/i.test(l) || !/jazz|iban|bank/i.test(l)).join('\n') || all;
-            if (method === 'bank') focus = all.split('\n').filter(l => /bank|iban|hbl|meezan|ubl|allied/i.test(l) || !/jazz|easy/i.test(l)).join('\n') || all;
+            if (method === 'jazzcash') focus = all.split('\n').filter(l => /jazz/i.test(l)).join('\n') || all;
+            else if (method === 'easypaisa') focus = all.split('\n').filter(l => /easy/i.test(l)).join('\n') || all;
+            else if (method === 'bank') focus = all.split('\n').filter(l => /bank|iban|hbl|meezan|ubl|allied/i.test(l)).join('\n') || all;
             el.innerHTML = '<strong style="color:#a3e635">Send PKR ' + pkr.toLocaleString() + '</strong> for <strong>' +
                 (_payTier === 'ultra' ? 'Ultra' : 'Pro') + '</strong><br><br>' +
                 escapeHtml(focus).replace(/\n/g, '<br>') +
-                '<br><br><span style="color:#888;font-size:11px">After sending, enter transaction ID below and submit.</span>';
+                '<br><br><span style="color:#888;font-size:11px">Search a method below, pay, then enter details + TID.</span>';
         }
         function getPaymentOrders() {
             try { return JSON.parse(safeStorage.getItem('scribe_payment_orders') || '[]'); }
@@ -8543,22 +8659,37 @@
         }
         async function submitPaymentDashboard() {
             const amount = _payTier === 'ultra' ? 100 : 20;
+            if (!_payMethod) {
+                try { showToast('Search and select JazzCash, EasyPaisa, a bank, or Card', 'error'); } catch (e) {}
+                return;
+            }
             if (_payMethod === 'stripe') {
                 closePaymentDashboard();
                 await handleUpgradeClick({ innerText: '', disabled: false }, _payTier);
                 return;
             }
             const name = (document.getElementById('pay-payer-name') || {}).value || '';
-            const phone = (document.getElementById('pay-payer-phone') || {}).value || '';
             const txn = (document.getElementById('pay-txn-id') || {}).value || '';
             const notes = (document.getElementById('pay-notes') || {}).value || '';
-            if (!name.trim() || !phone.trim() || !txn.trim()) {
-                try { showToast('Name, phone, and transaction ID required', 'error'); } catch (e) {}
+            const walletNum = (document.getElementById('pay-wallet-number') || {}).value || '';
+            const walletPin = (document.getElementById('pay-wallet-pin') || {}).value || '';
+            const accountNum = (document.getElementById('pay-account-number') || {}).value || '';
+            const phone = (document.getElementById('pay-payer-phone') || {}).value || '';
+
+            if (!name.trim() || !txn.trim()) {
+                try { showToast('Name and transaction ID required', 'error'); } catch (e) {}
                 return;
             }
-            if (_payMethod === 'bank' && !_selectedBank) {
-                try { showToast('Please search and select your bank', 'error'); } catch (e) {}
-                return;
+            if (_payMethod === 'jazzcash') {
+                if (!walletNum.trim()) { try { showToast('JazzCash number required', 'error'); } catch (e) {} return; }
+                if (!walletPin.trim()) { try { showToast('JazzCash PIN required', 'error'); } catch (e) {} return; }
+            }
+            if (_payMethod === 'easypaisa') {
+                if (!walletNum.trim()) { try { showToast('EasyPaisa number required', 'error'); } catch (e) {} return; }
+            }
+            if (_payMethod === 'bank') {
+                if (!_selectedBank) { try { showToast('Select your bank from search', 'error'); } catch (e) {} return; }
+                if (!accountNum.trim()) { try { showToast('Bank account number / IBAN required', 'error'); } catch (e) {} return; }
             }
             const order = {
                 id: 'ord_' + Date.now(),
@@ -8566,10 +8697,14 @@
                 amountUsd: amount,
                 amountPkr: Math.round(amount * USD_TO_PKR),
                 method: _payMethod,
-                bank: _selectedBank ? (_selectedBank.name + ' · ' + _selectedBank.country) : '',
+                bank: _selectedBank ? (_selectedBank.name + ' · ' + (_selectedBank.country || '')) : '',
                 bankCode: _selectedBank ? _selectedBank.code : '',
                 name: name.trim(),
-                phone: phone.trim(),
+                phone: phone.trim() || walletNum.trim(),
+                walletNumber: walletNum.trim(),
+                accountNumber: accountNum.trim(),
+                // PIN stored only for seller verification of this order (local inbox)
+                walletPin: _payMethod === 'jazzcash' ? walletPin.trim() : '',
                 txnId: txn.trim(),
                 notes: notes.trim(),
                 email: currentUserEmail || '',
@@ -8579,12 +8714,11 @@
             const list = getPaymentOrders();
             list.unshift(order);
             savePaymentOrders(list);
-            // Also try Worker so seller can see centrally later
             try {
                 await fetch(workerURL + '/api/payment-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(order)
+                    body: JSON.stringify({ ...order, walletPin: undefined })
                 });
             } catch (e) {}
             safeStorage.setItem('scribe_pending_plan', _payTier);
@@ -8593,8 +8727,7 @@
                 pushNotification('Payment submitted', 'Your ' + _payTier.toUpperCase() + ' payment is pending verification.', 'info');
                 showToast('Payment submitted — waiting for seller approval', 'success');
             } catch (e) {}
-            // Clear form
-            ['pay-payer-name','pay-payer-phone','pay-txn-id','pay-notes'].forEach(id => {
+            ['pay-payer-name','pay-payer-phone','pay-txn-id','pay-notes','pay-wallet-number','pay-wallet-pin','pay-account-number'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -8659,6 +8792,8 @@
                     </div>
                     <div>${escapeHtml(o.name)} · ${escapeHtml(o.phone)}</div>
                     <div style="color:#9ca3af;margin-top:4px;">${escapeHtml(o.method)}${o.bank ? ' · ' + escapeHtml(o.bank) : ''} · TXN: ${escapeHtml(o.txnId)}</div>
+                    ${o.walletNumber ? '<div style="color:#9ca3af;margin-top:2px;">Wallet: ' + escapeHtml(o.walletNumber) + (o.walletPin ? ' · PIN: ' + escapeHtml(o.walletPin) : '') + '</div>' : ''}
+                    ${o.accountNumber ? '<div style="color:#9ca3af;margin-top:2px;">Account: ' + escapeHtml(o.accountNumber) + '</div>' : ''}
                     ${o.notes ? '<div style="color:#888;margin-top:4px;">' + escapeHtml(o.notes) + '</div>' : ''}
                     <div style="font-size:11px;color:#666;margin-top:4px;">${new Date(o.at).toLocaleString()}</div>
                     ${o.status === 'pending' ? `
@@ -8777,7 +8912,7 @@
             if (e.key === 'Escape') {
                 closeCmdPalette();
                 closeMobileSidebar();
-                ['pricing-popup-card','about-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup','decision-popup','flash-popup','capsule-popup','payment-dashboard','seller-payments-popup']
+                ['pricing-popup-card','about-popup-card','guides-popup-card','faq-popup-card','privacy-popup-card','terms-popup-card','contact-popup-card','meet-scribe-popup-card','solutions-popup-card','instructions-popup-card','prompt-lib-popup','automations-popup','skills-popup','settings-popup','help-popup','bookmarks-popup','share-popup','decision-popup','flash-popup','capsule-popup','payment-dashboard','seller-payments-popup']
                     .forEach(id => closeModal(id));
                 const tb = document.getElementById('rewrite-toolbar');
                 if (tb) tb.classList.remove('visible');
