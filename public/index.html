@@ -3742,6 +3742,56 @@
             .pay-grok-amount { font-size: 28px; }
         }
 
+
+        .code-card {
+            border: 1px solid #e5e5e5;
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 12px 0;
+            cursor: pointer;
+            background: #0d1117;
+            box-shadow: 0 4px 16px rgba(0,0,0,.08);
+            transition: transform .12s, box-shadow .12s;
+        }
+        .code-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+        }
+        .code-card-preview {
+            padding: 14px 16px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 11.5px;
+            line-height: 1.45;
+            color: #c9d1d9;
+            white-space: pre;
+            overflow: hidden;
+            max-height: 180px;
+            mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+        }
+        .code-card-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 14px;
+            background: #161b22;
+            border-top: 1px solid #30363d;
+            font-size: 12px;
+            color: #8b949e;
+        }
+        .code-card-meta .cc-lang {
+            color: #58a6ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+        .code-card-meta .cc-open {
+            margin-left: auto;
+            color: #58a6ff;
+            font-weight: 600;
+        }
+        body.theme-dark .code-card { border-color: #30363d; }
+
     </style>
 </head>
 <body>
@@ -6000,9 +6050,9 @@
 
                     const lineCount = part.value.split('\n').length;
                     // Grok-style: long code → compact card (click opens full panel)
-                    const LONG = lineCount >= 80 || part.value.length >= 4000;
+                    const LONG = lineCount >= 8 || part.value.length >= 280; // image-like card for most code blocks
                     if (LONG) {
-                        const previewLines = part.value.split('\n').slice(0, 18).join('\n');
+                        const previewLines = part.value.split('\n').slice(0, 14).join('\n');
                         html += `<div class="code-card" role="button" tabindex="0"
                             onclick="openStoredCode('${id}')"
                             onkeydown="if(event.key==='Enter')openStoredCode('${id}')"
@@ -6434,47 +6484,81 @@
             } catch (e) { return { about: '', style: '' }; }
         }
 
-        function buildSystemContext() {
+
+        function normalizePastedCode(text) {
+            if (!text || text.indexOf('```') >= 0) return text;
+            const lines = text.split('\n');
+            // Heuristic: many lines that look like code
+            const codey = lines.filter(l =>
+                /^\s*(function|const|let|var|class|import|export|def |public |private |#include|<\w+|{\s*$|}\s*$|<\/\w+)/.test(l) ||
+                /;\s*$/.test(l) ||
+                /^\s*\/\//.test(l)
+            ).length;
+            if (lines.length >= 6 && codey >= Math.max(3, lines.length * 0.35)) {
+                let lang = 'javascript';
+                if (/<\w+[^>]*>/.test(text) && /<\/\w+>/.test(text)) lang = 'html';
+                else if (/\bdef |import |print\(/.test(text)) lang = 'python';
+                else if (/\{\s*[^}]*:\s*[^}]+\}/.test(text) && /color:|display:|margin:/.test(text)) lang = 'css';
+                return 'Here is my code — please read it carefully. If I ask for changes, return the full updated code.\n\n```' + lang + '\n' + text.trim() + '\n```';
+            }
+            return text;
+        }
+
+        function detectUserLanguage(sample) {
+            const s = (sample || '').slice(0, 800);
+            // Urdu script
+            if (/[\u0600-\u06FF]/.test(s)) return 'urdu-script';
+            // Roman Urdu common markers
+            const roman = (s.match(/\b(hai|hain|kya|nahi|nahin|krdo|karo|mujhe|mujy|yar|please|acha|theek|kesay|kaise|kyun|mein|tum|aap)\b/gi) || []).length;
+            if (roman >= 2) return 'roman-urdu';
+            return 'english';
+        }
+
+        function buildSystemContext(userSample) {
             const instr = getCustomInstructions();
             const tone = (document.getElementById('tone-select') || {}).value || 'default';
             const skill = safeStorage.getItem('scribe_active_skill') || '';
             const mode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
             const parts = [];
+            const lang = detectUserLanguage(userSample || '');
 
-            // NEW CHAT / normal mode — friendly general assistant (NOT coding pitch)
-            if (mode !== 'code') {
-                parts.push(
-                    'You are Scribe AI, a helpful friendly assistant for everyday questions, writing, brainstorming, and general chat. ' +
-                    'Reply naturally and briefly unless the user asks for depth. ' +
-                    'Do NOT introduce yourself as a coding partner or list programming topics unless the user asks about code. ' +
-                    'For a simple greeting (hi/hello/hlo), reply with a short warm greeting and ask how you can help — one or two sentences max. ' +
-                    'Format clearly when useful: short paragraphs, bullets, **bold** for key terms, ==highlight== for critical phrases.'
-                );
+            // Always match user language
+            if (lang === 'urdu-script') {
+                parts.push('LANGUAGE: The user is writing in Urdu (Arabic script). Reply fully in clear Urdu script unless they ask for English code identifiers.');
+            } else if (lang === 'roman-urdu') {
+                parts.push('LANGUAGE: The user is writing in Roman Urdu (Urdu in Latin letters). Reply in natural Roman Urdu mixed with English only for code/technical terms. Do not switch to pure English.');
             } else {
-                // CODE mode only
-                parts.push(
-                    'You are Scribe AI in CODE mode — an elite programming partner. ' +
-                    '(1) Prefer complete, runnable solutions. ' +
-                    '(2) Put code in fenced markdown blocks with language tags. ' +
-                    '(3) Brief explanation, then code, then short notes. ' +
-                    '(4) Mention edge cases, complexity, security when relevant. ' +
-                    '(5) Never invent APIs — if unsure, say so. ' +
-                    'Format: ## headings, bullets; **bold** key terms; ==highlight== critical phrases.'
-                );
-                if (skill === 'debug') {
-                    parts.push('Active skill: DEBUGGER. Find root cause, minimal fix, and a test case.');
-                } else if (skill === 'architect') {
-                    parts.push('Active skill: ARCHITECT. Propose clean structure, files, interfaces, tradeoffs before code.');
-                } else if (skill === 'review') {
-                    parts.push('Active skill: CODE REVIEW. List issues (bugs/security/style), then patches.');
-                } else if (skill === 'leetcode') {
-                    parts.push('Active skill: ALGORITHMS. Approach, complexity O(...), then optimal code.');
-                } else if (skill === 'frontend') {
-                    parts.push('Active skill: FRONTEND. Accessible responsive HTML/CSS/JS; full demos when useful.');
-                } else if (skill === 'backend') {
-                    parts.push('Active skill: BACKEND. Validation, errors, auth, data models.');
-                }
+                parts.push('LANGUAGE: Reply in the same language the user is using. If they mix languages, mirror their mix.');
             }
+
+            const codingHint = /\b(code|function|bug|error|html|css|js|javascript|python|react|api|debug|script|class|const|let|var|```)\b/i.test(userSample || '')
+                || mode === 'code';
+
+            if (mode === 'code' || codingHint) {
+                parts.push(
+                    'You are Scribe AI — an expert software engineer. Coding rules (strict):\n' +
+                    '1) Always return COMPLETE, runnable code — never truncated with "// ..." unless the omitted part is truly identical and you say so.\n' +
+                    '2) Put every code file in a markdown fenced block with the correct language tag (```html, ```javascript, ```python, etc).\n' +
+                    '3) When the user pastes code and asks to change something: APPLY the changes and return the FULL updated code, not only a snippet of the diff, unless they explicitly ask for a diff only.\n' +
+                    '4) Smooth, clean, modern code — no half answers, no fake APIs, no placeholder nonsense like foo/bar unless demo-only and labeled.\n' +
+                    '5) Short explanation first (2–5 lines), then code blocks, then optional notes.\n' +
+                    '6) If they ask "is code me ye changing karo" / edit / fix / add feature — treat the last code in the conversation (or the code they pasted) as the source and modify it carefully.\n' +
+                    '7) For HTML/CSS/JS prefer a single working example when reasonable.\n' +
+                    '8) If an image is attached, READ it (UI screenshot, error text, diagram) and answer from what you see.'
+                );
+                if (skill === 'debug') parts.push('Active skill: DEBUGGER. Root cause, minimal fix, test case.');
+                else if (skill === 'architect') parts.push('Active skill: ARCHITECT. Structure, files, tradeoffs, then code.');
+                else if (skill === 'review') parts.push('Active skill: CODE REVIEW. Issues then patches.');
+                else if (skill === 'leetcode') parts.push('Active skill: ALGORITHMS. Approach, complexity, optimal code.');
+                else if (skill === 'frontend') parts.push('Active skill: FRONTEND. Accessible responsive UI; full demos.');
+                else if (skill === 'backend') parts.push('Active skill: BACKEND. Validation, errors, auth, models.');
+            } else {
+                parts.push(
+                    'You are Scribe AI, a helpful assistant for everyday questions, writing, and brainstorming. ' +
+                    'Reply naturally. For greetings, keep it short. Use clear formatting when useful.'
+                );
+            }
+
             if (instr.about) parts.push('User context: ' + instr.about);
             if (instr.style) parts.push('Response style: ' + instr.style);
             if (tone && tone !== 'default') {
@@ -6487,39 +6571,25 @@
                 };
                 if (toneMap[tone]) parts.push(toneMap[tone]);
             }
-                        if (instr.about) parts.push('User context: ' + instr.about);
-            if (instr.style) parts.push('Response style: ' + instr.style);
-            if (tone && tone !== 'default') {
-                const toneMap = {
-                    formal: 'Write in a formal, professional tone.',
-                    casual: 'Write in a casual, friendly tone.',
-                    persuasive: 'Write in a persuasive, compelling tone.',
-                    simple: 'Use simple words and short sentences.',
-                    urdu: 'Prefer Urdu (Roman or Nastaliq) when natural; mix if needed.'
-                };
-                if (toneMap[tone]) parts.push(toneMap[tone]);
-            }
-            // Future-unique modes
             if (window._honestMode) {
-                parts.push(
-                    'HONEST MODE is ON (anti-sycophancy). Do not flatter the user. Challenge weak assumptions. ' +
-                    'If the user is wrong or the idea is risky, say so clearly. Prefer truth over agreeableness. ' +
-                    'End with a short "Pushback" bullet if you disagreed with anything.'
-                );
+                parts.push('HONEST MODE ON: Challenge weak assumptions; prefer truth over flattery.');
             }
             if (window._debateMode) {
-                parts.push(
-                    'DEBATE MODE is ON. Structure the answer as: ## Side A (strongest case) then ## Side B (strongest opposing case) ' +
-                    'then ## Referee verdict (which side is stronger and why). Do not collapse into one-sided advice.'
-                );
+                parts.push('DEBATE MODE ON: ## Side A, ## Side B, ## Referee verdict.');
             }
             const contract = (document.getElementById('output-contract') || {}).value || '';
             if (contract.trim()) {
-                parts.push(
-                    'OUTPUT CONTRACT (must follow exactly): The user requires this structure/sections in your answer: ' +
-                    contract.trim() + '. Do not skip required sections.'
-                );
+                parts.push('OUTPUT CONTRACT (must follow): ' + contract.trim());
             }
+            // Last artifact code for edit continuity
+            try {
+                if (window._lastArtifactCode && window._lastArtifactCode.length > 20) {
+                    parts.push(
+                        'CURRENT CODE IN EDITOR / LAST ARTIFACT (use this when user asks to change/fix/update the code):\n```\n' +
+                        window._lastArtifactCode.slice(0, 12000) + '\n```'
+                    );
+                }
+            } catch (e) {}
             return parts.join('\n');
         }
 
@@ -6615,14 +6685,16 @@
             activeAbort = new AbortController();
             setGeneratingUI(true);
 
-            const systemCtx = buildSystemContext();
+            // If user pasted raw code without fences, wrap it so model + UI treat it as code
+            promptPayload = normalizePastedCode(promptPayload);
+            const systemCtx = buildSystemContext(promptPayload);
             const memoryBlock = buildConversationMemory(promptPayload);
             let question = '';
             if (systemCtx) question += systemCtx + '\n\n';
             if (memoryBlock) question += memoryBlock + '\n\n';
             question += 'User: ' + promptPayload;
             if (imagesForApi.length) {
-                question += '\n\n[User attached ' + imagesForApi.length + ' image(s). Analyze the image content and answer based on what you see. Image data is included in the request.]';
+                question += '\n\n[VISION] User attached ' + imagesForApi.length + ' image(s). You MUST look at the image(s): read any text, describe UI/layout, errors, or diagrams, and answer based on what is visible. Do not say you cannot see images.';
             }
 
             try {
@@ -6684,6 +6756,16 @@
                     targetOutputBox.dataset.speak = aiResponseText;
                     targetOutputBox.dataset.userPrompt = promptPayload;
                     targetOutputBox.innerHTML = buildAiMessageHtml(aiResponseText, targetId, promptPayload);
+                    try {
+                        const blocks = aiResponseText.match(/```[\w]*\n([\s\S]*?)```/g);
+                        if (blocks && blocks.length) {
+                            const last = blocks[blocks.length - 1].replace(/^```[\w]*\n/, '').replace(/```$/, '');
+                            if (last && last.length > 20) window._lastArtifactCode = last;
+                        }
+                        if (window._pendingArtifact && window._pendingArtifact.code) {
+                            window._lastArtifactCode = window._pendingArtifact.code;
+                        }
+                    } catch (e) {}
                     if (window._pendingArtifact && window._pendingArtifact.code) {
                         const s = getSettings();
                         if (s.autoArtifact !== false) {
