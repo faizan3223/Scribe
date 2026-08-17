@@ -3792,6 +3792,27 @@
         }
         body.theme-dark .code-card { border-color: #30363d; }
 
+
+        .user-msg-bubble {
+            background-color: #f0f0ee;
+            border: 1px solid #e5e5e5;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: min(80%, 560px);
+            line-height: 1.6;
+            color: #111;
+        }
+        body.theme-dark .user-msg-bubble {
+            background: #2a2a30;
+            border-color: #3a3a42;
+            color: #eee;
+        }
+        .user-msg-bubble .code-card {
+            margin-top: 8px;
+            max-width: 100%;
+        }
+        .user-msg-text { word-break: break-word; }
+
     </style>
 </head>
 <body>
@@ -5334,14 +5355,19 @@
         function startNewChat() {
             currentChatId = null;
             currentChatMessages = [];
+            // Never carry code/artifact memory into a brand-new chat
+            try {
+                window._lastArtifactCode = '';
+                window._pendingArtifact = null;
+            } catch (e) {}
+            // New Chat button always means general chat (not previous code mode)
             if (scribeWorkspaceMode === 'imagine') {
                 /* keep imagine if launched from Imagine */
-            } else if (scribeWorkspaceMode !== 'code') {
+            } else {
                 scribeWorkspaceMode = 'chat';
             }
             const ib = document.getElementById('imagine-style-bar');
             if (ib && scribeWorkspaceMode !== 'imagine') ib.classList.remove('visible');
-            // Leaving new chat does not force exit from incognito; user can toggle off
             resetDashboardView(isIncognito);
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if (isIncognito) {
@@ -5400,7 +5426,7 @@
 
             // Incognito: keep messages in memory only — never write to storage
             if (isIncognito) return;
-            try { updateLongTermMemory(userText, aiText); } catch (e) {}
+            /* cross-chat long memory disabled — only current chat context is used */
 
             let chats = getChatHistory();
             if (!currentChatId) {
@@ -6017,6 +6043,16 @@
             return s;
         }
 
+
+        function formatUserMessageHtml(text) {
+            if (!text) return '';
+            // If contains fenced code or looks like big code paste → use code cards
+            if (/```/.test(text) || (text.split('\n').length >= 8 && /[;{}<>]|function |const |def /.test(text))) {
+                return '<div class="user-msg-text">' + formatMessageHtml(text) + '</div>';
+            }
+            return '<div class="user-msg-text">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div>';
+        }
+
         function formatMessageHtml(raw) {
             if (!raw) return '';
             const text = String(raw).replace(/\r\n/g, '\n');
@@ -6514,82 +6550,106 @@
             return 'english';
         }
 
-        function buildSystemContext(userSample) {
+        function buildSystemContext(userSample, opts) {
+            opts = opts || {};
+            const hasImage = !!opts.hasImage;
             const instr = getCustomInstructions();
             const tone = (document.getElementById('tone-select') || {}).value || 'default';
             const skill = safeStorage.getItem('scribe_active_skill') || '';
-            const mode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
+            let mode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
+            // Image questions never run as pure code-mode
+            if (hasImage && !/\b(code|html|css|javascript|write code|banao|bana do)\b/i.test(userSample || '')) {
+                mode = 'chat';
+            }
             const parts = [];
-            const lang = detectUserLanguage(userSample || '');
+            const sample = userSample || '';
+            const lang = detectUserLanguage(sample);
 
-            // Always match user language
             if (lang === 'urdu-script') {
-                parts.push('LANGUAGE: The user is writing in Urdu (Arabic script). Reply fully in clear Urdu script unless they ask for English code identifiers.');
+                parts.push('LANGUAGE: Reply in clear Urdu script unless the user asks for English.');
             } else if (lang === 'roman-urdu') {
-                parts.push('LANGUAGE: The user is writing in Roman Urdu (Urdu in Latin letters). Reply in natural Roman Urdu mixed with English only for code/technical terms. Do not switch to pure English.');
+                parts.push('LANGUAGE: Reply in natural Roman Urdu. Use English only for technical terms or code. Do not answer only in English.');
             } else {
-                parts.push('LANGUAGE: Reply in the same language the user is using. If they mix languages, mirror their mix.');
+                parts.push('LANGUAGE: Reply in the same language the user is using.');
             }
 
-            const codingHint = /\b(code|function|bug|error|html|css|js|javascript|python|react|api|debug|script|class|const|let|var|```)\b/i.test(userSample || '')
-                || mode === 'code';
+            const asksAboutImage = hasImage;
+            const explicitlyWantsCode = /\b(code|html|css|javascript|python|write code|bana do|banao|implement|is code)\b/i.test(sample) &&
+                !/\b(image|screenshot|photo|pic|ye error|koi error)\b/i.test(sample);
 
-            if (mode === 'code' || codingHint) {
+            const forceNoCode = hasImage && !explicitlyWantsCode;
+            if (forceNoCode) {
                 parts.push(
-                    'You are Scribe AI — an expert software engineer. Coding rules (strict):\n' +
-                    '1) Always return COMPLETE, runnable code — never truncated with "// ..." unless the omitted part is truly identical and you say so.\n' +
-                    '2) Put every code file in a markdown fenced block with the correct language tag (```html, ```javascript, ```python, etc).\n' +
-                    '3) When the user pastes code and asks to change something: APPLY the changes and return the FULL updated code, not only a snippet of the diff, unless they explicitly ask for a diff only.\n' +
-                    '4) Smooth, clean, modern code — no half answers, no fake APIs, no placeholder nonsense like foo/bar unless demo-only and labeled.\n' +
-                    '5) Short explanation first (2–5 lines), then code blocks, then optional notes.\n' +
-                    '6) If they ask "is code me ye changing karo" / edit / fix / add feature — treat the last code in the conversation (or the code they pasted) as the source and modify it carefully.\n' +
-                    '7) For HTML/CSS/JS prefer a single working example when reasonable.\n' +
-                    '8) If an image is attached, READ it (UI screenshot, error text, diagram) and answer from what you see.'
+                    'VISION ONLY — CRITICAL RULES:\n' +
+                    '1) Look at the attached image. Describe only what is visible.\n' +
+                    '2) Read text on the image (buttons, prices, errors, labels).\n' +
+                    '3) Answer the user question in a few sentences.\n' +
+                    '4) NEVER invent a different UI.\n' +
+                    '5) FORBIDDEN: no HTML, CSS, JavaScript, no markdown code fences.\n' +
+                    '6) Code mode is OFF for this message.'
                 );
-                if (skill === 'debug') parts.push('Active skill: DEBUGGER. Root cause, minimal fix, test case.');
-                else if (skill === 'architect') parts.push('Active skill: ARCHITECT. Structure, files, tradeoffs, then code.');
-                else if (skill === 'review') parts.push('Active skill: CODE REVIEW. Issues then patches.');
-                else if (skill === 'leetcode') parts.push('Active skill: ALGORITHMS. Approach, complexity, optimal code.');
-                else if (skill === 'frontend') parts.push('Active skill: FRONTEND. Accessible responsive UI; full demos.');
-                else if (skill === 'backend') parts.push('Active skill: BACKEND. Validation, errors, auth, models.');
+            } else if (hasImage && explicitlyWantsCode) {
+                parts.push('VISION + CODE: Look at the image first, then write code only as requested.');
             } else {
-                parts.push(
-                    'You are Scribe AI, a helpful assistant for everyday questions, writing, and brainstorming. ' +
-                    'Reply naturally. For greetings, keep it short. Use clear formatting when useful.'
-                );
+                // Strong code intent only — avoid triggering on the word "error" alone
+                const codingHint =
+                    /```/.test(sample) ||
+                    /\b(function\s*\(|const\s+\w+\s*=|let\s+\w+\s*=|#include|def\s+\w+|public\s+class)\b/.test(sample) ||
+                    /\b(write code|fix (this )?code|debug (this )?code|html page|react component|in this code|is code me|code me changing|refactor)\b/i.test(sample) ||
+                    (mode === 'code' && !hasImage && /\b(code|bug|function|api|html|css|js|python|implement|build)\b/i.test(sample));
+
+                if (mode === 'code' && !hasImage) {
+                    parts.push(
+                        'You are Scribe AI in CODE mode — expert engineer.\n' +
+                        '1) Complete runnable code in fenced blocks with language tags.\n' +
+                        '2) If user pastes code and asks to change it: return the FULL updated code.\n' +
+                        '3) Short explanation, then code, then optional notes.\n' +
+                        '4) No fake APIs; no truncated "// rest of code" unless stated.\n' +
+                        '5) If the message is NOT about programming (general chat), answer normally without forcing code.'
+                    );
+                    if (skill === 'debug') parts.push('Active skill: DEBUGGER.');
+                    else if (skill === 'architect') parts.push('Active skill: ARCHITECT.');
+                    else if (skill === 'review') parts.push('Active skill: CODE REVIEW.');
+                    else if (skill === 'leetcode') parts.push('Active skill: ALGORITHMS.');
+                    else if (skill === 'frontend') parts.push('Active skill: FRONTEND.');
+                    else if (skill === 'backend') parts.push('Active skill: BACKEND.');
+                } else if (codingHint) {
+                    parts.push(
+                        'User is asking about code. Give complete, correct solutions in fenced blocks. ' +
+                        'If they want changes to pasted code, return the full updated version.'
+                    );
+                } else {
+                    parts.push(
+                        'You are Scribe AI, a helpful assistant. Answer the actual question directly. ' +
+                        'Do not write code unless asked. Do not invent unrelated examples.'
+                    );
+                }
             }
 
             if (instr.about) parts.push('User context: ' + instr.about);
             if (instr.style) parts.push('Response style: ' + instr.style);
             if (tone && tone !== 'default') {
                 const toneMap = {
-                    formal: 'Write in a formal, professional tone.',
-                    casual: 'Write in a casual, friendly tone.',
-                    persuasive: 'Write in a persuasive, compelling tone.',
-                    simple: 'Use simple words and short sentences.',
-                    urdu: 'Prefer Urdu (Roman or Nastaliq) when natural; mix if needed.'
+                    formal: 'Formal professional tone.',
+                    casual: 'Casual friendly tone.',
+                    persuasive: 'Persuasive tone.',
+                    simple: 'Simple short sentences.',
+                    urdu: 'Prefer Urdu when natural.'
                 };
                 if (toneMap[tone]) parts.push(toneMap[tone]);
             }
-            if (window._honestMode) {
-                parts.push('HONEST MODE ON: Challenge weak assumptions; prefer truth over flattery.');
-            }
-            if (window._debateMode) {
-                parts.push('DEBATE MODE ON: ## Side A, ## Side B, ## Referee verdict.');
-            }
+            if (window._honestMode) parts.push('HONEST MODE: Prefer truth over flattery.');
+            if (window._debateMode) parts.push('DEBATE MODE: Side A, Side B, Referee verdict.');
             const contract = (document.getElementById('output-contract') || {}).value || '';
-            if (contract.trim()) {
-                parts.push('OUTPUT CONTRACT (must follow): ' + contract.trim());
+            if (contract.trim() && !hasImage) parts.push('OUTPUT CONTRACT: ' + contract.trim());
+
+            if (!hasImage && window._lastArtifactCode && window._lastArtifactCode.length > 20 &&
+                /\b(change|fix|update|add|edit|is code|changing|bug|error in code)\b/i.test(sample)) {
+                parts.push(
+                    'LAST CODE TO EDIT (return full updated file when changing):\n```\n' +
+                    window._lastArtifactCode.slice(0, 12000) + '\n```'
+                );
             }
-            // Last artifact code for edit continuity
-            try {
-                if (window._lastArtifactCode && window._lastArtifactCode.length > 20) {
-                    parts.push(
-                        'CURRENT CODE IN EDITOR / LAST ARTIFACT (use this when user asks to change/fix/update the code):\n```\n' +
-                        window._lastArtifactCode.slice(0, 12000) + '\n```'
-                    );
-                }
-            } catch (e) {}
             return parts.join('\n');
         }
 
@@ -6622,7 +6682,7 @@
                     data: a.dataUrl || a.url
                 }));
             if (!promptPayload && imagesForApi.length) {
-                promptPayload = 'Describe this image in detail. What do you see? Answer clearly.';
+                promptPayload = 'Is image ko carefully dekho. Jo dikh raha hai woh batao. Koi error ya problem hai to clear batao. Code mat likho jab tak main na mangun.';
             }
             if ((!promptPayload && !imagesForApi.length) || isGenerating) return;
 
@@ -6657,7 +6717,8 @@
                         }).join('') + '</div>';
                 }
 
-                const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div style="background-color: #f0f0ee; border: 1px solid #e5e5e5; padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; color: #111111;">${escapeHtml(promptPayload)}${attachmentsHtml}<div class="msg-time">${formatMsgTime()}</div></div><div class="user-avatar-bubble">${userInitial}</div></div>`;
+                const userBody = formatUserMessageHtml(promptPayload);
+                const userHtml = `<div class="console-stream-row" style="justify-content: flex-end;"><div class="user-msg-bubble">${userBody}${attachmentsHtml}<div class="msg-time">${formatMsgTime()}</div></div><div class="user-avatar-bubble">${userInitial}</div></div>`;
                 chatConsole.insertAdjacentHTML('beforeend', userHtml);
                 wireVoiceOnPlay(chatConsole);
             }
@@ -6687,14 +6748,14 @@
 
             // If user pasted raw code without fences, wrap it so model + UI treat it as code
             promptPayload = normalizePastedCode(promptPayload);
-            const systemCtx = buildSystemContext(promptPayload);
+            const systemCtx = buildSystemContext(promptPayload, { hasImage: imagesForApi.length > 0 });
             const memoryBlock = buildConversationMemory(promptPayload);
             let question = '';
             if (systemCtx) question += systemCtx + '\n\n';
             if (memoryBlock) question += memoryBlock + '\n\n';
             question += 'User: ' + promptPayload;
             if (imagesForApi.length) {
-                question += '\n\n[VISION] User attached ' + imagesForApi.length + ' image(s). You MUST look at the image(s): read any text, describe UI/layout, errors, or diagrams, and answer based on what is visible. Do not say you cannot see images.';
+                question += '\n\n[VISION REQUIRED] ' + imagesForApi.length + ' image(s) attached. Describe ONLY what is in the image. Answer the user question in plain text. STRICTLY NO code blocks, NO HTML, NO CSS, NO JavaScript unless the user explicitly asked for code.';
             }
 
             try {
@@ -8245,18 +8306,15 @@
         }
         function buildConversationMemory(currentPrompt) {
             const parts = [];
-            // Long-term across chats
-            const longMem = getLongTermMemory();
-            if (longMem && !isIncognito) {
-                parts.push('Long-term memory (things to remember about this user from past chats):\n' + longMem.slice(-1500));
-            }
-            // Short-term: previous turns in THIS chat
-            const msgs = (currentChatMessages || []).slice(-12); // last 12 messages
+            // ONLY this open chat — never inject other chats' history
+            const msgs = (currentChatMessages || []).slice(-16);
             if (msgs.length) {
-                parts.push('Previous messages in this conversation (use for continuity — answer with full context, do not pretend you forgot):');
+                parts.push('This conversation only (ignore any other chats):');
                 msgs.forEach(m => {
                     const role = m.role === 'user' ? 'User' : 'Assistant';
-                    const t = (m.text || '').replace(/\s+/g, ' ').slice(0, 900);
+                    // Strip huge code from memory to avoid forcing code style next turn
+                    let t = (m.text || '').replace(/\s+/g, ' ');
+                    if (t.length > 600) t = t.slice(0, 600) + '…';
                     if (t) parts.push(role + ': ' + t);
                 });
             }
