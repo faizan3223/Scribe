@@ -277,4 +277,4 @@ function streamResponse(stream, ctx, corsHeaders) {
     },
   });
 }
-'''
+
