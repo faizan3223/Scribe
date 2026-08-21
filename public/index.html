@@ -7864,29 +7864,24 @@
 
         // ========== STEP 2: Cloud chat sync (Worker KV) ==========
         async function cloudSyncChats() {
-            const email = currentUserEmail;
-            if (!email) {
-                try { showToast('Sign in to sync chats to cloud', 'info'); } catch (e) {}
-                return;
-            }
-            const chats = getChatHistory();
+            // Optional feature — failures must never break chat
             try {
+                const email = (currentUserEmail || '').trim();
+                if (!email || isIncognito) return;
+                const chats = getChatHistory().slice(0, 80);
                 const r = await fetch(workerURL + '/api/sync-chats', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, chats, action: 'push' })
+                    body: JSON.stringify({ email, action: 'push', chats })
                 });
-                const d = await r.json().catch(() => ({}));
-                if (d.success) {
-                    try { showToast('Chats synced to cloud', 'success'); } catch (e) {}
-                } else {
-                    // local fallback marker
-                    safeStorage.setItem('scribe_cloud_backup', JSON.stringify({ email, chats, at: Date.now() }));
-                    try { showToast('Saved local cloud-backup (Worker sync pending)', 'info'); } catch (e) {}
+                if (!r.ok) return;
+                const data = await r.json().catch(() => ({}));
+                if (data && data.success) {
+                    try { showToast('Chats synced', 'success'); } catch (e) {}
                 }
+                // if optional:true / success:false — silent (KV not bound)
             } catch (e) {
-                safeStorage.setItem('scribe_cloud_backup', JSON.stringify({ email, chats, at: Date.now() }));
-                try { showToast('Offline — backup saved on device', 'info'); } catch (e) {}
+                // network / worker error — ignore
             }
         }
         async function cloudPullChats() {
