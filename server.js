@@ -202,19 +202,29 @@ export default {
         return json({ success: true, url: session.url, tier, amount: unitAmount / 100 });
       }
 
-      // Chat sync / share (optional KV)
+      // Chat sync — soft-fail if KV not bound (do not throw)
       if (request.method === 'POST' && url.pathname === '/api/sync-chats') {
-        const body = await request.json();
-        const email = (body.email || '').toLowerCase().trim();
-        if (!email || !env.CHATS_KV) return json({ success: false, error: 'email or KV missing' }, 400);
-        const key = 'chats:' + email;
-        if (body.action === 'pull') {
-          const raw = await env.CHATS_KV.get(key);
-          return json({ success: true, chats: raw ? JSON.parse(raw) : [] });
+        try {
+          const body = await request.json().catch(() => ({}));
+          const email = String(body.email || '').toLowerCase().trim();
+          if (!email) return json({ success: false, error: 'email missing', optional: true }, 200);
+          if (!env.CHATS_KV) {
+            // Not an error for the app — local storage still works
+            return json({ success: false, error: 'cloud sync not configured (bind CHATS_KV)', optional: true }, 200);
+          }
+          const key = 'chats:' + email;
+          if (body.action === 'pull') {
+            const raw = await env.CHATS_KV.get(key);
+            let chats = [];
+            try { chats = raw ? JSON.parse(raw) : []; } catch (e) { chats = []; }
+            return json({ success: true, chats });
+          }
+          const chats = Array.isArray(body.chats) ? body.chats.slice(0, 100) : [];
+          await env.CHATS_KV.put(key, JSON.stringify(chats));
+          return json({ success: true, count: chats.length });
+        } catch (e) {
+          return json({ success: false, error: String(e && e.message || e), optional: true }, 200);
         }
-        const chats = Array.isArray(body.chats) ? body.chats.slice(0, 100) : [];
-        await env.CHATS_KV.put(key, JSON.stringify(chats));
-        return json({ success: true, count: chats.length });
       }
 
       if (url.pathname === '/api/share-chat') {
