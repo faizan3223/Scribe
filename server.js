@@ -27,7 +27,14 @@ export default {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
 
-    const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+    // Do NOT create Groq on every request — only when needed (avoids crash on sync-chats)
+    const getGroq = () => {
+      const key = env.GROQ_API_KEY;
+      if (!key) {
+        throw new Error('GROQ_API_KEY is missing. Add it in Cloudflare Worker → Settings → Variables → Secrets.');
+      }
+      return new Groq({ apiKey: key });
+    };
     const stripe = env.STRIPE_SECRET_KEY ? new Stripe(env.STRIPE_SECRET_KEY) : null;
 
     try {
@@ -41,6 +48,13 @@ export default {
       }
 
       if (request.method === 'POST' && url.pathname === '/api/ask-question') {
+        if (!env.GROQ_API_KEY) {
+          return json({
+            success: false,
+            error: 'GROQ_API_KEY missing on Worker. Cloudflare → Workers → scribe-backend → Settings → Variables → Add Secret GROQ_API_KEY'
+          }, 500);
+        }
+        const groq = getGroq();
         const body = await request.json();
         let { question, images, image, hasImage, webSearch, vision } = body;
         if (!question) return json({ success: false, error: 'Question text is required' }, 400);
