@@ -5573,25 +5573,30 @@
                 try {
                     dataUrl = await fileToDataURL(file);
                 } catch (e) {
-                    dataUrl = URL.createObjectURL(file);
+                    try { showToast('Image read failed — try another file', 'error'); } catch (e2) {}
+                    return;
                 }
-                // compress large images for API (max edge ~1280)
+                if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+                    try { showToast('Image format not supported', 'error'); } catch (e) {}
+                    return;
+                }
+                // Compress for API size limits (Workers body limit)
                 try {
-                    dataUrl = await compressImageDataUrl(dataUrl, 1280, 0.82);
+                    dataUrl = await compressImageDataUrl(dataUrl, 1024, 0.72);
                 } catch (e) {}
                 pendingAttachments.push({
                     name: file.name || 'image.png',
                     isImage: true,
                     url: dataUrl,
                     dataUrl: dataUrl,
-                    mime: file.type || 'image/jpeg'
+                    mime: (dataUrl.split(';')[0] || '').replace('data:', '') || file.type || 'image/jpeg'
                 });
                 renderAttachmentPreviews();
                 if (!promptInput.value.trim()) {
-                    promptInput.value = 'Describe this image in detail and answer questions about what you see.';
+                    promptInput.value = 'Is image ko dekho aur batao kya dikh raha hai. Koi error hai to clear kaho.';
                     promptInput.dispatchEvent(new Event('input'));
                 }
-                try { showToast('Image attached — AI will see it', 'success'); } catch (e) {}
+                try { showToast('Image attached — will be sent to AI', 'success'); } catch (e) {}
                 return;
             }
             const extracted = await extractTextFromFile(file);
@@ -6758,6 +6763,17 @@
                 question += '\n\n[VISION REQUIRED] ' + imagesForApi.length + ' image(s) attached. Describe ONLY what is in the image. Answer the user question in plain text. STRICTLY NO code blocks, NO HTML, NO CSS, NO JavaScript unless the user explicitly asked for code.';
             }
 
+            if (imagesForApi.length) {
+                const okImg = imagesForApi.every(x => x.data && String(x.data).startsWith('data:'));
+                if (!okImg) {
+                    try { showToast('Image data missing — re-attach the image', 'error'); } catch (e) {}
+                    if (avatarNode) avatarNode.classList.remove('thinking');
+                    targetOutputBox.innerHTML = '<p style="color:#c00">Image could not be sent. Please attach again.</p>';
+                    setGeneratingUI(false);
+                    activeAbort = null;
+                    return;
+                }
+            }
             try {
                 const response = await fetch(`${workerURL}/api/ask-question`, {
                     method: 'POST',
@@ -6766,16 +6782,25 @@
                         question,
                         tone: (document.getElementById('tone-select')||{}).value,
                         instructions: getCustomInstructions(),
-                        images: imagesForApi,
+                        images: imagesForApi.map(x => ({ name: x.name, mime: x.mime, data: x.data })),
                         hasImage: imagesForApi.length > 0,
-                        image: imagesForApi[0] ? imagesForApi[0].data : null,
+                        image: (imagesForApi[0] && imagesForApi[0].data) ? imagesForApi[0].data : null,
+                        imageMime: (imagesForApi[0] && imagesForApi[0].mime) || 'image/jpeg',
                         webSearch: !!window._webSearchOn,
-                        mode: (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat'
+                        mode: (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat',
+                        vision: imagesForApi.length > 0
                     }),
                     signal: activeAbort.signal
                 });
 
-                if (!response.ok) throw new Error('Server rejected request');
+                if (!response.ok) {
+                    let errMsg = 'Server rejected request';
+                    try {
+                        const errBody = await response.json();
+                        if (errBody && errBody.error) errMsg = errBody.error;
+                    } catch (e) {}
+                    throw new Error(errMsg);
+                }
 
                 if (avatarNode) avatarNode.classList.remove('thinking');
                 targetOutputBox.textContent = '';
