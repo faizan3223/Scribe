@@ -90,15 +90,8 @@ export default {
 
                 // ===== GEMINI PATH =====
         if (hasGemini) {
+          let geminiLastErr = '';
           try {
-            const model = env.GEMINI_MODEL || 'gemini-2.0-flash';
-            // Non-stream first (most reliable on Workers), then stream to client as SSE
-            const endpoint =
-              'https://generativelanguage.googleapis.com/v1beta/models/' +
-              encodeURIComponent(model) +
-              ':generateContent?key=' +
-              encodeURIComponent(env.GEMINI_API_KEY);
-
             const parts = [{ text: String(question).slice(0, 30000) }];
 
             if (wantVision && imgData && typeof imgData === 'string' && imgData.length > 100) {
@@ -111,7 +104,6 @@ export default {
               } else if (!imgData.startsWith('data:')) {
                 b64 = imgData;
               }
-              // Cap image size ~4MB base64
               if (b64.length > 4_000_000) {
                 return json({ success: false, error: 'Image too large for vision. Use a smaller screenshot.' }, 400);
               }
@@ -128,39 +120,63 @@ export default {
               generationConfig: { temperature: 0.4 },
             };
 
-            const gr = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(gemBody),
-            });
+            const gemModels = [
+              env.GEMINI_MODEL,
+              'gemini-2.0-flash',
+              'gemini-2.0-flash-lite',
+              'gemini-1.5-flash',
+              'gemini-1.5-flash-latest',
+              'gemini-1.5-pro',
+            ].filter(Boolean);
 
-            const raw = await gr.text();
-            if (!gr.ok) {
-              console.error('Gemini error', gr.status, raw.slice(0, 500));
-              if (!hasGroq) {
-                return json({
-                  success: false,
-                  error: 'Gemini error ' + gr.status + ': ' + raw.slice(0, 400),
-                }, 500);
-              }
-              // else fall through to Groq
-            } else {
-              let textOut = '';
+            for (const model of gemModels) {
               try {
-                const obj = JSON.parse(raw);
-                const gparts = obj.candidates?.[0]?.content?.parts || [];
-                textOut = gparts.map((p) => p.text || '').join('');
-              } catch (e) {
-                textOut = '';
-              }
-              if (!textOut) {
-                if (!hasGroq) {
-                  return json({ success: false, error: 'Gemini returned empty text: ' + raw.slice(0, 200) }, 500);
+                const endpoint =
+                  'https://generativelanguage.googleapis.com/v1beta/models/' +
+                  encodeURIComponent(model) +
+                  ':generateContent?key=' +
+                  encodeURIComponent(String(env.GEMINI_API_KEY).trim());
+
+                const gr = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(gemBody),
+                });
+                const raw = await gr.text();
+                if (!gr.ok) {
+                  geminiLastErr = model + ' → ' + gr.status + ' ' + raw.slice(0, 250);
+                  console.error('Gemini error', geminiLastErr);
+                  continue;
                 }
-              } else {
-                return singleTextAsStream(textOut, ctx, corsHeaders);
+                let textOut = '';
+                try {
+                  const obj = JSON.parse(raw);
+                  const gparts = obj.candidates?.[0]?.content?.parts || [];
+                  textOut = gparts.map((p) => p.text || '').join('');
+                  // blocked / safety
+                  if (!textOut && obj.candidates?.[0]?.finishReason) {
+                    geminiLastErr = 'finishReason=' + obj.candidates[0].finishReason + ' ' + raw.slice(0, 200);
+                  }
+                } catch (e) {
+                  geminiLastErr = 'bad JSON: ' + raw.slice(0, 200);
+                }
+                if (textOut) {
+                  return singleTextAsStream(textOut, ctx, corsHeaders);
+                }
+              } catch (e) {
+                geminiLastErr = (e && e.message) || String(e);
               }
             }
+
+            if (!hasGroq) {
+              return json({
+                success: false,
+                error: 'Gemini failed on all models. Last: ' + (geminiLastErr || 'unknown') +
+                  ' — Check GEMINI_API_KEY at https://aistudio.google.com/apikey (enable Generative Language API).',
+              }, 500);
+            }
+            // keep geminiLastErr for final message if Groq also fails
+            env._geminiLastErr = geminiLastErr;
           } catch (e) {
             console.error('Gemini failed', e);
             if (!hasGroq) {
@@ -179,7 +195,7 @@ export default {
           const visionModels = [
             env.GROQ_VISION_MODEL,
             'meta-llama/llama-4-scout-17b-16e-instruct',
-            'llama-3.2-11b-vision-preview',
+            'meta-llama/llama-4-maverick-17b-128e-instruct',
           ].filter(Boolean);
           let lastErr = null;
           for (const model of visionModels) {
@@ -218,10 +234,11 @@ export default {
         const textModels = [
           env.GROQ_MODEL,
           'llama-3.1-8b-instant',
-          'llama-3.1-70b-versatile',
           'llama-3.3-70b-versatile',
+          'meta-llama/llama-4-scout-17b-16e-instruct',
+          'meta-llama/llama-4-maverick-17b-128e-instruct',
+          'qwen/qwen3-32b',
           'gemma2-9b-it',
-          'mixtral-8x7b-32768',
         ].filter(Boolean);
         let lastGroqErr = null;
         for (const model of textModels) {
@@ -240,8 +257,10 @@ export default {
         return json({
           success: false,
           error:
-            'All models failed. Gemini: check GEMINI_API_KEY. Groq: ' +
-            ((lastGroqErr && lastGroqErr.message) || 'unknown'),
+            'All models failed. ' +
+            (env._geminiLastErr ? 'Gemini: ' + env._geminiLastErr + ' | ' : 'Gemini: key missing or all models failed. ') +
+            'Groq: ' + ((lastGroqErr && lastGroqErr.message) || 'unknown') +
+            ' — Set working GEMINI_API_KEY or GROQ_API_KEY. Groq models list: https://console.groq.com/docs/models',
         }, 500);
       }
 
