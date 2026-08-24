@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scribe Console — API Keys</title>
+  <style>
+    :root {
+      --bg: #0a0a0b; --panel: #121214; --border: #27272a;
+      --text: #fafafa; --muted: #a1a1aa; --accent: #22c55e; --accent2: #3b82f6;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    a { color: var(--accent2); text-decoration: none; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 28px 16px 60px; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 12px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+    .logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#22c55e,#3b82f6); display: grid; place-items: center; font-weight: 800; color: #fff; }
+    .badge { font-size: 11px; font-weight: 600; color: #052e16; background: var(--accent); padding: 3px 8px; border-radius: 999px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+    h1 { font-size: 26px; margin: 0 0 8px; letter-spacing: -0.02em; }
+    h2 { font-size: 15px; margin: 0 0 10px; }
+    .lead { color: var(--muted); margin: 0 0 20px; line-height: 1.5; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    input { width: 100%; background: #0a0a0b; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 12px; font: inherit; margin-bottom: 12px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 140px; }
+    button { border: none; cursor: pointer; font: inherit; font-weight: 600; border-radius: 8px; padding: 10px 14px; background: #fff; color: #000; }
+    button.secondary { background: #27272a; color: #fff; }
+    button.danger { background: #450a0a; color: #fecaca; }
+    button.accent { background: var(--accent); color: #052e16; }
+    .hidden { display: none !important; }
+    .key-box { font-family: ui-monospace, monospace; font-size: 13px; background: #09090b; border: 1px dashed #3f3f46; border-radius: 8px; padding: 12px; word-break: break-all; margin: 8px 0 12px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+    .stat { background: #0a0a0b; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .stat b { display: block; font-size: 20px; margin-top: 4px; }
+    .stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+    .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #14532d; color: #bbf7d0; }
+    .pill.off { background: #3f3f46; color: #d4d4d8; }
+    code { font-family: ui-monospace, monospace; font-size: 12px; background: #18181b; padding: 2px 6px; border-radius: 4px; }
+    pre { background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 14px; overflow: auto; font-size: 12px; line-height: 1.45; color: #e4e4e7; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #fff; color: #000; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .2s; z-index: 50; }
+    .toast.show { opacity: 1; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tabs button { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .tabs button.on { background: #fff; color: #000; border-color: #fff; }
+    footer { margin-top: 36px; color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">S</div>
+        <span>Scribe Console</span>
+        <span class="badge">FREE · FAST</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="index.html" class="secondary" style="display:inline-block;padding:10px 14px;background:#27272a;color:#fff;border-radius:8px;font-weight:600;">← Scribe App</a>
+        <button type="button" class="secondary hidden" id="btn-logout">Log out</button>
+      </div>
+    </header>
+
+    <section id="view-auth">
+      <h1>Developer Console</h1>
+      <p class="lead">Create free API keys for Scribe. Free tier: <strong>100 requests / day</strong> per key.</p>
+      <div class="card" style="max-width:420px;">
+        <h2>Sign in with email</h2>
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@email.com" />
+        <label>Display name</label>
+        <input type="text" id="auth-name" placeholder="Your name" />
+        <button type="button" class="accent" id="btn-login" style="width:100%;">Continue</button>
+        <p class="muted" style="margin-top:12px;margin-bottom:0;">MVP login — email is your console identity.</p>
+      </div>
+    </section>
+
+    <section id="view-dash" class="hidden">
+      <h1>API Keys</h1>
+      <p class="lead">Hello, <span id="dash-name">dev</span> · <span id="dash-email" class="muted"></span></p>
+      <div class="tabs">
+        <button type="button" class="on" data-tab="keys">Keys</button>
+        <button type="button" data-tab="quickstart">Quickstart</button>
+        <button type="button" data-tab="usage">Usage</button>
+      </div>
+
+      <div id="tab-keys">
+        <div class="card">
+          <h2>Create new key</h2>
+          <div class="row">
+            <div>
+              <label>Label</label>
+              <input type="text" id="key-label" placeholder="Production, Demo…" maxlength="40" />
+            </div>
+            <div style="flex:0;display:flex;align-items:flex-end;">
+              <button type="button" class="accent" id="btn-create-key">Create free key</button>
+            </div>
+          </div>
+          <div id="new-key-panel" class="hidden">
+            <p class="muted" style="margin:0;">Copy now — full key shown once.</p>
+            <div class="key-box" id="new-key-value"></div>
+            <button type="button" class="secondary" id="btn-copy-key">Copy key</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Your keys</h2>
+          <div id="keys-empty" class="muted">No keys yet.</div>
+          <table id="keys-table" class="hidden">
+            <thead><tr><th>Label</th><th>Key</th><th>Status</th><th>Created</th><th></th></tr></thead>
+            <tbody id="keys-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-quickstart" class="hidden">
+        <div class="card">
+          <h2>Chat API</h2>
+          <p class="muted">Replace <code>YOUR_KEY</code> with your key.</p>
+          <pre id="curl-sample"></pre>
+        </div>
+        <div class="card">
+          <h2>JavaScript</h2>
+          <pre id="js-sample"></pre>
+        </div>
+      </div>
+
+      <div id="tab-usage" class="hidden">
+        <div class="card">
+          <h2>Free tier</h2>
+          <div class="stat-grid">
+            <div class="stat"><span>Daily / key</span><b>100</b></div>
+            <div class="stat"><span>Max keys</span><b>5</b></div>
+            <div class="stat"><span>Speed</span><b>Fast</b></div>
+            <div class="stat"><span>Cost</span><b>$0</b></div>
+          </div>
+          <p class="muted" style="margin-top:12px;margin-bottom:0;">
+            Keys identify callers. Answers still run on your Worker (Gemini/Groq). Wire <code>/api/v1/chat</code> on Worker for full enforcement.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Scribe Console · <a href="index.html">Back to Scribe</a>
+    </footer>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const WORKER = 'https://scribe-backend.mworkspace123.workers.dev';
+    const FREE_DAILY = 100, MAX_KEYS = 5;
+    const $ = (id) => document.getElementById(id);
+    function toast(msg) {
+      const t = $('toast'); t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+    function getSession() {
+      try { return JSON.parse(localStorage.getItem('scribe_console_session') || 'null'); } catch (e) { return null; }
+    }
+    function setSession(s) { localStorage.setItem('scribe_console_session', JSON.stringify(s)); }
+    function clearSession() { localStorage.removeItem('scribe_console_session'); }
+    function sk(email) { return 'scribe_console_keys_' + (email || '').toLowerCase(); }
+    function loadKeys(email) {
+      try { return JSON.parse(localStorage.getItem(sk(email)) || '[]'); } catch (e) { return []; }
+    }
+    function saveKeys(email, list) { localStorage.setItem(sk(email), JSON.stringify(list.slice(0, MAX_KEYS))); }
+    function randomKey() {
+      const b = new Uint8Array(24); crypto.getRandomValues(b);
+      return 'sk_scribe_' + [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+    function maskKey(k) { return (!k || k.length < 16) ? k : k.slice(0, 12) + '…' + k.slice(-4); }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function showAuth() {
+      $('view-auth').classList.remove('hidden');
+      $('view-dash').classList.add('hidden');
+      $('btn-logout').classList.add('hidden');
+    }
+    function showDash(session) {
+      $('view-auth').classList.add('hidden');
+      $('view-dash').classList.remove('hidden');
+      $('btn-logout').classList.remove('hidden');
+      $('dash-name').textContent = session.name || 'Developer';
+      $('dash-email').textContent = session.email || '';
+      renderKeys(); updateSamples();
+    }
+    function renderKeys() {
+      const s = getSession(); if (!s) return;
+      const list = loadKeys(s.email);
+      const empty = $('keys-empty'), table = $('keys-table'), body = $('keys-body');
+      if (!list.length) { empty.classList.remove('hidden'); table.classList.add('hidden'); body.innerHTML = ''; return; }
+      empty.classList.add('hidden'); table.classList.remove('hidden');
+      body.innerHTML = list.map((k, i) => `<tr>
+        <td>${escapeHtml(k.label || 'Key')}</td>
+        <td><code>${escapeHtml(maskKey(k.key))}</code></td>
+        <td><span class="pill ${k.revoked ? 'off' : ''}">${k.revoked ? 'Revoked' : 'Active'}</span></td>
+        <td class="muted">${new Date(k.created).toLocaleDateString()}</td>
+        <td>${k.revoked ? '' : `<button type="button" class="danger" data-revoke="${i}" style="padding:6px 10px;font-size:12px;">Revoke</button>`}</td>
+      </tr>`).join('');
+      body.querySelectorAll('[data-revoke]').forEach(btn => {
+        btn.onclick = () => {
+          const idx = Number(btn.getAttribute('data-revoke'));
+          const list2 = loadKeys(s.email);
+          if (list2[idx]) list2[idx].revoked = true;
+          saveKeys(s.email, list2);
+          fetch(WORKER + '/api/console/revoke-key', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: s.email, key: list2[idx] && list2[idx].key })
+          }).catch(() => {});
+          renderKeys(); toast('Key revoked');
+        };
+      });
+    }
+    function updateSamples() {
+      const endpoint = WORKER + '/api/v1/chat';
+      $('curl-sample').textContent = 'curl ' + endpoint + ' \\\n  -H "Authorization: Bearer YOUR_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"message":"Hello from Scribe API"}\'';
+      $('js-sample').textContent = 'const res = await fetch("' + endpoint + '", {\n  method: "POST",\n  headers: {\n    "Authorization": "Bearer YOUR_KEY",\n    "Content-Type": "application/json"\n  },\n  body: JSON.stringify({ message: "Hello from Scribe API" })\n});\n// SSE lines: data: {"text":"..."}';
+    }
+    document.querySelectorAll('.tabs button').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        const tab = btn.getAttribute('data-tab');
+        ['keys','quickstart','usage'].forEach(id => {
+          const el = $('tab-' + id); if (el) el.classList.toggle('hidden', id !== tab);
+        });
+      };
+    });
+    $('btn-login').onclick = () => {
+      const email = ($('auth-email').value || '').trim().toLowerCase();
+      const name = ($('auth-name').value || '').trim() || email.split('@')[0];
+      if (!email.includes('@')) { toast('Enter a valid email'); return; }
+      setSession({ email, name, at: Date.now() });
+      showDash(getSession()); toast('Welcome to Scribe Console');
+    };
+    $('btn-logout').onclick = () => { clearSession(); showAuth(); };
+    $('btn-create-key').onclick = async () => {
+      const s = getSession(); if (!s) return;
+      let list = loadKeys(s.email);
+      if (list.filter(k => !k.revoked).length >= MAX_KEYS) { toast('Max ' + MAX_KEYS + ' keys'); return; }
+      const label = ($('key-label').value || 'Default').trim().slice(0, 40);
+      const key = randomKey();
+      const record = { key, label, created: Date.now(), revoked: false, email: s.email, dailyLimit: FREE_DAILY };
+      list.unshift(record); saveKeys(s.email, list);
+      try {
+        await fetch(WORKER + '/api/console/create-key', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(record)
+        });
+      } catch (e) {}
+      $('new-key-value').textContent = key;
+      $('new-key-panel').classList.remove('hidden');
+      $('key-label').value = '';
+      renderKeys(); toast('Key created');
+    };
+    $('btn-copy-key').onclick = async () => {
+      try { await navigator.clipboard.writeText($('new-key-value').textContent); toast('Copied'); }
+      catch (e) { toast('Copy manually'); }
+    };
+    const session = getSession();
+    if (session && session.email) showDash(session); else showAuth();
+  </script>
+</body>
+</html>
