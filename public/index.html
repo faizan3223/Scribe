@@ -6794,10 +6794,16 @@
                 });
 
                 if (!response.ok) {
-                    let errMsg = 'Server rejected request';
+                    let errMsg = 'Server error ' + response.status;
                     try {
-                        const errBody = await response.json();
-                        if (errBody && errBody.error) errMsg = errBody.error;
+                        const ct = response.headers.get('content-type') || '';
+                        if (ct.includes('application/json')) {
+                            const errBody = await response.json();
+                            if (errBody && errBody.error) errMsg = errBody.error;
+                        } else {
+                            const t = await response.text();
+                            if (t) errMsg = t.slice(0, 240);
+                        }
                     } catch (e) {}
                     throw new Error(errMsg);
                 }
@@ -6808,31 +6814,43 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let aiResponseText = '';
+                let sseBuffer = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const dataStr = line.slice(6).trim();
-                            if (dataStr === '[DONE]') continue;
-                            try {
-                                const parsed = JSON.parse(dataStr);
-                                if (parsed.text) {
-                                    aiResponseText += parsed.text;
-                                    try {
-                                        const s = getSettings();
-                                        if (s.liveMd === false) targetOutputBox.textContent = aiResponseText;
-                                        else targetOutputBox.innerHTML = formatMessageHtml(aiResponseText);
-                                    } catch (e) {
-                                        targetOutputBox.textContent = aiResponseText;
-                                    }
-                                    chatConsole.scrollTop = chatConsole.scrollHeight;
-                                    updateScrollBottomBtn();
+                    sseBuffer += decoder.decode(value, { stream: true });
+                    // Normalize line endings; keep incomplete last line in buffer
+                    const parts = sseBuffer.split(/\r?\n/);
+                    sseBuffer = parts.pop() || '';
+                    for (const line of parts) {
+                        const trimmed = line.trim();
+                        if (!trimmed.startsWith('data:')) continue;
+                        const dataStr = trimmed.replace(/^data:\s?/, '').trim();
+                        if (!dataStr || dataStr === '[DONE]') continue;
+                        try {
+                            const parsed = JSON.parse(dataStr);
+                            // Our worker format: { text }
+                            let piece = parsed.text || '';
+                            // Graceful: raw Gemini-shaped chunk if proxy ever forwards it
+                            if (!piece && parsed.candidates) {
+                                const p = parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts;
+                                if (p) piece = p.map(x => x.text || '').join('');
+                            }
+                            if (piece) {
+                                aiResponseText += piece;
+                                try {
+                                    const s = getSettings();
+                                    if (s.liveMd === false) targetOutputBox.textContent = aiResponseText;
+                                    else targetOutputBox.innerHTML = formatMessageHtml(aiResponseText);
+                                } catch (e) {
+                                    targetOutputBox.textContent = aiResponseText;
                                 }
-                            } catch (e) {}
+                                chatConsole.scrollTop = chatConsole.scrollHeight;
+                                updateScrollBottomBtn();
+                            }
+                        } catch (e) {
+                            // ignore partial JSON lines
                         }
                     }
                 }
@@ -6861,7 +6879,6 @@
                     persistCurrentChat(promptPayload, aiResponseText);
                     if (!opts.skipUserBubble) incChatCount();
                     playReplySound();
-                    // light memory: remember preferred tone if set
                     try {
                         const mem = JSON.parse(safeStorage.getItem('scribe_memory') || '{}');
                         const t = (document.getElementById('tone-select')||{}).value;
@@ -6870,7 +6887,7 @@
                         safeStorage.setItem('scribe_memory', JSON.stringify(mem));
                     } catch (e) {}
                 } else {
-                    showRetryError(targetId, promptPayload, 'Empty response from model.');
+                    showRetryError(targetId, promptPayload, 'Empty response from model. Check GEMINI_API_KEY / model on Worker.');
                     persistCurrentChat(promptPayload, 'Empty response from model.');
                 }
             } catch (err) {
@@ -6882,8 +6899,13 @@
                         targetOutputBox.dataset.speak = partial;
                     }
                 } else {
-                    showRetryError(targetId, promptPayload, 'Connection lost with server. Check network or try again.');
-                    persistCurrentChat(promptPayload, 'Connection lost with background server.'); try { pushNotification('Connection error', 'Could not reach the AI server. Check your network.', 'error'); } catch (e) {}
+                    const real = (err && err.message) ? err.message : 'Unknown error';
+                    const nice = /failed to fetch|networkerror|load failed/i.test(real)
+                        ? ('Network error: ' + real + ' — Worker URL / CORS / offline?')
+                        : real;
+                    showRetryError(targetId, promptPayload, nice);
+                    persistCurrentChat(promptPayload, nice);
+                    try { pushNotification('Chat error', nice.slice(0, 120), 'error'); } catch (e) {}
                 }
             } finally {
                 setGeneratingUI(false);
