@@ -352,7 +352,142 @@ export default {
         return json({ success: true });
       }
 
-      return json({ success: false, message: 'Route Not Found' }, 404);
+
+      // ===== Public API v1 (Scribe Console keys) =====
+      if (request.method === 'POST' && url.pathname === '/api/v1/chat') {
+        const auth = request.headers.get('Authorization') || '';
+        const apiKey = auth.replace(/^Bearer\s+/i, '').trim();
+        if (!apiKey || !apiKey.startsWith('sk_scribe_')) {
+          return json({ success: false, error: 'Missing or invalid API key. Get one at /scribe-console.html' }, 401);
+        }
+
+        // Optional KV validation
+        if (env.CHATS_KV) {
+          try {
+            const meta = await env.CHATS_KV.get('apikey:' + apiKey);
+            if (meta === 'revoked') {
+              return json({ success: false, error: 'API key revoked' }, 403);
+            }
+          } catch (e) {}
+        }
+
+        const body = await request.json().catch(() => ({}));
+        let message = body.message || body.question || body.prompt || '';
+        const mode = String(body.mode || 'chat').toLowerCase();
+        let imgData = body.image || null;
+        if (!message) return json({ success: false, error: 'message is required' }, 400);
+
+        // Route for quality: code / vision / fast chat
+        if (mode === 'code' || mode === 'coding') {
+          message =
+            '[SYSTEM: You are Scribe Code — expert programmer. Give correct, complete, production-quality code. ' +
+            'Explain briefly, then full code in markdown fences. No hacks or incomplete snippets.]\n\n' +
+            message;
+        } else if (mode === 'vision' || imgData) {
+          message =
+            '[SYSTEM: You can see images. Describe only what is visible. Answer accurately.]\n\n' + message;
+        } else {
+          message =
+            '[SYSTEM: You are Scribe API — fast, clear, helpful. Match user language.]\n\n' + message;
+        }
+
+        // Reuse ask-question logic by internal-style call: prefer Gemini flash for speed
+        const hasGemini = !!(env.GEMINI_API_KEY && String(env.GEMINI_API_KEY).trim());
+        const hasGroq = !!(env.GROQ_API_KEY && String(env.GROQ_API_KEY).trim());
+        if (!hasGemini && !hasGroq) {
+          return json({ success: false, error: 'Server has no AI keys configured' }, 500);
+        }
+
+        if (hasGemini) {
+          const parts = [{ text: String(message).slice(0, 30000) }];
+          if (imgData && typeof imgData === 'string' && imgData.length > 100) {
+            let mime = 'image/jpeg';
+            let b64 = imgData;
+            const m = String(imgData).match(/^data:([^;]+);base64,(.+)$/);
+            if (m) { mime = m[1] || mime; b64 = m[2]; }
+            parts.push({ inline_data: { mime_type: mime, data: b64 } });
+          }
+          // Fastest good models first; code mode prefers stronger if available
+          const gemModels = mode === 'code'
+            ? [env.GEMINI_MODEL, 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-2.0-flash']
+            : [env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+          for (const model of gemModels.filter(Boolean)) {
+            try {
+              const endpoint =
+                'https://generativelanguage.googleapis.com/v1beta/models/' +
+                encodeURIComponent(model) +
+                ':generateContent?key=' +
+                encodeURIComponent(String(env.GEMINI_API_KEY).trim());
+              const gr = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ role: 'user', parts }],
+                  generationConfig: { temperature: mode === 'code' ? 0.2 : 0.4 },
+                }),
+              });
+              const raw = await gr.text();
+              if (!gr.ok) continue;
+              const obj = JSON.parse(raw);
+              const textOut = (obj.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+              if (textOut) return singleTextAsStream(textOut, ctx, corsHeaders);
+            } catch (e) {}
+          }
+        }
+
+        if (hasGroq) {
+          const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+          const models = [
+            env.GROQ_MODEL,
+            mode === 'code' ? 'llama-3.3-70b-versatile' : 'llama-3.1-8b-instant',
+            'llama-3.1-8b-instant',
+            'llama-3.3-70b-versatile',
+            'openai/gpt-oss-20b',
+          ].filter(Boolean);
+          for (const model of models) {
+            try {
+              const stream = await groq.chat.completions.create({
+                model,
+                stream: true,
+                temperature: mode === 'code' ? 0.2 : 0.5,
+                messages: [{ role: 'user', content: String(message).slice(0, 60000) }],
+              });
+              return streamResponse(stream, ctx, corsHeaders);
+            } catch (e) {}
+          }
+        }
+
+        return json({ success: false, error: 'All models failed for /api/v1/chat' }, 500);
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/console/create-key') {
+        const body = await request.json().catch(() => ({}));
+        const key = body.key || '';
+        if (!key.startsWith('sk_scribe_')) return json({ success: false, error: 'bad key' }, 400);
+        if (env.CHATS_KV) {
+          await env.CHATS_KV.put('apikey:' + key, JSON.stringify({
+            email: body.email || '',
+            label: body.label || '',
+            plan: body.plan || 'free',
+            dailyLimit: body.dailyLimit || 100,
+            created: body.created || Date.now(),
+            revoked: false,
+          }));
+        }
+        return json({ success: true });
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/console/revoke-key') {
+        const body = await request.json().catch(() => ({}));
+        const key = body.key || '';
+        if (env.CHATS_KV && key) {
+          await env.CHATS_KV.put('apikey:' + key, 'revoked');
+        }
+        return json({ success: true });
+      }
+
+
+            return json({ success: false, message: 'Route Not Found' }, 404);
     } catch (error) {
       return json({ success: false, error: error.message }, 500);
     }
