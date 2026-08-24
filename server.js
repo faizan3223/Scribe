@@ -122,11 +122,11 @@ export default {
 
             const gemModels = [
               env.GEMINI_MODEL,
+              'gemini-3.7-flash',
+              'gemini-2.5-flash',
+              'gemini-2.5-flash-lite',
+              'gemini-2.5-pro',
               'gemini-2.0-flash',
-              'gemini-2.0-flash-lite',
-              'gemini-1.5-flash',
-              'gemini-1.5-flash-latest',
-              'gemini-1.5-pro',
             ].filter(Boolean);
 
             for (const model of gemModels) {
@@ -194,8 +194,8 @@ export default {
             : 'data:image/jpeg;base64,' + imgData;
           const visionModels = [
             env.GROQ_VISION_MODEL,
-            'meta-llama/llama-4-scout-17b-16e-instruct',
-            'meta-llama/llama-4-maverick-17b-128e-instruct',
+            'llama-3.1-8b-instant',
+            'llama-3.3-70b-versatile',
           ].filter(Boolean);
           let lastErr = null;
           for (const model of visionModels) {
@@ -235,10 +235,8 @@ export default {
           env.GROQ_MODEL,
           'llama-3.1-8b-instant',
           'llama-3.3-70b-versatile',
-          'meta-llama/llama-4-scout-17b-16e-instruct',
-          'meta-llama/llama-4-maverick-17b-128e-instruct',
-          'qwen/qwen3-32b',
-          'gemma2-9b-it',
+          'openai/gpt-oss-20b',
+          'openai/gpt-oss-120b',
         ].filter(Boolean);
         let lastGroqErr = null;
         for (const model of textModels) {
