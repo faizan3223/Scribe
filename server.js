@@ -1,9 +1,15 @@
 /**
- * Scribe Worker — vision-capable ask-question
- * Deploy this to: scribe-backend.mworkspace123.workers.dev
+ * Scribe Worker — Gemini (primary) + Groq (fallback) + vision
+ * Deploy: scribe-backend.mworkspace123.workers.dev
  *
- * Secrets: GROQ_API_KEY, STRIPE_SECRET_KEY
- * Optional: GROQ_VISION_MODEL, GROQ_MODEL, SERPER_API_KEY
+ * Secrets (add in Cloudflare Worker → Settings → Variables):
+ *   GEMINI_API_KEY     ← recommended (Google AI Studio)
+ *   GROQ_API_KEY       ← optional fallback
+ *   STRIPE_SECRET_KEY  ← optional payments
+ *
+ * Optional: GEMINI_MODEL, GROQ_MODEL, SERPER_API_KEY
+ *
+ * Gemini key: https://aistudio.google.com/apikey
  */
 
 import Groq from 'groq-sdk';
@@ -27,14 +33,6 @@ export default {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
 
-    // Do NOT create Groq on every request — only when needed (avoids crash on sync-chats)
-    const getGroq = () => {
-      const key = env.GROQ_API_KEY;
-      if (!key) {
-        throw new Error('GROQ_API_KEY is missing. Add it in Cloudflare Worker → Settings → Variables → Secrets.');
-      }
-      return new Groq({ apiKey: key });
-    };
     const stripe = env.STRIPE_SECRET_KEY ? new Stripe(env.STRIPE_SECRET_KEY) : null;
 
     try {
@@ -47,19 +45,12 @@ export default {
         return json({ success: true, token: 'mock-session-token' });
       }
 
+      // ---------- AI CHAT (Gemini first, Groq fallback) ----------
       if (request.method === 'POST' && url.pathname === '/api/ask-question') {
-        if (!env.GROQ_API_KEY) {
-          return json({
-            success: false,
-            error: 'GROQ_API_KEY missing on Worker. Cloudflare → Workers → scribe-backend → Settings → Variables → Add Secret GROQ_API_KEY'
-          }, 500);
-        }
-        const groq = getGroq();
         const body = await request.json();
         let { question, images, image, hasImage, webSearch, vision } = body;
         if (!question) return json({ success: false, error: 'Question text is required' }, 400);
 
-        // Resolve image data URL from several shapes
         let imgData =
           (typeof image === 'string' && image) ||
           (images && images[0] && (images[0].data || images[0].url || images[0].dataUrl)) ||
@@ -67,43 +58,114 @@ export default {
         if (imgData && typeof imgData === 'object') imgData = imgData.data || imgData.url || null;
         const wantVision = !!(hasImage || vision || imgData);
 
-        // Web search (optional)
-        if (webSearch && (env.SERPER_API_KEY || env.BRAVE_API_KEY)) {
+        // Optional web search
+        if (webSearch && env.SERPER_API_KEY) {
           try {
-            let snippets = '';
-            if (env.SERPER_API_KEY) {
-              const sr = await fetch('https://google.serper.dev/search', {
-                method: 'POST',
-                headers: { 'X-API-KEY': env.SERPER_API_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ q: String(question).slice(0, 200), num: 5 }),
-              });
-              const sd = await sr.json();
-              snippets = (sd.organic || [])
-                .slice(0, 5)
-                .map((o, i) => `[${i + 1}] ${o.title}\n${o.snippet}\n${o.link}`)
-                .join('\n\n');
-            }
-            if (snippets) {
-              question += '\n\n---\nLive web search results:\n' + snippets;
-            }
+            const sr = await fetch('https://google.serper.dev/search', {
+              method: 'POST',
+              headers: { 'X-API-KEY': env.SERPER_API_KEY, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ q: String(question).slice(0, 200), num: 5 }),
+            });
+            const sd = await sr.json();
+            const snippets = (sd.organic || [])
+              .slice(0, 5)
+              .map((o, i) => `[${i + 1}] ${o.title}\n${o.snippet}\n${o.link}`)
+              .join('\n\n');
+            if (snippets) question += '\n\n---\nLive web search results:\n' + snippets;
           } catch (e) {
             console.error('web search failed', e);
           }
         }
 
-        // ---- VISION PATH ----
+        const hasGemini = !!(env.GEMINI_API_KEY && String(env.GEMINI_API_KEY).trim());
+        const hasGroq = !!(env.GROQ_API_KEY && String(env.GROQ_API_KEY).trim());
+
+        if (!hasGemini && !hasGroq) {
+          return json({
+            success: false,
+            error:
+              'No AI key on Worker. Add Secret GEMINI_API_KEY (https://aistudio.google.com/apikey) or GROQ_API_KEY in Cloudflare → Workers → Settings → Variables.',
+          }, 500);
+        }
+
+        // ===== GEMINI PATH =====
+        if (hasGemini) {
+          try {
+            const model =
+              env.GEMINI_MODEL ||
+              (wantVision ? 'gemini-2.0-flash' : 'gemini-2.0-flash');
+            const endpoint =
+              'https://generativelanguage.googleapis.com/v1beta/models/' +
+              encodeURIComponent(model) +
+              ':streamGenerateContent?alt=sse&key=' +
+              encodeURIComponent(env.GEMINI_API_KEY);
+
+            const parts = [{ text: String(question).slice(0, 30000) }];
+
+            if (wantVision && imgData && typeof imgData === 'string' && imgData.length > 100) {
+              // data:image/jpeg;base64,XXXX
+              let mime = 'image/jpeg';
+              let b64 = imgData;
+              const m = String(imgData).match(/^data:([^;]+);base64,(.+)$/);
+              if (m) {
+                mime = m[1] || mime;
+                b64 = m[2];
+              } else if (!imgData.startsWith('data:')) {
+                b64 = imgData;
+              }
+              parts.push({ inline_data: { mime_type: mime, data: b64 } });
+            }
+
+            const systemText =
+              wantVision
+                ? 'You can see the attached image. Describe only what is visible. Answer the user. Do not claim you cannot see images. Do not invent UI. No code unless asked.'
+                : 'You are Scribe AI, a helpful assistant. Answer clearly. Match the user language.';
+
+            const gemBody = {
+              system_instruction: { parts: [{ text: systemText }] },
+              contents: [{ role: 'user', parts }],
+              generationConfig: { temperature: 0.4 },
+            };
+
+            const gr = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(gemBody),
+            });
+
+            if (!gr.ok) {
+              const errText = await gr.text();
+              console.error('Gemini error', gr.status, errText.slice(0, 400));
+              // fall through to Groq if available
+              if (!hasGroq) {
+                return json({
+                  success: false,
+                  error: 'Gemini error ' + gr.status + ': ' + errText.slice(0, 300),
+                }, 500);
+              }
+            } else {
+              return geminiSSEToClient(gr, ctx, corsHeaders);
+            }
+          } catch (e) {
+            console.error('Gemini failed', e);
+            if (!hasGroq) {
+              return json({ success: false, error: 'Gemini failed: ' + (e.message || e) }, 500);
+            }
+          }
+        }
+
+        // ===== GROQ FALLBACK =====
+        const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+
         if (wantVision && imgData && typeof imgData === 'string' && imgData.length > 100) {
           const imageUrl = imgData.startsWith('data:')
             ? imgData
             : 'data:image/jpeg;base64,' + imgData;
-
           const visionModels = [
             env.GROQ_VISION_MODEL,
             'meta-llama/llama-4-scout-17b-16e-instruct',
-            'llama-3.2-90b-vision-preview',
             'llama-3.2-11b-vision-preview',
           ].filter(Boolean);
-
           let lastErr = null;
           for (const model of visionModels) {
             try {
@@ -115,9 +177,7 @@ export default {
                   {
                     role: 'system',
                     content:
-                      'You can see the user image. Describe what is actually visible. Answer the question. ' +
-                      'If asked about an error, say yes/no based on the image. Do not claim you cannot see images. ' +
-                      'Do not invent a different UI. Do not output code unless the user asked for code.',
+                      'You can see the user image. Describe what is visible. Do not claim you cannot see images. No code unless asked.',
                   },
                   {
                     role: 'user',
@@ -131,33 +191,14 @@ export default {
               return streamResponse(stream, ctx, corsHeaders);
             } catch (e) {
               lastErr = e;
-              console.error('vision model failed', model, e && e.message);
             }
           }
-          // If all vision models failed, return clear error (do NOT fall back silently to text-only)
-          return json(
-            {
-              success: false,
-              error:
-                'Vision model failed: ' +
-                ((lastErr && lastErr.message) || 'unknown') +
-                '. Check GROQ_API_KEY and vision model access.',
-            },
-            500
-          );
+          return json({
+            success: false,
+            error: 'Vision failed: ' + ((lastErr && lastErr.message) || 'unknown'),
+          }, 500);
         }
 
-        if (wantVision && !imgData) {
-          return json(
-            {
-              success: false,
-              error: 'Image was requested but no image data received by server.',
-            },
-            400
-          );
-        }
-
-        // ---- TEXT ONLY ----
         const stream = await groq.chat.completions.create({
           messages: [{ role: 'user', content: String(question).slice(0, 60000) }],
           model: env.GROQ_MODEL || 'llama-3.3-70b-versatile',
@@ -166,7 +207,7 @@ export default {
         return streamResponse(stream, ctx, corsHeaders);
       }
 
-      // Image generation
+      // Image generation (Workers AI — optional)
       if (request.method === 'POST' && url.pathname === '/api/generate-image') {
         const body = await request.json();
         const { prompt } = body;
@@ -181,50 +222,40 @@ export default {
         if (!stripe) return json({ success: false, error: 'Stripe not configured' }, 500);
         const body = await request.json().catch(() => ({}));
         const tier = (body.tier || body.plan || 'pro').toLowerCase();
-        let unitAmount = Number(body.unit_amount || body.unitAmount);
-        if (!unitAmount || unitAmount < 100) unitAmount = tier === 'ultra' ? 10000 : 2000;
-        if (tier === 'ultra') unitAmount = 10000;
-        if (tier === 'pro') unitAmount = 2000;
-
+        let unitAmount = tier === 'ultra' ? 10000 : 2000;
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ['card'],
-          line_items: [
-            {
-              price_data: {
-                currency: 'usd',
-                product_data: {
-                  name: tier === 'ultra' ? 'Scribe Ultra' : 'ScribeAI Pro Plan',
-                  description:
-                    tier === 'ultra'
-                      ? 'Unlimited chats, unlimited images, fastest responses'
-                      : 'Unlimited AI generations & Priority Processing',
-                },
-                unit_amount: unitAmount,
-                recurring: { interval: 'month' },
+          line_items: [{
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: tier === 'ultra' ? 'Scribe Ultra' : 'ScribeAI Pro Plan',
+                description: tier === 'ultra' ? 'Unlimited everything' : 'Unlimited generations',
               },
-              quantity: 1,
+              unit_amount: unitAmount,
+              recurring: { interval: 'month' },
             },
-          ],
+            quantity: 1,
+          }],
           mode: 'subscription',
           success_url:
             'https://scribe-5mr.pages.dev?checkout=success&plan=' +
             encodeURIComponent(tier) +
             '&session_id={CHECKOUT_SESSION_ID}',
           cancel_url: 'https://scribe-5mr.pages.dev?checkout=cancel',
-          metadata: { tier, unit_amount: String(unitAmount) },
+          metadata: { tier },
         });
         return json({ success: true, url: session.url, tier, amount: unitAmount / 100 });
       }
 
-      // Chat sync — soft-fail if KV not bound (do not throw)
+      // Chat sync — soft fail
       if (request.method === 'POST' && url.pathname === '/api/sync-chats') {
         try {
           const body = await request.json().catch(() => ({}));
           const email = String(body.email || '').toLowerCase().trim();
           if (!email) return json({ success: false, error: 'email missing', optional: true }, 200);
           if (!env.CHATS_KV) {
-            // Not an error for the app — local storage still works
-            return json({ success: false, error: 'cloud sync not configured (bind CHATS_KV)', optional: true }, 200);
+            return json({ success: false, error: 'cloud sync not configured', optional: true }, 200);
           }
           const key = 'chats:' + email;
           if (body.action === 'pull') {
@@ -273,6 +304,66 @@ export default {
   },
 };
 
+/** Convert Gemini SSE stream → same format frontend expects: data: {"text":"..."} */
+function geminiSSEToClient(geminiResponse, ctx, corsHeaders) {
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  ctx.waitUntil(
+    (async () => {
+      try {
+        const reader = geminiResponse.body.getReader();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const chunks = buffer.split('\n');
+          buffer = chunks.pop() || '';
+          for (const line of chunks) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) continue;
+            const payload = trimmed.slice(5).trim();
+            if (!payload || payload === '[DONE]') continue;
+            try {
+              const obj = JSON.parse(payload);
+              const parts = obj.candidates?.[0]?.content?.parts || [];
+              for (const p of parts) {
+                if (p.text) {
+                  await writer.write(
+                    encoder.encode('data: ' + JSON.stringify({ text: p.text }) + '\n\n')
+                  );
+                }
+              }
+            } catch (e) {
+              // ignore partial JSON
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Gemini stream error', e);
+      } finally {
+        try {
+          await writer.write(encoder.encode('data: [DONE]\n\n'));
+          await writer.close();
+        } catch (e) {}
+      }
+    })()
+  );
+
+  return new Response(readable, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
+}
+
 function streamResponse(stream, ctx, corsHeaders) {
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
@@ -283,7 +374,7 @@ function streamResponse(stream, ctx, corsHeaders) {
         for await (const chunk of stream) {
           const content = chunk.choices?.[0]?.delta?.content || '';
           if (content) {
-            await writer.write(encoder.encode(`data: ${JSON.stringify({ text: content })}\n\n`));
+            await writer.write(encoder.encode('data: ' + JSON.stringify({ text: content }) + '\n\n'));
           }
         }
       } catch (e) {
