@@ -88,22 +88,20 @@ export default {
           }, 500);
         }
 
-        // ===== GEMINI PATH =====
+                // ===== GEMINI PATH =====
         if (hasGemini) {
           try {
-            const model =
-              env.GEMINI_MODEL ||
-              (wantVision ? 'gemini-2.0-flash' : 'gemini-2.0-flash');
+            const model = env.GEMINI_MODEL || 'gemini-2.0-flash';
+            // Non-stream first (most reliable on Workers), then stream to client as SSE
             const endpoint =
               'https://generativelanguage.googleapis.com/v1beta/models/' +
               encodeURIComponent(model) +
-              ':streamGenerateContent?alt=sse&key=' +
+              ':generateContent?key=' +
               encodeURIComponent(env.GEMINI_API_KEY);
 
             const parts = [{ text: String(question).slice(0, 30000) }];
 
             if (wantVision && imgData && typeof imgData === 'string' && imgData.length > 100) {
-              // data:image/jpeg;base64,XXXX
               let mime = 'image/jpeg';
               let b64 = imgData;
               const m = String(imgData).match(/^data:([^;]+);base64,(.+)$/);
@@ -113,13 +111,16 @@ export default {
               } else if (!imgData.startsWith('data:')) {
                 b64 = imgData;
               }
+              // Cap image size ~4MB base64
+              if (b64.length > 4_000_000) {
+                return json({ success: false, error: 'Image too large for vision. Use a smaller screenshot.' }, 400);
+              }
               parts.push({ inline_data: { mime_type: mime, data: b64 } });
             }
 
-            const systemText =
-              wantVision
-                ? 'You can see the attached image. Describe only what is visible. Answer the user. Do not claim you cannot see images. Do not invent UI. No code unless asked.'
-                : 'You are Scribe AI, a helpful assistant. Answer clearly. Match the user language.';
+            const systemText = wantVision
+              ? 'You can see the attached image. Describe only what is visible. Answer the user. Do not claim you cannot see images. Do not invent UI. No code unless asked.'
+              : 'You are Scribe AI, a helpful assistant. Answer clearly. Match the user language.';
 
             const gemBody = {
               system_instruction: { parts: [{ text: systemText }] },
@@ -133,18 +134,32 @@ export default {
               body: JSON.stringify(gemBody),
             });
 
+            const raw = await gr.text();
             if (!gr.ok) {
-              const errText = await gr.text();
-              console.error('Gemini error', gr.status, errText.slice(0, 400));
-              // fall through to Groq if available
+              console.error('Gemini error', gr.status, raw.slice(0, 500));
               if (!hasGroq) {
                 return json({
                   success: false,
-                  error: 'Gemini error ' + gr.status + ': ' + errText.slice(0, 300),
+                  error: 'Gemini error ' + gr.status + ': ' + raw.slice(0, 400),
                 }, 500);
               }
+              // else fall through to Groq
             } else {
-              return geminiSSEToClient(gr, ctx, corsHeaders);
+              let textOut = '';
+              try {
+                const obj = JSON.parse(raw);
+                const gparts = obj.candidates?.[0]?.content?.parts || [];
+                textOut = gparts.map((p) => p.text || '').join('');
+              } catch (e) {
+                textOut = '';
+              }
+              if (!textOut) {
+                if (!hasGroq) {
+                  return json({ success: false, error: 'Gemini returned empty text: ' + raw.slice(0, 200) }, 500);
+                }
+              } else {
+                return singleTextAsStream(textOut, ctx, corsHeaders);
+              }
             }
           } catch (e) {
             console.error('Gemini failed', e);
@@ -199,12 +214,35 @@ export default {
           }, 500);
         }
 
-        const stream = await groq.chat.completions.create({
-          messages: [{ role: 'user', content: String(question).slice(0, 60000) }],
-          model: env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-          stream: true,
-        });
-        return streamResponse(stream, ctx, corsHeaders);
+        // Try several current Groq models (account access varies)
+        const textModels = [
+          env.GROQ_MODEL,
+          'llama-3.1-8b-instant',
+          'llama-3.1-70b-versatile',
+          'llama-3.3-70b-versatile',
+          'gemma2-9b-it',
+          'mixtral-8x7b-32768',
+        ].filter(Boolean);
+        let lastGroqErr = null;
+        for (const model of textModels) {
+          try {
+            const stream = await groq.chat.completions.create({
+              messages: [{ role: 'user', content: String(question).slice(0, 60000) }],
+              model,
+              stream: true,
+            });
+            return streamResponse(stream, ctx, corsHeaders);
+          } catch (e) {
+            lastGroqErr = e;
+            console.error('Groq model failed', model, e && e.message);
+          }
+        }
+        return json({
+          success: false,
+          error:
+            'All models failed. Gemini: check GEMINI_API_KEY. Groq: ' +
+            ((lastGroqErr && lastGroqErr.message) || 'unknown'),
+        }, 500);
       }
 
       // Image generation (Workers AI — optional)
@@ -353,6 +391,39 @@ function geminiSSEToClient(geminiResponse, ctx, corsHeaders) {
     })()
   );
 
+  return new Response(readable, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
+}
+
+function singleTextAsStream(text, ctx, corsHeaders) {
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
+  ctx.waitUntil(
+    (async () => {
+      try {
+        // Chunk for nicer typing effect
+        const s = String(text);
+        const size = 48;
+        for (let i = 0; i < s.length; i += size) {
+          const piece = s.slice(i, i + size);
+          await writer.write(encoder.encode('data: ' + JSON.stringify({ text: piece }) + '\n\n'));
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        await writer.write(encoder.encode('data: [DONE]\n\n'));
+        await writer.close();
+      }
+    })()
+  );
   return new Response(readable, {
     status: 200,
     headers: {
