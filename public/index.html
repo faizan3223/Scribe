@@ -3897,6 +3897,7 @@
                 <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
             </div>
             <div class="landing-nav-links">
+                <span onclick="window.open('scribe-console.html','_blank')">API Console</span>
                 <span onclick="toggleAboutModal()">About</span>
                 <span onclick="toggleGuidesModal()">Guides</span>
                 <span onclick="toggleFaqModal()">FAQ</span>
@@ -5353,6 +5354,10 @@
         }
 
 
+        function openScribeConsole() {
+            window.open('scribe-console.html', '_blank');
+        }
+
         function startNewChat() {
             currentChatId = null;
             currentChatMessages = [];
@@ -6052,8 +6057,9 @@
 
         function formatUserMessageHtml(text) {
             if (!text) return '';
-            // If contains fenced code or looks like big code paste → use code cards
-            if (/```/.test(text) || (text.split('\n').length >= 8 && /[;{}<>]|function |const |def /.test(text))) {
+            const lines = text.split('\n').length;
+            const looksCode = /```/.test(text) || (lines >= 5 && /[;{}<>]|function |const |def |class |import /.test(text));
+            if (looksCode) {
                 return '<div class="user-msg-text">' + formatMessageHtml(text) + '</div>';
             }
             return '<div class="user-msg-text">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div>';
@@ -6092,7 +6098,7 @@
 
                     const lineCount = part.value.split('\n').length;
                     // Grok-style: long code → compact card (click opens full panel)
-                    const LONG = lineCount >= 8 || part.value.length >= 280; // image-like card for most code blocks
+                    const LONG = lineCount >= 5 || part.value.length >= 160; // compact card like Grok
                     if (LONG) {
                         const previewLines = part.value.split('\n').slice(0, 14).join('\n');
                         html += `<div class="code-card" role="button" tabindex="0"
@@ -6419,18 +6425,34 @@
         // Paste image from clipboard
         promptInput.addEventListener('paste', (e) => {
             const items = e.clipboardData && e.clipboardData.items;
-            if (!items) return;
-            for (const it of items) {
-                if (it.type && it.type.startsWith('image/')) {
-                    e.preventDefault();
-                    const file = it.getAsFile();
-                    if (file) {
-                        handleFileChosen(file, true);
-                        showToast('Image pasted', 'success');
+            if (items) {
+                for (const it of items) {
+                    if (it.type && it.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const file = it.getAsFile();
+                        if (file) {
+                            handleFileChosen(file, true);
+                            showToast('Image pasted', 'success');
+                        }
+                        return;
                     }
-                    break;
                 }
             }
+            // Large code paste → in Code mode shows as compact card when you send
+            setTimeout(() => {
+                try {
+                    const t = promptInput.value || '';
+                    const lines = t.split('\n');
+                    if (lines.length >= 8 && /function |const |def |class |import |<\w+/.test(t)) {
+                        const mode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
+                        if (mode === 'code' || mode === 'coding') {
+                            showToast('Code detected — will show as card when sent', 'success');
+                        } else {
+                            showToast('Large code paste — open Code mode for best results', 'info');
+                        }
+                    }
+                } catch (err) {}
+            }, 30);
         });
 
         if (chatConsole) {
@@ -6527,21 +6549,36 @@
         }
 
 
+        function detectCodeLanguage(text) {
+            const t = text || '';
+            if (/<\w+[^>]*>/.test(t) && /<\/\w+>/.test(t)) return 'html';
+            if (/\bdef |import |print\(|elif |lambda /.test(t)) return 'python';
+            if (/color:\s*|display:\s*|margin:\s*|@media/.test(t)) return 'css';
+            if (/#include|std::|int main\s*\(/.test(t)) return 'cpp';
+            if (/\bpackage |System\.out|public class /.test(t)) return 'java';
+            if (/\bfn |let mut |println!/.test(t)) return 'rust';
+            if (/\bfunc |fmt\.|package main/.test(t)) return 'go';
+            return 'javascript';
+        }
+
         function normalizePastedCode(text) {
             if (!text || text.indexOf('```') >= 0) return text;
             const lines = text.split('\n');
-            // Heuristic: many lines that look like code
+            const mode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
             const codey = lines.filter(l =>
-                /^\s*(function|const|let|var|class|import|export|def |public |private |#include|<\w+|{\s*$|}\s*$|<\/\w+)/.test(l) ||
+                /^\s*(function|const|let|var|class|import|export|def |public |private |#include|<\w+|{\s*$|}\s*$|<\/\w+|fn |func |package )/.test(l) ||
                 /;\s*$/.test(l) ||
-                /^\s*\/\//.test(l)
+                /^\s*(\/\/|#|\/\*)/.test(l) ||
+                /=>|:=|::/.test(l)
             ).length;
-            if (lines.length >= 6 && codey >= Math.max(3, lines.length * 0.35)) {
-                let lang = 'javascript';
-                if (/<\w+[^>]*>/.test(text) && /<\/\w+>/.test(text)) lang = 'html';
-                else if (/\bdef |import |print\(/.test(text)) lang = 'python';
-                else if (/\{\s*[^}]*:\s*[^}]+\}/.test(text) && /color:|display:|margin:/.test(text)) lang = 'css';
-                return 'Here is my code — please read it carefully. If I ask for changes, return the full updated code.\n\n```' + lang + '\n' + text.trim() + '\n```';
+            // Code workspace: any multi-line paste that looks structured → card
+            const inCodeMode = mode === 'code' || mode === 'coding';
+            const enough = inCodeMode
+                ? (lines.length >= 4 && (codey >= 2 || text.length >= 120))
+                : (lines.length >= 6 && codey >= Math.max(3, lines.length * 0.3));
+            if (enough) {
+                const lang = detectCodeLanguage(text);
+                return '```' + lang + '\n' + text.trim() + '\n```';
             }
             return text;
         }
@@ -6705,6 +6742,9 @@
             greetingBanner.style.display = 'none';
             chatConsole.style.display = 'flex';
 
+            // Wrap raw pasted code first so user bubble shows Grok-style code card
+            promptPayload = normalizePastedCode(promptPayload);
+
             if (!opts.skipUserBubble) {
                 const userInitial = (currentNickname || currentUserEmail || 'U').trim().charAt(0).toUpperCase();
                 let attachmentsHtml = '';
@@ -6752,8 +6792,6 @@
             activeAbort = new AbortController();
             setGeneratingUI(true);
 
-            // If user pasted raw code without fences, wrap it so model + UI treat it as code
-            promptPayload = normalizePastedCode(promptPayload);
             const systemCtx = buildSystemContext(promptPayload, { hasImage: imagesForApi.length > 0 });
             const memoryBlock = buildConversationMemory(promptPayload);
             let question = '';
@@ -6776,23 +6814,47 @@
                 }
             }
             try {
-                const response = await fetch(`${workerURL}/api/ask-question`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        question,
-                        tone: (document.getElementById('tone-select')||{}).value,
-                        instructions: getCustomInstructions(),
-                        images: imagesForApi.map(x => ({ name: x.name, mime: x.mime, data: x.data })),
-                        hasImage: imagesForApi.length > 0,
-                        image: (imagesForApi[0] && imagesForApi[0].data) ? imagesForApi[0].data : null,
-                        imageMime: (imagesForApi[0] && imagesForApi[0].mime) || 'image/jpeg',
-                        webSearch: !!window._webSearchOn,
-                        mode: (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat',
-                        vision: imagesForApi.length > 0
-                    }),
-                    signal: activeAbort.signal
-                });
+                // Prefer Scribe API key (Console) → /api/v1/chat (fast / code / vision routing)
+                const scribeKey = (getSettings().apiKey || '').trim();
+                const wsMode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
+                let apiMode = 'chat';
+                if (imagesForApi.length) apiMode = 'vision';
+                else if (wsMode === 'code' || wsMode === 'coding') apiMode = 'code';
+
+                let response;
+                if (scribeKey && scribeKey.startsWith('sk_scribe_')) {
+                    response = await fetch(`${workerURL}/api/v1/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + scribeKey
+                        },
+                        body: JSON.stringify({
+                            message: question,
+                            mode: apiMode,
+                            image: (imagesForApi[0] && imagesForApi[0].data) ? imagesForApi[0].data : null
+                        }),
+                        signal: activeAbort.signal
+                    });
+                } else {
+                    response = await fetch(`${workerURL}/api/ask-question`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            question,
+                            tone: (document.getElementById('tone-select')||{}).value,
+                            instructions: getCustomInstructions(),
+                            images: imagesForApi.map(x => ({ name: x.name, mime: x.mime, data: x.data })),
+                            hasImage: imagesForApi.length > 0,
+                            image: (imagesForApi[0] && imagesForApi[0].data) ? imagesForApi[0].data : null,
+                            imageMime: (imagesForApi[0] && imagesForApi[0].mime) || 'image/jpeg',
+                            webSearch: !!window._webSearchOn,
+                            mode: wsMode,
+                            vision: imagesForApi.length > 0
+                        }),
+                        signal: activeAbort.signal
+                    });
+                }
 
                 if (!response.ok) {
                     let errMsg = 'Server error ' + response.status;
@@ -7324,6 +7386,8 @@
                 const el = document.getElementById(id);
                 if (el) el.checked = map[id];
             });
+            const keyInput = document.getElementById('set-api-key');
+            if (keyInput) keyInput.value = s.apiKey || '';
             card.style.display = 'flex';
         }
         function closeSettingsModal() {
@@ -9465,6 +9529,14 @@
                     <input type="checkbox" id="set-reduce-motion" onchange="saveSetting('reduceMotion', this.checked)">
                     <span class="slider"></span>
                 </label>
+            </div>
+            <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div>
+                    <div class="sr-label">Scribe API key</div>
+                    <div class="sr-desc">Paste sk_scribe_… from API Console. Site will use fast / code / vision routing.</div>
+                </div>
+                <input type="password" id="set-api-key" placeholder="sk_scribe_..." autocomplete="off" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #333;background:#111;color:#eee;font-size:13px;" onchange="saveSetting('apiKey', this.value.trim())" onblur="saveSetting('apiKey', this.value.trim())">
+                <button type="button" class="contact-submit-btn" style="background:#2a2a30;margin:0;" onclick="(function(){var v=(document.getElementById('set-api-key')||{}).value||'';saveSetting('apiKey', String(v).trim());try{showToast(String(v).trim()?'API key saved':'API key cleared','success');}catch(e){}})()">Save API key</button>
             </div>
         </div>
     </div>
