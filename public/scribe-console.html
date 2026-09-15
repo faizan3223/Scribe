@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Scribe Console — API Keys</title>
+  <title>Scrobo Console — API Keys</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -165,13 +165,13 @@
       <div class="brand">
         <div class="logo">S</div>
         <div>
-          <h1>Scribe Console</h1>
+          <h1>Scrobo Console</h1>
           <p>Fast API · Code · Vision</p>
         </div>
         <span class="badge">KEYS</span>
       </div>
       <div class="nav-actions">
-        <a class="btn btn-ghost" href="index.html">← Scribe App</a>
+        <a class="btn btn-ghost" href="index.html">← Scrobo App</a>
         <button type="button" class="btn-ghost hidden" id="btn-logout">Log out</button>
       </div>
     </header>
@@ -179,7 +179,7 @@
     <!-- AUTH -->
     <section id="view-auth">
       <div class="hero">
-        <h2>Ship with the fastest Scribe API</h2>
+        <h2>Ship with the fastest Scrobo API</h2>
         <p class="lead">
           Free keys for testing. Paid plans unlock higher limits, priority routing,
           stronger coding models, and image vision — all through one simple key.
@@ -318,7 +318,7 @@
     </section>
 
     <footer>
-      Scribe Console · <a href="index.html">Back to app</a>
+      Scrobo Console · <a href="index.html">Back to app</a>
     </footer>
   </div>
   <div class="toast" id="toast"></div>
@@ -444,7 +444,7 @@
       if (!email.includes('@')) { toast('Enter a valid email'); return; }
       const prev = getSession();
       setSession({ email, name, at: Date.now(), plan: (prev && prev.email === email && prev.plan) || 'free' });
-      showDash(getSession()); toast('Welcome to Scribe Console');
+      showDash(getSession()); toast('Welcome to Scrobo Console');
     };
     $('btn-logout').onclick = () => { clearSession(); showAuth(); };
 
