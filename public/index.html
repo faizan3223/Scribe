@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Scribe AI — your everyday writing and thinking partner. Chat, brainstorm, and draft with AI.">
+    <meta name="description" content="Scrobo AI — your everyday writing and thinking partner. Chat, code, brainstorm, and create with AI.">
     <meta name="theme-color" content="#0a0a0a">
-    <meta property="og:title" content="Scribe AI">
-    <meta property="og:description" content="Write faster, think clearer — your AI writing workspace.">
+    <meta property="og:title" content="Scrobo AI">
+    <meta property="og:description" content="Write faster, code smarter, think clearer — Scrobo AI workspace.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230a0a0a' width='32' height='32' rx='8'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='20' font-weight='700' fill='%23fff'%3ES%3C/text%3E%3Cline x1='6' y1='26' x2='26' y2='6' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
-    <title>Scribe AI Workspace</title>
+    <title>Scrobo AI — Chat, Code &amp; Create</title>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Scribe AI">
+    <meta name="apple-mobile-web-app-title" content="Scrobo AI">
     <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlNjcmliZSBBSSIsICJzaG9ydF9uYW1lIjogIlNjcmliZSIsICJkZXNjcmlwdGlvbiI6ICJXcml0ZSwgY29kZSwgYW5kIGNyZWF0ZSB3aXRoIFNjcmliZSBBSSIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGEwYTBhIiwgInRoZW1lX2NvbG9yIjogIiMwYTBhMGEiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMjggMTI4JyUzRSUzQ3JlY3Qgd2lkdGg9JzEyOCcgaGVpZ2h0PScxMjgnIHJ4PScyOCcgZmlsbD0nJTIzMGEwYTBhJy8lM0UlM0N0ZXh0IHg9JzY0JyB5PSc4OCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1mYW1pbHk9J0dlb3JnaWEnIGZvbnQtc2l6ZT0nNzInIGZvbnQtd2VpZ2h0PSc3MDAnIGZpbGw9JyUyM2ZmZiclM0VTJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwgInNpemVzIjogIjEyOHgxMjgiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIn1dfQ==">
-     <meta name="clckd" content="f5118132480d3cace29e3ad52505437c" />
-    <meta name="clckd" content="f5118132480d3cace29e3ad52505437c" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437"crossorigin="anonymous"></script>
+
+    <!-- Speed: connect early to API + ads (ads load late so UI not blocked) -->
+    <link rel="preconnect" href="https://scribe-backend.mworkspace123.workers.dev" crossorigin />
+    <link rel="dns-prefetch" href="https://scribe-backend.mworkspace123.workers.dev" />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+    <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
     <style>
         * {
             box-sizing: border-box;
@@ -26,11 +30,45 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
+        /* Instant taps / less delay on mobile */
+        button, a, .nav-item, .link-btn, .recent-chat-item, [role="button"] {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        html {
+            text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             background-color: #f7f7f5;
             color: #111111;
             height: 100vh;
             overflow: hidden;
+            /* GPU-friendly layer */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Off-screen modals: don't pay layout cost until open */
+        .global-popup-overlay {
+            content-visibility: auto;
+            contain: layout style;
+        }
+        #chat-stream-console {
+            content-visibility: auto;
+            contain: layout paint;
+        }
+        .sidebar-mid {
+            content-visibility: auto;
+            contain: layout;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         /* ========== INTRO (DARK) ========== */
@@ -1662,6 +1700,18 @@
         body.theme-dark .attach-menu-item:hover { background: #222; }
         body.theme-dark .user-avatar-bubble { background: #333; }
         body.theme-dark .artifact-panel { border-left-color: #222; }
+        
+        /* scribe-fast-click */
+        button:active, .nav-item:active, .link-btn:active, .recent-chat-item:active,
+        .btn-try-intro:active, .btn-social:active, .landing-submit-btn:active,
+        .btn-upgrade-top:active, .contact-submit-btn:active {
+            transform: scale(0.97);
+            transition: transform 0.06s ease-out;
+        }
+        .console-stream-row, .user-msg-bubble, .console-text-payload {
+            contain: content;
+        }
+
         body.theme-dark #landing-page-screen { background-color: #0a0a0a; }
         body.theme-dark .landing-navbar {
             border-bottom-color: #222;
@@ -3824,7 +3874,7 @@
     <div id="intro-page-screen">
         <header class="intro-navbar">
             <div class="intro-logo">
-                <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
+                <img class="logo-img logo-img--sm" src="" alt="Scrobo" data-scribe-logo>
             </div>
             <div class="intro-nav-links">
                 <span class="link-btn" onclick="window.open('scribe-console.html','_blank')">API Console</span>
@@ -3836,7 +3886,7 @@
                 <span class="link-btn" onclick="toggleContactModal()">Contact</span>
                 <span class="link-btn" onclick="togglePricingModal()">Pricing</span>
                 <button type="button" class="theme-toggle-btn" title="Dark / Light" onclick="toggleTheme()" style="border-color:rgba(255,255,255,0.25);color:#fff;">🌙</button>
-                <button class="btn-try-intro" onclick="goToAuthScreen()">Try Scribe</button>
+                <button class="btn-try-intro" onclick="goToAuthScreen()">Try Scrobo</button>
             </div>
         </header>
 
@@ -3871,7 +3921,7 @@
                 </div>
 
                 <p class="intro-fine-print">
-                    By continuing, you acknowledge Scribe AI's
+                    By continuing, you acknowledge Scrobo AI's
                     <a onclick="togglePrivacyModal()">Privacy Policy</a>
                     and
                     <a onclick="toggleTermsModal()">Terms of Service</a>
@@ -3888,13 +3938,34 @@
     </div>
 
     <!-- SCREEN 1: LANDING / AUTH PAGE -->
-    <div id="landing-page-screen">
+    <div 
+        <!-- AdSense-friendly content (indexable, original) -->
+        <section id="scrobo-content-strip" style="max-width:900px;margin:0 auto;padding:32px 24px 48px;color:#a3a3a3;font-size:14px;line-height:1.65;">
+            <h2 style="color:#f5f5f5;font-size:20px;margin-bottom:12px;">About Scrobo AI</h2>
+            <p style="margin-bottom:12px;">Scrobo AI is an AI workspace for chat, coding help, image ideas, and everyday writing. Use <strong style="color:#ddd;">New Chat</strong> for general questions, <strong style="color:#ddd;">Code</strong> for programming, and <strong style="color:#ddd;">Imagine</strong> for image prompts. Free plans include limited daily chats; Pro and Ultra unlock higher limits.</p>
+            <h3 style="color:#e5e5e5;font-size:16px;margin:18px 0 8px;">How to use Scrobo</h3>
+            <ul style="margin:0 0 12px 18px;">
+                <li>Sign in with email or continue as a guest where available.</li>
+                <li>Type a question or paste code in Code mode for structured answers.</li>
+                <li>Attach an image when you need vision-style help describing a screenshot.</li>
+                <li>Open Settings to save preferences and an optional API key from Scrobo Console.</li>
+            </ul>
+            <h3 style="color:#e5e5e5;font-size:16px;margin:18px 0 8px;">Policies</h3>
+            <p style="margin-bottom:8px;">Please read our <span class="link-btn" style="color:#fff;text-decoration:underline;cursor:pointer;" onclick="togglePrivacyModal()">Privacy Policy</span>,
+            <span class="link-btn" style="color:#fff;text-decoration:underline;cursor:pointer;" onclick="toggleTermsModal()">Terms</span>,
+            <span class="link-btn" style="color:#fff;text-decoration:underline;cursor:pointer;" onclick="toggleAboutModal()">About</span>, and
+            <span class="link-btn" style="color:#fff;text-decoration:underline;cursor:pointer;" onclick="toggleFaqModal()">FAQ</span>.
+            We do not allow illegal use of the service. Do not paste passwords or sensitive personal data into chats.</p>
+            <p style="margin:0;font-size:12px;color:#737373;">© Scrobo AI · Educational and productivity tool · Contact via the in-app form for support.</p>
+        </section>
+
+    id="landing-page-screen">
         <div class="corner-rail on-light" onclick="location.reload()" title="Home">
-            <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
+            <img class="logo-img logo-img--sm" src="" alt="Scrobo" data-scribe-logo>
         </div>
         <header class="landing-navbar">
             <div class="landing-logo">
-                <img class="logo-img logo-img--sm" src="" alt="Scribe" data-scribe-logo>
+                <img class="logo-img logo-img--sm" src="" alt="Scrobo" data-scribe-logo>
             </div>
             <div class="landing-nav-links">
                 <span onclick="window.open('scribe-console.html','_blank')">API Console</span>
@@ -3905,7 +3976,7 @@
                 <span onclick="toggleTermsModal()">Terms</span>
                 <span onclick="toggleContactModal()">Contact</span>
                 <span onclick="togglePricingModal()">Pricing</span>
-                <button class="btn-try-scribe" onclick="document.getElementById('landing-email').focus()">Try Scribe</button>
+                <button class="btn-try-scribe" onclick="document.getElementById('landing-email').focus()">Try Scrobo</button>
             </div>
         </header>
 
@@ -3941,7 +4012,7 @@
             <div class="hero-right">
                 <div class="preview-showcase-box">
                     <div class="preview-showcase-logo">
-                        <img class="logo-img logo-img--lg" src="" alt="Scribe" data-scribe-logo>
+                        <img class="logo-img logo-img--lg" src="" alt="Scrobo" data-scribe-logo>
                     </div>
                     <h2 class="preview-showcase-title" id="preview-showcase-title-text"></h2>
                 </div>
@@ -3955,7 +4026,7 @@
             <aside class="sidebar">
                 <div class="sidebar-top">
                     <div class="nav-logo" title="Home" onclick="resetDashboardView()">
-                        <img class="logo-img logo-img--nav" src="" alt="Scribe" data-scribe-logo>
+                        <img class="logo-img logo-img--nav" src="" alt="Scrobo" data-scribe-logo>
                     </div>
                     <button type="button" class="nav-item" id="nav-search" title="Search" onclick="toggleChatSearch()">
                         <span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><span class="label">Search</span>
@@ -4062,7 +4133,7 @@
                         </div>
                         <div id="onboard-banner" class="onboard-banner">
                             <button type="button" class="ob-close" onclick="dismissOnboarding()" title="Dismiss">×</button>
-                            <h4>Welcome to Scribe AI</h4>
+                            <h4>Welcome to Scrobo AI</h4>
                             <p>Free plan: <strong>15 chats</strong> total and <strong>1 AI image per day</strong>. Use starters below, or press <strong>Ctrl/Cmd+K</strong> for commands. Upgrade anytime for unlimited chats &amp; more images.</p>
                             <div class="ob-actions">
                                 <button type="button" onclick="togglePricingModal()">See plans</button>
@@ -4106,7 +4177,7 @@
                         </div>
                         <div class="master-prompt-enclosure" id="master-prompt-enclosure">
                             <div id="attachment-preview-row" class="attachment-preview-row"></div>
-                            <textarea id="prompt-input" placeholder="Ask Scribe" rows="1"></textarea>
+                            <textarea id="prompt-input" placeholder="Ask Scrobo" rows="1"></textarea>
                             <div class="prompt-controls-dock">
                                 <div class="controls-left-group">
                                     <div class="attach-menu-wrap">
@@ -4123,7 +4194,7 @@
                                     <input type="file" id="hidden-file-image" accept="image/*" style="display:none;">
                                     <input type="file" id="hidden-file-any" style="display:none;">
                                     <select class="engine-picker-selector" id="engine-picker">
-                                        <option value="ultra">Scribe Ultra</option>
+                                        <option value="ultra">Scrobo Ultra</option>
                                         <option value="logic">Analytical Logic</option>
                                     </select>
                                     <select class="tone-select" id="tone-select" title="Writing tone">
@@ -4183,7 +4254,7 @@
     <div id="pricing-popup-card" class="global-popup-overlay">
         <div class="popup-window-box wide">
             <button class="popup-close-trigger" onclick="togglePricingModal()">×</button>
-            <h2 style="text-align: center; color: white; margin-bottom: 30px;">Scribe AI <span style="color: #fff;">Pricing Tiers</span></h2>
+            <h2 style="text-align: center; color: white; margin-bottom: 30px;">Scrobo AI <span style="color: #fff;">Pricing Tiers</span></h2>
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="price-tier-card" id="tier-card-free">
                     <h3>Free</h3>
@@ -4236,7 +4307,7 @@
         <div class="pay-grok-shell">
             <button type="button" class="pay-grok-close" onclick="closePaymentDashboard()" aria-label="Close">×</button>
             <div class="pay-grok-left">
-                <div class="pay-grok-brand">Scribe AI</div>
+                <div class="pay-grok-brand">Scrobo AI</div>
                 <div class="pay-grok-sub">Subscribe to <span id="pay-plan-name">Pro Build</span></div>
                 <div class="pay-grok-amount" id="pay-plan-price-display">PKR 5,560<span> per month</span></div>
                 <div class="pay-currency-toggle">
@@ -4287,7 +4358,7 @@
                         </select>
                     </div>
                 </div>
-                <p class="pay-legal">By subscribing, you agree to our <a onclick="toggleTermsModal()">Terms</a> and <a onclick="togglePrivacyModal()">Privacy Policy</a>. You authorize Scribe AI to charge your payment method monthly until you cancel.</p>
+                <p class="pay-legal">By subscribing, you agree to our <a onclick="toggleTermsModal()">Terms</a> and <a onclick="togglePrivacyModal()">Privacy Policy</a>. You authorize Scrobo AI to charge your payment method monthly until you cancel.</p>
                 <button type="button" class="pay-subscribe-btn" id="pay-submit-btn" onclick="submitPaymentDashboard()">Subscribe</button>
                 <p class="pay-powered">Powered by <strong>stripe</strong> · Secure card checkout</p>
                 <p style="text-align:center;margin-top:10px;">
@@ -4331,17 +4402,17 @@
             <p style="text-align:center;color:#9ca3af;font-size:13px;margin-bottom:18px;">Practical articles on writing, coding, and using AI responsibly</p>
             <div class="legal-content" style="max-height:65vh;overflow-y:auto;">
                 <h3>1. How to write a professional email with AI (without sounding robotic)</h3>
-                <p>Start with your real goal: what should the reader do after reading? Paste a rough draft into Scribe and ask for a clearer version in a formal tone. Then edit names, numbers, and deadlines yourself. Good AI email workflow: (1) bullet your points, (2) ask for a draft, (3) cut fluff, (4) add a specific subject line. Never send AI text that still contains placeholders like [Name] or generic praise.</p>
-                <p>For Pakistani workplace context, ask Scribe to keep polite openings and a short closing. If you need Urdu, request Roman Urdu first so you can adjust tone before converting to Urdu script.</p>
+                <p>Start with your real goal: what should the reader do after reading? Paste a rough draft into Scrobo and ask for a clearer version in a formal tone. Then edit names, numbers, and deadlines yourself. Good AI email workflow: (1) bullet your points, (2) ask for a draft, (3) cut fluff, (4) add a specific subject line. Never send AI text that still contains placeholders like [Name] or generic praise.</p>
+                <p>For Pakistani workplace context, ask Scrobo to keep polite openings and a short closing. If you need Urdu, request Roman Urdu first so you can adjust tone before converting to Urdu script.</p>
 
                 <h3>2. Code mode vs New Chat — when to use which</h3>
                 <p>Use <strong>New Chat</strong> for explanations, writing, planning, and everyday questions. Use <strong>Code</strong> when you need runnable solutions, debugging, or HTML/CSS/JS previews. Mixing both in one thread is fine, but starting in Code mode gives better complete examples. After you get code, click the preview card to open the side panel, edit, and download.</p>
 
                 <h3>3. Prompt tips that actually improve answers</h3>
-                <p>Weak prompt: “Write about marketing.” Strong prompt: “Write a 200-word Instagram caption for a Lahore bakery launching weekend discounts; friendly tone; include a clear call to action.” Add constraints: length, audience, language, and format (bullets, table, email). Use Output Contract on Scribe to force sections such as Verdict · Reasons · Risks · Next step.</p>
+                <p>Weak prompt: “Write about marketing.” Strong prompt: “Write a 200-word Instagram caption for a Lahore bakery launching weekend discounts; friendly tone; include a clear call to action.” Add constraints: length, audience, language, and format (bullets, table, email). Use Output Contract on Scrobo to force sections such as Verdict · Reasons · Risks · Next step.</p>
 
                 <h3>4. Honest mode and Debate mode — reduce AI flattery</h3>
-                <p>Many chatbots agree too quickly. Scribe’s Honest mode asks the model to challenge weak assumptions. Debate mode returns Side A, Side B, and a referee verdict. Use these when you are making a business or study decision and need pushback, not cheerleading.</p>
+                <p>Many chatbots agree too quickly. Scrobo's Honest mode asks the model to challenge weak assumptions. Debate mode returns Side A, Side B, and a referee verdict. Use these when you are making a business or study decision and need pushback, not cheerleading.</p>
 
                 <h3>5. Privacy basics: what to share and what to avoid</h3>
                 <p>Do not paste passwords, full bank cards, CNIC scans, or private customer databases into any AI chat. Prefer Incognito for sensitive drafts. Review our Privacy Policy for how account data and messages are handled. You are responsible for content you upload.</p>
@@ -4353,7 +4424,7 @@
                 <p>Free is for light daily use with chat and image limits. Pro removes chat limits and increases image capacity for regular creators. Ultra is for heavy image and priority workflows. Choose based on real usage for two weeks on Free before upgrading.</p>
 
                 <h3>8. Mobile and desktop use</h3>
-                <p>Scribe works in the mobile browser. For a desktop-like window, use the Download for Windows/Mac package or your browser’s “Install app” option when available. Keep the launcher file next to Scribe-AI.html so app mode can open correctly.</p>
+                <p>Scrobo works in the mobile browser. For a desktop-like window, use the Download for Windows/Mac package or your browser’s “Install app” option when available. Keep the launcher file next to index.html so app mode can open correctly.</p>
             </div>
         </div>
     </div>
@@ -4364,14 +4435,14 @@
             <button class="popup-close-trigger" onclick="toggleFaqModal()">×</button>
             <h2 style="text-align:center;color:#fff;margin-bottom:16px;">FAQ</h2>
             <div class="legal-content">
-                <h3>Is Scribe AI free?</h3>
+                <h3>Is Scrobo AI free?</h3>
                 <p>Yes. Free includes limited chats and one AI image per day. Pro and Ultra unlock higher limits.</p>
                 <h3>Can I pay from Pakistan?</h3>
                 <p>Yes. Checkout supports JazzCash, EasyPaisa, bank transfer (search your bank), and international cards via Stripe where available.</p>
-                <h3>Does Scribe remember past chats?</h3>
+                <h3>Does Scrobo remember past chats?</h3>
                 <p>Within a conversation, recent messages are used for continuity. Long-term notes may be stored on your device unless you use Incognito.</p>
                 <h3>Is AI always correct?</h3>
-                <p>No. Always verify facts, code, and important advice. Scribe is a productivity assistant, not a certified professional advisor.</p>
+                <p>No. Always verify facts, code, and important advice. Scrobo is a productivity assistant, not a certified professional advisor.</p>
                 <h3>How do I get my plan activated after local payment?</h3>
                 <p>Submit your transaction ID in Checkout. The seller verifies payment and approves the order, then your plan activates.</p>
                 <h3>How do I contact support?</h3>
@@ -4384,10 +4455,10 @@
     <div id="about-popup-card" class="global-popup-overlay">
         <div class="popup-window-box">
             <button class="popup-close-trigger" onclick="toggleAboutModal()">×</button>
-            <h2 style="text-align: center; color: white; margin-bottom: 20px;">About <span style="color: #fff;">Scribe AI</span></h2>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">About <span style="color: #fff;">Scrobo AI</span></h2>
             <div class="legal-content">
-                <p>Scribe AI is a writing and productivity workspace designed for students, freelancers, developers, and teams. It combines everyday chat, specialized code help, image generation, and structured tools such as decision journals and flashcards — so you can move from idea to finished draft in one place.</p>
-                <h3>What you can do with Scribe</h3>
+                <p>Scrobo AI is a writing and productivity workspace designed for students, freelancers, developers, and teams. It combines everyday chat, specialized code help, image generation, and structured tools such as decision journals and flashcards — so you can move from idea to finished draft in one place.</p>
+                <h3>What you can do with Scrobo</h3>
                 <ul>
                     <li><strong>Write faster:</strong> emails, essays, reports, captions, and rewrites with clear formatting</li>
                     <li><strong>Code mode:</strong> full solutions, explanations, and side-panel previews for HTML/CSS/JS</li>
@@ -4396,7 +4467,7 @@
                     <li><strong>Stay in control:</strong> custom instructions, honest mode, output contracts, and incognito chat</li>
                 </ul>
                 <h3>Who it is for</h3>
-                <p>Scribe is built for people who work with words and code every day — especially users in Pakistan and across Asia who need both English and Urdu-friendly workflows, local payment options, and a simple interface that works on mobile and desktop.</p>
+                <p>Scrobo is built for people who work with words and code every day — especially users in Pakistan and across Asia who need both English and Urdu-friendly workflows, local payment options, and a simple interface that works on mobile and desktop.</p>
                 <h3>Our approach</h3>
                 <p>We focus on practical outcomes: shorter drafts, clearer explanations, and tools that remember context within a chat. We do not claim to replace professional legal, medical, or financial advice. AI can be wrong; you should always review important results.</p>
                 <h3>Contact</h3>
@@ -4412,7 +4483,7 @@
             <h2 style="text-align: center; color: white; margin-bottom: 20px;">Privacy <span style="color: #fff;">Policy</span></h2>
             <div class="legal-content">
                 <p><strong>Last updated:</strong> July 2026</p>
-                <p>Scribe AI (“we”, “our”, or “us”) respects your privacy. This policy explains what information we collect and how we use it.</p>
+                <p>Scrobo AI (“we”, “our”, or “us”) respects your privacy. This policy explains what information we collect and how we use it.</p>
                 <h3>1. Information we collect</h3>
                 <ul>
                     <li>Account details (name, nickname, email) when you sign up</li>
@@ -4421,7 +4492,7 @@
                 </ul>
                 <h3>2. How we use information</h3>
                 <ul>
-                    <li>To provide and improve the Scribe AI service</li>
+                    <li>To provide and improve the Scrobo AI service</li>
                     <li>To authenticate your account and prevent abuse</li>
                     <li>To process payments if you upgrade to a paid plan</li>
                 </ul>
@@ -4432,9 +4503,9 @@
                 <h3>5. Cookies and local storage</h3>
                 <p>We use browser local storage to keep preferences, chat history on-device, and session state. You can clear site data from your browser settings. Analytics or advertising cookies, if enabled later, will be disclosed here.</p>
                 <h3>6. Children</h3>
-                <p>Scribe AI is not directed at children under 13. If you believe a child has provided personal data, contact us to remove it.</p>
+                <p>Scrobo AI is not directed at children under 13. If you believe a child has provided personal data, contact us to remove it.</p>
                 <h3>7. International users</h3>
-                <p>Service infrastructure may process data in regions where our providers operate. By using Scribe you understand transfers may occur as needed to deliver the product.</p>
+                <p>Service infrastructure may process data in regions where our providers operate. By using Scrobo you understand transfers may occur as needed to deliver the product.</p>
                 <h3>8. Contact</h3>
                 <p>For privacy questions, use the Contact form on this site. We aim to respond within a reasonable time.</p>
             </div>
@@ -4448,23 +4519,23 @@
             <h2 style="text-align: center; color: white; margin-bottom: 20px;">Terms of <span style="color: #fff;">Service</span></h2>
             <div class="legal-content">
                 <p><strong>Last updated:</strong> July 2026</p>
-                <p>By using Scribe AI you agree to these terms.</p>
+                <p>By using Scrobo AI you agree to these terms.</p>
                 <h3>1. The service</h3>
-                <p>Scribe AI provides AI-assisted writing, chat, and related tools. Features may change over time. Free and paid plans have different limits.</p>
+                <p>Scrobo AI provides AI-assisted writing, chat, and related tools. Features may change over time. Free and paid plans have different limits.</p>
                 <h3>2. Accounts</h3>
                 <p>You are responsible for keeping your login details secure and for activity under your account. You must provide accurate information when registering.</p>
                 <h3>3. Acceptable use</h3>
                 <ul>
-                    <li>Do not use Scribe for illegal activity or to harm others</li>
+                    <li>Do not use Scrobo for illegal activity or to harm others</li>
                     <li>Do not attempt to abuse, overload, or reverse-engineer the service</li>
                     <li>Do not upload content you do not have rights to</li>
                 </ul>
                 <h3>4. AI outputs</h3>
-                <p>AI responses may be inaccurate or incomplete. You are responsible for checking important information before using it. Scribe is not a substitute for professional legal, medical, or financial advice.</p>
+                <p>AI responses may be inaccurate or incomplete. You are responsible for checking important information before using it. Scrobo is not a substitute for professional legal, medical, or financial advice.</p>
                 <h3>5. Payments</h3>
                 <p>Paid plans are billed according to the plan you choose. Refunds are handled according to our payment provider’s policies where applicable.</p>
                 <h3>6. Limitation of liability</h3>
-                <p>To the maximum extent allowed by law, Scribe AI is provided “as is” without warranties. We are not liable for indirect or consequential damages arising from use of the service.</p>
+                <p>To the maximum extent allowed by law, Scrobo AI is provided “as is” without warranties. We are not liable for indirect or consequential damages arising from use of the service.</p>
                 <h3>7. Contact</h3>
                 <p>Questions about these terms can be sent via the Contact form.</p>
             </div>
@@ -4503,10 +4574,10 @@
     <!-- MEET SCRIBE (kept for compatibility) -->
     <div id="meet-scribe-popup-card" class="global-popup-overlay">
         <div class="popup-window-box">
-            <button class="popup-close-trigger" onclick="toggleMeetScribeModal()">×</button>
-            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Meet <span style="color: #fff;">Scribe AI</span></h2>
+            <button class="popup-close-trigger" onclick="toggleMeetScroboModal()">×</button>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">Meet <span style="color: #fff;">Scrobo AI</span></h2>
             <p style="color: #9ca3af; font-size: 15px; line-height: 1.7; text-align: center; max-width: 520px; margin: 0 auto 24px;">
-                Scribe AI is your everyday writing and thinking partner — draft emails, summarize documents, brainstorm ideas, and get quick answers, all from one simple chat window.
+                Scrobo AI is your everyday writing and thinking partner — draft emails, summarize documents, brainstorm ideas, and get quick answers, all from one simple chat window.
             </p>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                 <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 14px; padding: 16px 20px; flex: 1; min-width: 140px; text-align: center;">
@@ -4541,7 +4612,7 @@
                 </div>
                 <div style="background-color: #16161a; border: 1px solid #23232a; border-radius: 16px; padding: 20px; flex: 1; min-width: 180px;">
                     <h3 style="font-size: 15px; margin-bottom: 8px; color:#f3f4f6;">For Developers</h3>
-                    <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">API access to build Scribe into your own products and tools.</p>
+                    <p style="font-size: 13px; color: #9ca3af; line-height: 1.5;">API access to build Scrobo into your own products and tools.</p>
                 </div>
             </div>
         </div>
@@ -4556,6 +4627,57 @@
 
         // Backend (Cloudflare Worker) — same as your original
         const workerURL = "https://scribe-backend.mworkspace123.workers.dev";
+
+        // ---- AdSense: load ONLY after approval-friendly conditions ----
+        // Do not request ads on empty/thin first paint; wait for real engagement.
+        (function loadAdsWhenReady() {
+            function inject() {
+                if (window.__scroboAdsLoaded) return;
+                // Optional kill-switch until AdSense fully approves the site
+                if (window.__SCROBO_DISABLE_ADS === true) return;
+                window.__scroboAdsLoaded = true;
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2515584387571437';
+                s.crossOrigin = 'anonymous';
+                document.head.appendChild(s);
+            }
+            // Google: avoid aggressive ad loading on first second of visit
+            var armed = false;
+            function arm() {
+                if (armed) return;
+                armed = true;
+                setTimeout(inject, 5000);
+            }
+            ['click', 'scroll', 'keydown'].forEach(function (ev) {
+                window.addEventListener(ev, arm, { once: true, passive: true });
+            });
+            // Fallback: still load after long idle if user stays
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(function () { setTimeout(arm, 8000); }, { timeout: 12000 });
+            } else {
+                window.addEventListener('load', function () { setTimeout(arm, 10000); });
+            }
+        })();
+
+        // Warm API connection so first chat is faster
+        (function warmWorker() {
+            function ping() {
+                try {
+                    fetch(workerURL + '/api/ask-question', {
+                        method: 'OPTIONS',
+                        mode: 'cors'
+                    }).catch(function () {});
+                } catch (e) {}
+            }
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(function () { ping(); }, { timeout: 3000 });
+            } else {
+                setTimeout(ping, 1800);
+            }
+        })();
+
+
 
 
         // ---- Toast ----
@@ -4647,7 +4769,7 @@
 
         // Safe storage: avoids SecurityError when page is sandboxed (no allow-same-origin)
 
-        function applyScribeLogos(root) {
+        function applyScroboLogos(root) {
             const uri = window.SCRIBE_LOGO_URI || '';
             if (!uri) return;
             (root || document).querySelectorAll('img[data-scribe-logo]').forEach(img => {
@@ -4659,7 +4781,7 @@
         function watchChatLogos() {
             const cons = document.getElementById('chat-stream-console');
             if (!cons || cons._logoObs) return;
-            cons._logoObs = new MutationObserver(() => applyScribeLogos(cons));
+            cons._logoObs = new MutationObserver(() => applyScroboLogos(cons));
             cons._logoObs.observe(cons, { childList: true, subtree: true });
         }
 
@@ -4698,7 +4820,7 @@
         }
 
         animateWords(document.getElementById('intro-headline-text'), 'Write faster, | think clearer');
-        animateWords(document.getElementById('preview-showcase-title-text'), 'Scribe handles your everyday tasks');
+        animateWords(document.getElementById('preview-showcase-title-text'), 'Scrobo handles your everyday tasks');
 
         function applyTheme(isDark) {
             document.body.classList.toggle('theme-dark', isDark);
@@ -4714,7 +4836,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            applyScribeLogos();
+            applyScroboLogos();
             watchChatLogos();
             if (typeof updatePlanUI === 'function') updatePlanUI();
             const savedTheme = safeStorage.getItem('scribe_theme');
@@ -4789,7 +4911,7 @@
                       </svg>
                     </div>
                     <h3>Sign in with Google</h3>
-                    <p>Enter the Google account email you want to use with Scribe AI.</p>
+                    <p>Enter the Google account email you want to use with Scrobo AI.</p>
                     <input type="email" id="google-auth-email" placeholder="name@gmail.com" autocomplete="username">
                     <input type="text" id="google-auth-name" placeholder="Display name (optional)">
                     <button type="button" class="ga-submit" onclick="finishGoogleAuth()">Continue</button>
@@ -5172,7 +5294,7 @@
                 if (dd) dd.classList.toggle('open');
             });
 
-            applyScribeLogos();
+            applyScroboLogos();
             configureGreetingBanner();
             renderRecentChats();
             renderProjects();
@@ -5220,9 +5342,9 @@
         }
 
         function setDocumentTitle(name) {
-            const base = 'Scribe AI';
+            const base = 'Scrobo AI';
             const n = (name || '').trim();
-            if (!n || n === 'New chat' || n === 'Scribe AI Workspace') {
+            if (!n || n === 'New chat' || n === 'Scrobo AI Workspace') {
                 document.title = base + ' Workspace';
             } else {
                 // Grok-style: chat name in tab
@@ -5354,7 +5476,7 @@
         }
 
 
-        function openScribeConsole() {
+        function openScroboConsole() {
             window.open('scribe-console.html', '_blank');
         }
 
@@ -5418,7 +5540,7 @@
                 } else {
                     const boxId = 'hist-ai-' + i + '-' + Date.now();
                     chatConsole.insertAdjacentHTML('beforeend',
-                        `<div class="console-stream-row"><div class="console-avatar-bubble"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scribe" data-scribe-logo></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
+                        `<div class="console-stream-row"><div class="console-avatar-bubble"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scrobo" data-scribe-logo></div><div class="console-text-payload" id="${boxId}" data-speak="${escapeHtml(m.text).replace(/"/g, '&quot;')}">${buildAiMessageHtml(m.text, boxId)}</div></div>`);
                 }
             });
             chatConsole.scrollTop = chatConsole.scrollHeight;
@@ -5856,7 +5978,7 @@
                 alert("Video generation isn't supported in this browser. Please try Chrome.");
                 return;
             }
-            const prompt = promptInput.value.trim() || 'Scribe AI';
+            const prompt = promptInput.value.trim() || 'Scrobo AI';
             const size = 400;
             const canvas = document.createElement('canvas');
             canvas.width = size;
@@ -6504,7 +6626,7 @@
             card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
             document.getElementById('contact-success').style.display = 'none';
         }
-        function toggleMeetScribeModal() {
+        function toggleMeetScroboModal() {
             const card = document.getElementById('meet-scribe-popup-card');
             card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
         }
@@ -6643,7 +6765,7 @@
 
                 if (mode === 'code' && !hasImage) {
                     parts.push(
-                        'You are Scribe AI in CODE mode — expert engineer.\n' +
+                        'You are Scrobo AI in CODE mode — expert engineer.\n' +
                         '1) Complete runnable code in fenced blocks with language tags.\n' +
                         '2) If user pastes code and asks to change it: return the FULL updated code.\n' +
                         '3) Short explanation, then code, then optional notes.\n' +
@@ -6663,7 +6785,7 @@
                     );
                 } else {
                     parts.push(
-                        'You are Scribe AI, a helpful assistant. Answer the actual question directly. ' +
+                        'You are Scrobo AI, a helpful assistant. Answer the actual question directly. ' +
                         'Do not write code unless asked. Do not invent unrelated examples.'
                     );
                 }
@@ -6781,7 +6903,7 @@
 
             const targetId = 'ai-chunk-' + Date.now();
             const avatarId = targetId + '-avatar';
-            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scribe" data-scribe-logo></div><div class="console-text-payload" id="${targetId}"></div></div>`;
+            const aiHtml = `<div class="console-stream-row"><div class="console-avatar-bubble thinking" id="${avatarId}"><img class="logo-img logo-img--chat" src="${window.SCRIBE_LOGO_URI||''}" alt="Scrobo" data-scribe-logo></div><div class="console-text-payload" id="${targetId}"></div></div>`;
             chatConsole.insertAdjacentHTML('beforeend', aiHtml);
             showSkeleton(targetId);
             chatConsole.scrollTop = chatConsole.scrollHeight;
@@ -6814,7 +6936,7 @@
                 }
             }
             try {
-                // Prefer Scribe API key (Console) → /api/v1/chat (fast / code / vision routing)
+                // Prefer Scrobo API key (Console) → /api/v1/chat (fast / code / vision routing)
                 const scribeKey = (getSettings().apiKey || '').trim();
                 const wsMode = (typeof scribeWorkspaceMode !== 'undefined') ? scribeWorkspaceMode : 'chat';
                 let apiMode = 'chat';
@@ -7260,9 +7382,9 @@
             if (kind === 'share') { shareCurrentChat(); return; }
             const msgs = currentChatMessages || [];
             if (!msgs.length) { try { showToast('No messages to export yet', 'info'); } catch (e) {} return; }
-            let text = '# Scribe AI Chat\n\n';
+            let text = '# Scrobo AI Chat\n\n';
             msgs.forEach(msg => {
-                const role = msg.role === 'user' ? '**You**' : '**Scribe**';
+                const role = msg.role === 'user' ? '**You**' : '**Scrobo**';
                 text += role + '\n\n' + (msg.text || '') + '\n\n---\n\n';
             });
             if (kind === 'copy') {
@@ -8009,7 +8131,7 @@
             }
             const payload = {
                 v: 1,
-                title: (getChatHistory().find(c => c.id === currentChatId) || {}).title || 'Scribe chat',
+                title: (getChatHistory().find(c => c.id === currentChatId) || {}).title || 'Scrobo chat',
                 messages: msgs.map(m => ({ role: m.role, text: (m.text || '').slice(0, 8000) })),
                 at: Date.now()
             };
@@ -8101,20 +8223,20 @@
             if (!msgs.length) { try { showToast('No messages to export', 'info'); } catch (e) {} return; }
             const w = window.open('', '_blank');
             if (!w) { try { showToast('Allow popups to export PDF', 'error'); } catch (e) {} return; }
-            let body = '<h1 style="font-family:system-ui">Scribe AI Chat</h1>';
+            let body = '<h1 style="font-family:system-ui">Scrobo AI Chat</h1>';
             msgs.forEach(m => {
-                const who = m.role === 'user' ? 'You' : 'Scribe';
+                const who = m.role === 'user' ? 'You' : 'Scrobo';
                 body += `<div style="margin:16px 0;padding:12px;border:1px solid #e5e5e5;border-radius:12px;font-family:system-ui;font-size:14px;line-height:1.5">
                     <strong>${who}</strong><pre style="white-space:pre-wrap;font-family:inherit;margin:8px 0 0">${(m.text || '').replace(/</g,'&lt;')}</pre></div>`;
             });
-            w.document.write(`<!DOCTYPE html><html><head><title>Scribe Chat</title></head><body style="max-width:720px;margin:40px auto;padding:20px">${body}
+            w.document.write(`<!DOCTYPE html><html><head><title>Scrobo Chat</title></head><body style="max-width:720px;margin:40px auto;padding:20px">${body}
                 <script>setTimeout(function(){window.print()},400)<\/script></body></html>`);
             w.document.close();
         }
 
         // ========== STEP 4: Onboarding tour ==========
         const TOUR_STEPS = [
-            { title: 'Welcome to Scribe', body: 'Your AI workspace for chat, code, and images — in one place.' },
+            { title: 'Welcome to Scrobo', body: 'Your AI workspace for chat, code, and images — in one place.' },
             { title: 'New Chat', body: 'Use New Chat for everyday questions, writing, and brainstorming. Short and friendly answers.' },
             { title: 'Code mode', body: 'Tap Code (</>) when you want full programming help — complete runnable solutions.' },
             { title: 'Imagine', body: 'Create images from text. Pick a style, write a prompt, then Generate image.' },
@@ -8252,9 +8374,9 @@
         function windowsLauncherBat() {
             return (
                 '@echo off\\r\\n' +
-                'title Scribe AI\\r\\n' +
+                'title Scrobo AI\\r\\n' +
                 'cd /d "%~dp0"\\r\\n' +
-                'set "HTML=%~dp0Scribe-AI.html"\\r\\n' +
+                'set "HTML=%~dp0index.html"\\r\\n' +
                 ':: Prefer Chrome app mode (desktop window, no tabs)\\r\\n' +
                 'if exist "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe" (\\r\\n' +
                 '  start "" "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe" --app="file:///%HTML:\\=/%" --new-window\\r\\n' +
@@ -8286,7 +8408,7 @@
             return (
                 '#!/bin/bash\\n' +
                 'DIR="$(cd "$(dirname "$0")" && pwd)"\\n' +
-                'HTML="$DIR/Scribe-AI.html"\\n' +
+                'HTML="$DIR/index.html"\\n' +
                 'FILE_URL="file://$HTML"\\n' +
                 '# Chrome app mode = desktop window (no browser chrome)\\n' +
                 'if [ -d "/Applications/Google Chrome.app" ]; then\\n' +
@@ -8305,29 +8427,29 @@
         function readmeFor(platform) {
             if (platform === 'mac') {
                 return (
-                    'Scribe AI — Mac Desktop\\n' +
+                    'Scrobo AI — Mac Desktop\\n' +
                     '========================\\n\\n' +
                     '1. Unzip this folder anywhere (Applications or Desktop).\\n' +
-                    '2. Right-click "Start Scribe AI.command" → Open (first time only).\\n' +
+                    '2. Right-click "Start Scrobo AI.command" → Open (first time only).\\n' +
                     '3. If macOS blocks it: System Settings → Privacy & Security → Allow.\\n' +
-                    '4. App opens in its own window (Chrome/Edge app mode) with Scribe logo.\\n\\n' +
-                    'Tip: Keep Scribe-AI.html and the .command file in the SAME folder.\\n'
+                    '4. App opens in its own window (Chrome/Edge app mode) with Scrobo logo.\\n\\n' +
+                    'Tip: Keep index.html and the .command file in the SAME folder.\\n'
                 );
             }
             return (
-                'Scribe AI — Windows Desktop\\n' +
+                'Scrobo AI — Windows Desktop\\n' +
                 '===========================\\n\\n' +
                 '1. Unzip this folder anywhere (Desktop is fine).\\n' +
-                '2. Double-click "Start Scribe AI.bat".\\n' +
+                '2. Double-click "Start Scrobo AI.bat".\\n' +
                 '3. Opens as a desktop app window (Chrome or Edge app mode).\\n' +
                 '4. Optional: Right-click the .bat → Send to → Desktop (create shortcut).\\n\\n' +
-                'Tip: Keep Scribe-AI.html and the .bat in the SAME folder.\\n'
+                'Tip: Keep index.html and the .bat in the SAME folder.\\n'
             );
         }
 
         async function downloadDesktopApp(platform) {
             const isMac = platform === 'mac';
-            const zipName = isMac ? 'Scribe-AI-Mac-Desktop.zip' : 'Scribe-AI-Windows-Desktop.zip';
+            const zipName = isMac ? 'Scrobo-AI-Mac-Desktop.zip' : 'Scrobo-AI-Windows-Desktop.zip';
             try {
                 try { showToast('Preparing desktop app…', 'info'); } catch (e) {}
                 const appHtml = await fetchAppHtml();
@@ -8342,13 +8464,13 @@
                 }
 
                 const files = [
-                    { name: 'Scribe-AI.html', data: finalHtml },
+                    { name: 'index.html', data: finalHtml },
                     { name: 'README.txt', data: readmeFor(platform) }
                 ];
                 if (isMac) {
-                    files.push({ name: 'Start Scribe AI.command', data: macLauncherCommand() });
+                    files.push({ name: 'Start Scrobo AI.command', data: macLauncherCommand() });
                 } else {
-                    files.push({ name: 'Start Scribe AI.bat', data: windowsLauncherBat() });
+                    files.push({ name: 'Start Scrobo AI.bat', data: windowsLauncherBat() });
                 }
 
                 const zipBytes = buildZip(files);
@@ -8362,8 +8484,8 @@
                 try {
                     showToast(
                         isMac
-                            ? 'Mac app downloaded — unzip, then open Start Scribe AI.command'
-                            : 'Windows app downloaded — unzip, then open Start Scribe AI.bat',
+                            ? 'Mac app downloaded — unzip, then open Start Scrobo AI.command'
+                            : 'Windows app downloaded — unzip, then open Start Scrobo AI.bat',
                         'success'
                     );
                 } catch (e) {}
@@ -8438,7 +8560,7 @@
             safeStorage.setItem('scribe_notifs', JSON.stringify(list.slice(0, 40)));
         }
         function notifyLoginSuccess(email) {
-            pushNotification('Login successful', 'Signed in as ' + (email || 'user') + '. Welcome to Scribe AI.', 'success');
+            pushNotification('Login successful', 'Signed in as ' + (email || 'user') + '. Welcome to Scrobo AI.', 'success');
         }
         function notifyLoginError(msg) {
             pushNotification('Login failed', msg || 'Please check your email and password.', 'error');
@@ -8447,7 +8569,7 @@
             const list = getNotifications();
             list.unshift({
                 id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-                title: title || 'Scribe',
+                title: title || 'Scrobo',
                 body: body || '',
                 type: type || 'info',
                 read: false,
@@ -9034,7 +9156,7 @@
             const main = document.getElementById('pay-plan-price-display');
             const line = document.getElementById('pay-line-price');
             const lineName = document.getElementById('pay-line-name');
-            const planName = _payTier === 'ultra' ? 'Scribe Ultra' : 'Pro Build';
+            const planName = _payTier === 'ultra' ? 'Scrobo Ultra' : 'Pro Build';
             if (lineName) lineName.textContent = planName;
             const nameEl = document.getElementById('pay-plan-name');
             if (nameEl) nameEl.textContent = planName;
@@ -9255,8 +9377,8 @@
                     unitAmount: unitAmountCents,
                     currency: 'usd',
                     mode: 'subscription',
-                    productName: tier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build',
-                    product_name: tier === 'ultra' ? 'Scribe Ultra' : 'Scribe Pro Build',
+                    productName: tier === 'ultra' ? 'Scrobo Ultra' : 'Scrobo Pro Build',
+                    product_name: tier === 'ultra' ? 'Scrobo Ultra' : 'Scrobo Pro Build',
                     success_url: location.origin + location.pathname + '?checkout=success&plan=' + encodeURIComponent(tier) + '&amount=' + amountDollars,
                     cancel_url: location.origin + location.pathname + '?checkout=cancel'
                 };
@@ -9336,13 +9458,13 @@
         <div class="popup-window-box">
             <button class="popup-close-trigger" onclick="toggleCustomInstructions()">×</button>
             <h2 style="text-align:center;color:#fff;margin-bottom:12px;">Custom instructions</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Scribe will follow these in every chat (saved on this device).</p>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Scrobo will follow these in every chat (saved on this device).</p>
             <div class="contact-form-group">
-                <label>What should Scribe know about you?</label>
+                <label>What should Scrobo know about you?</label>
                 <textarea class="settings-textarea" id="instr-about" placeholder="e.g. I'm a student in Pakistan, prefer short answers, write code in Python..."></textarea>
             </div>
             <div class="contact-form-group">
-                <label>How should Scribe respond?</label>
+                <label>How should Scrobo respond?</label>
                 <textarea class="settings-textarea" id="instr-style" placeholder="e.g. Always use bullet points. Be direct. Reply in Urdu when asked..."></textarea>
             </div>
             <button type="button" class="contact-submit-btn" onclick="saveCustomInstructions()">Save instructions</button>
@@ -9420,7 +9542,7 @@
         <div class="popup-window-box">
             <button class="popup-close-trigger" onclick="closeSkills()">×</button>
             <h2 style="text-align:center;color:#fff;margin-bottom:8px;">Skills</h2>
-            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scribe for coding — stronger than a generic chat.</p>
+            <p style="color:#9ca3af;font-size:13px;text-align:center;margin-bottom:16px;">Specialize Scrobo for coding — stronger than a generic chat.</p>
             <div style="display:grid;gap:8px;">
                 <button type="button" class="contact-submit-btn" data-skill="debug" style="background:#2a2a30;" onclick="setSkill('debug')">Debugger — root cause + fix</button>
                 <button type="button" class="contact-submit-btn" data-skill="architect" style="background:#2a2a30;" onclick="setSkill('architect')">Architect — structure first</button>
@@ -9532,7 +9654,7 @@
             </div>
             <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px;">
                 <div>
-                    <div class="sr-label">Scribe API key</div>
+                    <div class="sr-label">Scrobo API key</div>
                     <div class="sr-desc">Paste sk_scribe_… from API Console. Site will use fast / code / vision routing.</div>
                 </div>
                 <input type="password" id="set-api-key" placeholder="sk_scribe_..." autocomplete="off" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #333;background:#111;color:#eee;font-size:13px;" onchange="saveSetting('apiKey', this.value.trim())" onblur="saveSetting('apiKey', this.value.trim())">
