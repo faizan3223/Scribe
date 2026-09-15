@@ -3935,12 +3935,10 @@
                 </div>
             </div>
         </main>
-    </div>
 
-    <!-- SCREEN 1: LANDING / AUTH PAGE -->
-    <div 
-        <!-- AdSense-friendly content (indexable, original) -->
-        <section id="scrobo-content-strip" style="max-width:920px;margin:0 auto;padding:40px 24px 64px;color:#b3b3b3;font-size:15px;line-height:1.7;">
+
+    
+        <section id="scrobo-content-strip" style="max-width:920px;margin:0 auto;padding:40px 24px 64px;color:#b3b3b3;font-size:15px;line-height:1.7;background:#0a0a0a;">
             <h2 style="color:#f5f5f5;font-size:26px;margin:0 0 14px;font-weight:600;">About Scrobo AI</h2>
             <p style="margin:0 0 14px;">Scrobo AI is an AI workspace designed for students, developers, freelancers, and everyday writers. It combines chat, a dedicated coding mode, and image-prompt tools in one simple interface. You can brainstorm ideas, draft emails, debug code, summarize notes, and explore creative prompts without switching between multiple apps.</p>
             <p style="margin:0 0 14px;">Unlike a blank chatbot page with almost no text, Scrobo publishes clear product information, learning guides, and policies so visitors understand what the product does before they sign in. Free users get limited daily chats; Pro and Ultra plans raise limits for heavier work.</p>
@@ -3988,8 +3986,9 @@
             </p>
             <p style="margin:0;font-size:13px;color:#737373;">© Scrobo AI · AI productivity workspace · Not affiliated with Google. AdSense and other trademarks belong to their owners.</p>
         </section>
-
-    id="landing-page-screen">
+    </div>
+    <!-- SCREEN 1: LANDING / AUTH PAGE -->
+    <div id="landing-page-screen">
         <div class="corner-rail on-light" onclick="location.reload()" title="Home">
             <img class="logo-img logo-img--sm" src="" alt="Scrobo" data-scribe-logo>
         </div>
@@ -4865,6 +4864,32 @@
             applyTheme(!document.body.classList.contains('theme-dark'));
         }
 
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                var intro = document.getElementById('intro-page-screen');
+                var strip = document.getElementById('scrobo-content-strip');
+                var landing = document.getElementById('landing-page-screen');
+                var workspace = document.getElementById('workspace-screen');
+                if (strip && intro) {
+                    if (strip.parentElement !== intro) intro.appendChild(strip);
+                    strip.style.background = '#0a0a0a';
+                    strip.style.color = '#b3b3b3';
+                }
+                function syncStrip() {
+                    if (!strip || !intro) return;
+                    var introOn = getComputedStyle(intro).display !== 'none';
+                    strip.style.display = introOn ? 'block' : 'none';
+                }
+                syncStrip();
+                // hide strip whenever auth/workspace shown
+                var obs = new MutationObserver(syncStrip);
+                if (intro) obs.observe(intro, { attributes: true, attributeFilter: ['style', 'class'] });
+                if (landing) obs.observe(landing, { attributes: true, attributeFilter: ['style', 'class'] });
+                if (workspace) obs.observe(workspace, { attributes: true, attributeFilter: ['style', 'class'] });
+            } catch (e) {}
+        });
+
         window.addEventListener('DOMContentLoaded', () => {
             applyScroboLogos();
             watchChatLogos();
@@ -4876,7 +4901,7 @@
             if (savedSession) {
                 try {
                     const session = JSON.parse(savedSession);
-                    document.getElementById('intro-page-screen').style.display = 'none';
+                    document.getElementById('intro-page-screen').style.display = 'none'; try{setScroboContentStripVisible(false);}catch(e){}
                     switchToWorkspaceUI(session.email, session.nickname);
                 } catch (e) {}
             }
@@ -4980,7 +5005,7 @@
         }
 
         function goToAuthScreen() {
-            document.getElementById('intro-page-screen').style.display = 'none';
+            document.getElementById('intro-page-screen').style.display = 'none'; try{setScroboContentStripVisible(false);}catch(e){}
             document.getElementById('landing-page-screen').style.display = 'flex';
         }
 
@@ -5291,7 +5316,7 @@
 
         function switchToWorkspaceUI(email, nickname) {
             document.getElementById('landing-page-screen').style.display = 'none';
-            document.getElementById('intro-page-screen').style.display = 'none';
+            document.getElementById('intro-page-screen').style.display = 'none'; try{setScroboContentStripVisible(false);}catch(e){}
             document.getElementById('workspace-screen').style.display = 'flex';
 
             currentNickname = nickname || '';
@@ -6639,6 +6664,17 @@
             const card = document.getElementById('faq-popup-card');
             if (card) card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
         }
+
+        function setScroboContentStripVisible(show) {
+            var el = document.getElementById('scrobo-content-strip');
+            if (!el) return;
+            el.style.display = show ? 'block' : 'none';
+            if (show) {
+                el.style.background = '#0a0a0a';
+                el.style.color = '#b3b3b3';
+            }
+        }
+
         function toggleAboutModal() {
             const card = document.getElementById('about-popup-card','guides-popup-card','faq-popup-card');
             card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
